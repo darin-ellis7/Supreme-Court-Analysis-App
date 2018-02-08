@@ -11,11 +11,14 @@ body {
 	font-family: 'Open Sans', sans-serif;
 }
 
+#main-page-header {
+	border: 3px solid gray;
+}
+
 .header {
 	margin: auto;
 	height: 100%;
 	width: 50%;
-	border: 3px solid gray;
 	text-align: center;
 }
 
