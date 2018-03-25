@@ -16,7 +16,7 @@ function revertSH2(){ //revert style back to original for tab2
 	"rgba(255, 255, 255, 0.7)" /*transparent white*/;
 }
 function restartPage(){ //will reload index.html completely
-	window.location = "index.html";
+	window.location = "index.php";
 }
 
 //Functions for the form (searchbar)
