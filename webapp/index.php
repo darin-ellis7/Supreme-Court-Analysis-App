@@ -30,13 +30,19 @@
 			<input class = "search" type = "text" name = "query"
 			placeholder = "Enter keyword[s]"
 				<?php
-					if(isset($_GET['query'])) echo " value='{$_GET['query']}'";
+					echo " value='{$_GET['query']}'";
 				?> >
 			<p id="helpSearch" class="helpB" onmouseover = "onSHelp()"
 			onmouseout = "outSHelp()" onclick = "helpAlert()"><tab1>Help<tab1></p>
 			<br><br>
-			From <input type = "date" name = "sFrom"> <tab0>
-				To <input type = "date" name = "sTo">
+			From <input type = "date" name = "sFrom"
+				<?php
+					echo " value = '{$_GET['sFrom']}'";
+				?> > <tab0>
+			To <input type = "date" name = "sTo"
+				<?php
+					echo " value = '{$_GET['sTo']}'";
+				?> >
 			<input id = "formBut" class = "subBut" type = "submit" value = "Submit"
 			onmouseover = "changeSubBut()" onmouseout = "revertSubBut()">
 		</form>
