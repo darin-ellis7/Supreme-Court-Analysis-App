@@ -26,22 +26,22 @@
 
 	<div class = "searchbar"><!--the search fields-->
 		<form name = "keySearch" action = ""
-		onsubmit = "return validateForm()" method = 'GET'>
+		onsubmit = "return validateForm()" method = 'POST'>
 			<input class = "search" type = "text" name = "query"
 			placeholder = "Enter keyword[s]"
 				<?php
-					echo $_GET['query'];
+					echo $_POST['query'];
 				?> >
 			<p id="helpSearch" class="helpB" onmouseover = "onSHelp()"
 			onmouseout = "outSHelp()" onclick = "helpAlert()"><tab1>Help<tab1></p>
 			<br><br>
 			From <input type = "date" name = "sFrom"
 				<?php
-					echo $_GET['sFrom'];
+					echo $_POST['sFrom'];
 				?> > <tab0>
 			To <input type = "date" name = "sTo"
 				<?php
-					echo $_GET['sTo'];
+					echo $_POST['sTo'];
 				?> >
 			<input id = "formBut" class = "subBut" type = "submit" value = "Submit"
 			onmouseover = "changeSubBut()" onmouseout = "revertSubBut()">
