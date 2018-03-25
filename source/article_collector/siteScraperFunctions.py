@@ -1,8 +1,9 @@
-import urllib2
+import urllib.request
+import certifi
 from bs4 import BeautifulSoup
 
 def grabPage(url):
-    page = urllib2.urlopen(url)
+    page = urllib.request.urlopen(url, cafile=certifi.where())
     return BeautifulSoup(page, 'html.parser')
 
 
