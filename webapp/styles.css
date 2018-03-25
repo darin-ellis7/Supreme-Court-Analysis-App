@@ -88,7 +88,7 @@ p.helpB{ /*change help 'button' to web theme*/
 	border: solid 3px;
 	border-radius: 10px;
 }
-.searchBar {
+.sourceBar {
 	left: 0;
 	position: sticky;
 	overflow: auto;
