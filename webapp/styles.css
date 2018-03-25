@@ -1,5 +1,4 @@
 body {
-	height: 1000px;
 	background-color: #fffacd; /*Lemon Chiffon*/
 	font-family: monospace;
 	font-size: 15px;
@@ -86,6 +85,13 @@ p.helpB{ /*change help 'button' to web theme*/
 	display: inline;
 	font-family: monospace;
 	background-color: rgba(255, 255, 255, 0.45);
+	border: solid 3px;
+	border-radius: 10px;
+}
+.searchBar {
+	left: 0;
+	position: sticky;
+	overflow: auto;
 	border: solid 3px;
 	border-radius: 10px;
 }

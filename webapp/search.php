@@ -66,6 +66,38 @@
 
 	?>
 
+	<div class = "sourceBar">
+		Sources (<?php echo mysqli_num_rows($source_query) ?>)
+		<hr>
+		<?php
+			if(mysqli_num_rows($source_query) == 0){echo "No sources";}
+			else{
+				$names = ['query','sFrom','sTo'];
+
+				//get list of sources from search query
+				$i = 0;
+				while($row = mysqli_fetch_array($source_query)){
+					$source = $row['source'];
+
+					// get and display the number of articles from each specific source that meet the search criteria
+          $temp_count_sql = $source_count_sql . "'$source'";
+          $count_query = mysqli_query($connect,$temp_count_sql) or die(mysqli_connect_error());
+          $count = mysqli_num_rows($count_query);
+
+  				echo "$source ($count) <input type='checkbox' name='sourcebox[]' ";
+          if(isset($_GET['sourcebox'])){
+            if(in_array($source,$_GET['sourcebox'])){
+              echo "checked = 'checked' ";
+            }
+
+          }
+
+					$i += 1;
+				}
+			}
+		?>
+	</div>
+
 </body>
 
 </html>
