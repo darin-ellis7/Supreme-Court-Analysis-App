@@ -171,4 +171,3 @@ def scrapeHuffPo():
             urls.append('https://www.huffingtonpost.com' + link.get('href'))
     return urls
 
-
