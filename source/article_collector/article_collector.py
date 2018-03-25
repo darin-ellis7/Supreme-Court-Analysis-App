@@ -384,7 +384,7 @@ def parseURL(URL, c, checkRelevancy=False):
 
         title = cleanTitle(a.title)
         source = getSource(URL)
-        date = a.publish_date()
+        date = a.publish_date
         print('Title:', title)
         print('Source:', source)
         
@@ -418,7 +418,7 @@ def parseURL(URL, c, checkRelevancy=False):
                     if checkRelevancy and not relevant(keywords, title, source):
                         print('Article rejected - deemed irrelevant')
                     else:
-                        addToDatabase(url,source,author,date,text,title,keywords,image,c)
+                        addToDatabase(URL,source,author,date,text,title,keywords,image,c)
                         print('Article successfully analyzed & added to database')
                 
 
@@ -445,5 +445,4 @@ def main():
     db.close()
 
 main()
-
 # *** END OF SCRIPT ***
