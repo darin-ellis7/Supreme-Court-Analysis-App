@@ -11,6 +11,7 @@
 # libraries that need to be downloaded (preferably using pip)
 from feedparser import *
 from newspaper import *
+from siteScraperFunctions import *
 import MySQLdb
 import MySQLdb.cursors
 import tldextract
@@ -365,7 +366,9 @@ def parseFeed(RSS,c):
         
     print(successes,"/",total,"articles added to database.")
     print('=======================================================')
-        
+
+
+
 def main():
     
     # connect to database
