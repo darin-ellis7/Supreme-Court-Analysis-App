@@ -31,7 +31,7 @@
 			placeholder = "Enter keyword[s]"
 				<?php
 					if(isset($_GET['search_query'])) echo " value='{$_GET['search_query']}'";
-				?>
+				?> >
 			<p id="helpSearch" class="helpB" onmouseover = "onSHelp()"
 			onmouseout = "outSHelp()" onclick = "helpAlert()"><tab1>Help<tab1></p>
 			<br><br>
