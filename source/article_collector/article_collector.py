@@ -3,8 +3,8 @@
 # Data is collected by checking and parsing two custom RSS feeds we have 
 # To-do: perhaps refine the relevancy check a little more + minor stuff? (last successful run timestamp, little more error checking, verifying Google API isn't over quota, etc.)
 # Known defects: 
-     # Only one image (if there) is added to database per article - this isn't a "defect" per se, more a limitation - Newspaper can scrape all the images from an article but it often results in multiple irrelevant or duplicate images - we take the article's top image, which is usually the headline image and generally the one we want (and reasonably speaking, most articles won't have more than a headline image)
-     
+        # Only one image (if there) is added to database per article - this isn't a "defect" per se, more a limitation - Newspaper can scrape all the images from an article but it often results in multiple irrelevant or duplicate images - we take the article's top image, which is usually the headline image and generally the one we want (and reasonably speaking, most articles won't have more than a headline image)
+
 # ==============================================================
 # DEPENDENCIES
 
@@ -81,19 +81,19 @@ def addImage(image_url,idArticle,c):
     c.execute("""INSERT INTO image(idArticle, url) VALUES (%s,%s)""",(idArticle, image_url))
     idImage = c.lastrowid
     imageDownloaded = download_image(image_url,idImage)
-    
+
     # if image is successfully downloaded, update prelim entry to a permanent entry with image included
     if imageDownloaded != None:
         path = imageDownloaded
         c.execute("""UPDATE image SET path = (%s) WHERE idArticle = (%s) AND idImage = (%s)""",(path, idArticle,idImage))
         analyzeImage(path,idImage,c) # do image analysis
         print("Image successfully downloaded & analyzed")
-          
+
     else:
         # if file can't be downloaded, delete prelim entry
         c.execute("""DELETE FROM image WHERE idImage = (%s)""",(idImage, ))
         print('Image couldn\'t be downloaded')
-        
+
 # goes to image url and downloads the image (unless it doesn't)
 # if image is downloaded, the image filename (formatted as id{idImage}.jpg) is returned
 # if error occurs during download, return None
@@ -109,33 +109,33 @@ def download_image(url,idImage):
     except (urllib.error.HTTPError, OSError) as error: # check if any errors occur (problem retrieving image or OSError) - the OSError has only occurred once, doesn't seem to be frequent, not sure why it happened but it's handled
         print(error)
         return None
-    
+
 # uses Google Cloud Vision API to detect entities in the image
 # should get entity descriptions and their respective score (higher = more likely to be relevant to the image)
 def analyzeImage(filename,idImage,c):
     client = vision.ImageAnnotatorClient() # start API
-    
+
     # read image and detect web entities on the image
     path = "./images/" + filename
     with io.open(path,'rb') as image_file:
         content = image_file.read()
-    
+
     image = vision.types.Image(content=content)
     web_detection = client.web_detection(image=image).web_detection
-    
+
     # if there are entities, do the appropriate databases inserts one-by-one (this process is very similar to the one done with article keywords)
     if web_detection.web_entities:
         for entity in web_detection.web_entities:
             # check whether entity is already in database - if not, insert it
             if not EntityIsDuplicate(entity.description,c):
                 c.execute("""INSERT INTO image_entities(entity) VALUES (%s)""", (entity.description,))
-            
+
             # connect entity to image by inserting entity_instances entry
             c.execute("""SELECT idEntity FROM image_entities WHERE entity = %s""",(entity.description,))
             row = c.fetchone()
             idEntity = row['idEntity']
             c.execute("""INSERT INTO entity_instances(idEntity,score,idImage) VALUES (%s,%s,%s)""",(idEntity,entity.score,idImage))
-            
+
 # checks whether a specific image entity is already in the database
 def EntityIsDuplicate(entity, c):
     c.execute("""SELECT * FROM image_entities WHERE entity = %s""",(entity,))
@@ -149,12 +149,12 @@ def EntityIsDuplicate(entity, c):
 def isLogo(image):
     image = image.lower()
     knownLogos = ['https://s4.reutersmedia.net/resources_v2/images/rcom-default.png','https://www.usnews.com/static/images/favicon.ico'] # usnews and reuters often pop up in the feed, sometimes with these default image links (so we can filter them out)
-    
+
     if image in knownLogos or '.ico' in image or 'favicon' in image or 'default' in image or 'logo' in image: # .ico and favicon are terms usually associated with site icons, and chances are that a link with "default" in it is a generic site image
         return True
     else:
         return False
-    
+
 # ==============================================================
 # ARTICLE FUNCTIONS
 
@@ -165,7 +165,7 @@ def analyzeText(text):
     client = language.LanguageServiceClient() # initialize API
     document = language.types.Document(content=text,type=enums.Document.Type.PLAIN_TEXT)
     annotations = client.analyze_sentiment(document=document) # call to analyze sentiment
-    
+
     # get necessary values
     score = annotations.document_sentiment.score
     magnitude = annotations.document_sentiment.magnitude
@@ -183,7 +183,7 @@ def addKeywords(keywords,idArticle,c):
     for key in keywords:
         if not KeywordIsDuplicate(key,c):
             c.execute("""INSERT INTO article_keywords(keyword) VALUES (%s)""",(key,))
-        
+
         # connect the keyword to an article by inserting a keyword_instances entry    
         c.execute("""SELECT idKey FROM article_keywords WHERE keyword = %s""",(key,))
         row = c.fetchone()
@@ -203,19 +203,19 @@ def KeywordIsDuplicate(key, c):
 # adds all of an article's information to the database
 def addToDatabase(url,source,author,date,text,title,keywords,image,c):
     score, magnitude = analyzeText(text) # do text analysis
-    
+
     # insert new Article row
     t = (url, source, author, date, text, title, score, magnitude)
     c.execute(
         """INSERT INTO article(url, source, author, date, article_text, title, score, magnitude)
         VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""",t)
-    
+
     # then insert the other stuff (keywords and images)
     idArticle = c.lastrowid
     addKeywords(keywords,idArticle,c)
     if image != None:
         addImage(image,idArticle,c)
-      
+
 # checks whether the title of an article is already in the database, avoiding duplicates
 # we only check for title because the likeliness of identical titles is crazy low, and it cuts down on reposts from other sites
 def ArticleIsDuplicate(title,c):
@@ -233,66 +233,66 @@ def hasPaywall(source):
         return True
     else:
         return False
-   
+
 # barebones check for relevancy because local and international news are starting to creep into the database
 # seems to get pretty good results (it's quite selective)
 def relevant(keywords, title,source):
     # set everything to lowercase to standardize for checking
     title = title.lower()
-    
+
     # these are sources that seem to pop up often about the SC in India - kill anything from these websites
     avoidedSources = ['indiatimes','thehindu','liberianobserver']
-    
+
     # foreign supreme courts that appear most frequently
     foreignCountries = ['india','kenya','canada','spain']
-    
+
     # use these lists of states & abbreviations to filter out state supreme courts
     states = ["Alabama","Alaska","Arizona","Arkansas","California","Colorado",
-  "Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois",
-  "Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland",
-  "Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana",
-  "Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York",
-  "North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania",
-  "Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah",
-  "Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"]
-    
+              "Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois",
+              "Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland",
+              "Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana",
+              "Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York",
+              "North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania",
+              "Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah",
+              "Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"]
+
     stateAbbreviations = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA", 
-          "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", 
-          "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", 
-          "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", 
-          "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
-    
+                          "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", 
+                          "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", 
+                          "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", 
+                          "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
+
     # these are giveaways that an article is relevant
     if 'us supreme court' in title or 'u.s. supreme court' in title or 'scotus' in title:
         return True
-    
+
     # article needs supreme and court as keywords
     if 'supreme' not in keywords or 'court' not in keywords:
         return False
-    
+
     # drop any article that relates to an avoided source or foreign country (most likely about foreign supreme courts)
     if source.lower() in avoidedSources:
         return False
-    
+
     for country in foreignCountries:
         if country in title or country in keywords:
             return False
-    
+
     # check if the string "[state] Supreme Court" is in the title ([state] can be the word "state", a state name, or a state abbreviation) - this is generally a give away that this is a local Supreme Court
     if 'supreme court' in title:
         if 'state supreme court' in title:
             return False
-        
+
         for state in states:
             if state.lower() + ' supreme court' in title:
                 return False
-        
+
         for abv in stateAbbreviations:
             if abv.lower() + ' supreme court' in title:
                 split = title.split()
                 if abv.lower() in split:
                     return False
-    
+
     return True
 
 # ==============================================================
@@ -315,11 +315,11 @@ def parseFeed(RSS,c):
         title = cleanTitle(post['title'])
         date = convertDate(post['date'])
         source = getSource(url)
-        
+
         print('URL:',url)
         print('Title:',title)
         print('Source:',source)
-        
+
         # check for duplicates - otherwise, add to database
         if ArticleIsDuplicate(title,c):
             print("Rejected - already in database")
@@ -328,7 +328,7 @@ def parseFeed(RSS,c):
             try:
                 a.download()
                 a.parse()
-                
+
                 # since tiny articles are generally useless, we check for length here
                 # this also helps us weed out paywalls, snippets, maybe even some local news sources
                 text = a.text
@@ -337,7 +337,7 @@ def parseFeed(RSS,c):
                         author = a.authors[0]
                     else:
                         author = 'Unknown'
-                        
+
                     keywords = getKeywords(a)
                     if a.top_image == '':
                         image = None
@@ -346,7 +346,7 @@ def parseFeed(RSS,c):
                         if isLogo(image):
                             print('Image rejected - most likely a logo')
                             image = None
-                    
+
                     if hasPaywall(source):
                         print('Article rejected - source known to have a paywall')
                     else:
@@ -358,24 +358,80 @@ def parseFeed(RSS,c):
                             print('Article successfully analyzed & added to database')                        
                 else:
                     print('Article rejected - too short')
-                
+
             except ArticleException: # article couldn't download (throw this message and move on)
                 print('Rejected - couldn\'t download article ')
         print()
 
-        
+
     print(successes,"/",total,"articles added to database.")
     print('=======================================================')
 
+#Processes URLs returned by scraper functions
+#Doesn't check for relevancy because every URL from a scraper function is assumed relevant.
+def parseURL(URL, c, checkRelevancy=False):
+    #config (see above in parseFeed)
+    config = Config()
+    config.keep_article_html = False
+    config.browser_user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 Safari/601.3.9'
 
+    print('URL:', URL)
+
+    a = Article(URL, config) #Use newspaper to grab article
+    try:
+        a.download()
+        a.parse()
+
+        title = cleanTitle(a.title)
+        source = getSource(URL)
+        date = a.publish_date()
+        print('Title:', title)
+        print('Source:', source)
+        
+        #Check for duplicate using title
+        if ArticleIsDuplicate(title, c):
+            print("Rejected - already in database")
+        else:
+            
+            #exclude small articles (See justification above in ParseFeed)
+            text = a.text
+            if len(text) < 500:
+                print("Rejected - article too short")
+            else:
+                if(len(a.authors) > 0):
+                    author = a.authors[0]
+                else:
+                    author = 'Unknown'
+                
+                keywords = getKeywords(a)
+                if a.top_image == '':
+                    image = None
+                else:
+                    image = a.top_image
+                    if isLogo(image):
+                        print('Image rejected - most likely a logo')
+                        image = None
+
+                if hasPaywall(source):
+                    print('Article rejected - source known to have a paywall')
+                else:
+                    if checkRelevancy and not relevant(keywords, title, source):
+                        print('Article rejected - deemed irrelevant')
+                    else:
+                        addToDatabase(url,source,author,date,text,title,keywords,image,c)
+                        print('Article successfully analyzed & added to database')
+                
+
+    except ArticleException:
+        print('Rejected - couldn\'t download article')
 
 def main():
-    
+
     # connect to database
     db = MySQLdb.connect(host="127.0.0.1",port=3306,user="root",password="cs499",db="SupremeCourtApp",use_unicode=True,charset="utf8")
     db.autocommit(True)
     c = db.cursor(MySQLdb.cursors.DictCursor)
-    
+
     # Google Alert custom feed links
     feeds = ['https://www.google.com/alerts/feeds/16346142240605984801/8005087395970124365','https://www.google.com/alerts/feeds/16346142240605984801/12974548777403563412']
     i = 1 # counter to show which feed is being scanned
@@ -384,7 +440,7 @@ def main():
         print()
         parseFeed(feed,c)
         i += 1
-        
+
     c.close()
     db.close()
 
