@@ -16,7 +16,3 @@ def getLatestNewsAPI():
             articles.append(headline['url'])
 
     return articles
-
-def main():
-    getLatestNewsAPI()
-main()

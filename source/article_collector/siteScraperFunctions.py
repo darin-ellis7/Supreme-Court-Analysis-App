@@ -1,17 +1,24 @@
+#File that contains functions to scrape articles from supreme court sections of prominent news website
+
+#The below are used to download pages and sign GET requests for HTTPS
 import urllib.request
 import certifi
+
+#Used to scrape HTML pages. Useful in functions
 from bs4 import BeautifulSoup
 
+#Grabs the html of the webpage and returns a BeautifulSoup Object for scraping tags
 def grabPage(url):
     page = urllib.request.urlopen(url, cafile=certifi.where())
     try:
         soup = BeautifulSoup(page, 'html.parser')
         return soup
+    #Sometimes will get 404 from HTTPs pages
     except Exception as e:
         print("Could not retrieve: " + url)
         return "<html></html>"
 
-
+#Calls all scraper functions and adds to ongoing list. Returns list
 def scrapeAll():
     urls = scrapeCNN()
     urls += scrapeNYT()
@@ -28,22 +35,27 @@ def scrapeAll():
     urls +=scrapeNYPost()
     return urls
 
-#Scrapes CNN's supreme court section. Logic to scrape is correct as of 03/19/2018
+#Scrapes CNN's supreme court section. Logic to scrape is correct as of 04/08/2018
 #Returns lists of urls of articles
 def scrapeCNN():
+    #link of CNN supreme court page
     supreme_court_link = 'https://www.cnn.com/specials/politics/supreme-court-nine'
+    #downloads page in soup format
     soup = grabPage(supreme_court_link)
+    #each scraper function is different because of the differing formats. For cnn, any tags "article" contain links to articles
     articles = soup.find_all('article')
     urls = []
+    #For loop extracts links from the article tag and descendants
     for article in articles:
         headline = article.find('h3', attrs={'class': 'cd__headline'})
         link = headline.find('a')
         path = link.get('href')
+        #Ignores videos and profiles of reporters
         if not path.startswith('/profiles') and not path.startswith('/videos'):
             urls.append("https://www.cnn.com" + path)
     return urls
 
-
+#Scrapes New York Times and returns list of urls
 def scrapeNYT():
     urls = []
     supreme_court_link = 'https://www.nytimes.com/topic/organization/us-supreme-court'
@@ -54,6 +66,7 @@ def scrapeNYT():
         urls.append(link.get('href'))
     return urls
 
+#Scrapes Washington Post and returns list of urls
 def scrapeWaPo():
     urls = []
     supreme_court_link = 'https://www.washingtonpost.com/politics/courts-law/'
@@ -66,6 +79,7 @@ def scrapeWaPo():
         urls.append(path)
     return urls
 
+#Scrapes Fox News and returns list of urls
 def scrapeFoxNews():
     urls = []
     supreme_court_link = 'http://www.foxnews.com/category/politics/judiciary/supreme-court.html'
@@ -78,6 +92,7 @@ def scrapeFoxNews():
             urls.append("http://www.foxnews.com" + path)
     return urls
 
+#Scrapes Economist and returns list of urls
 def scrapeEconomist():
     urls = []
     supreme_court_link = 'https://www.economist.com/topics/us-supreme-court-1'
@@ -88,6 +103,7 @@ def scrapeEconomist():
         urls.append("https://economist.com" + article.find('a').get('href'))
     return urls
 
+#Scrapes Chicago Tribune and returns list of urls
 def scrapeChiTrib():
     urls = []
     supreme_court_link = 'http://www.chicagotribune.com/topic/crime-law-justice/justice-system/u.s.-supreme-court-ORGOV0000126-topic.html?target=stories'
@@ -98,6 +114,7 @@ def scrapeChiTrib():
             urls.append("http://www.chicagotribune.com" + article.find('a', {'class' : 'trb_search_result_figure'}).get('href'))
     return urls
 
+#Scrapes Reuters and returns list of urls
 def scrapeReuters():
     urls = []
     supreme_court_link = 'https://www.reuters.com/subjects/supreme-court'
@@ -108,10 +125,12 @@ def scrapeReuters():
             urls.append(article.find('a').get('href'))
     return urls
 
+#Scrapes Politico and returns list of urls
 def scrapePolitico():
     urls = []
     supreme_court_link = 'https://www.politico.com/news/supreme-court'
     soup = grabPage(supreme_court_link)
+
     articles = soup.find_all('article', {'class': 'story-frag'})
     for article in articles:
         header = article.find('header')
@@ -123,6 +142,7 @@ def scrapePolitico():
             urls.append(header.find('h3').find('a').get('href'))
     return urls
 
+#Scrapes NPR and returns list of urls
 def scrapeNPR():
     urls = []
     supreme_court_link = 'https://www.npr.org/tags/125938785/supreme-court'
@@ -133,6 +153,7 @@ def scrapeNPR():
         urls.append(header.find('a').get('href'))
     return urls
 
+#Scrapes MSNBC and returns list of urls
 def scrapeMSNBC():
     urls = []
     supreme_court_link = 'http://www.msnbc.com/topics/supreme-court'
@@ -144,6 +165,7 @@ def scrapeMSNBC():
             urls.append("http://www.msnbc.com/" + header.find('a').get('href'))
     return urls
 
+#Scrapes Wall Street Journal and returns list of urls
 def scrapeWSJ():
     urls = []
     supreme_court_link = 'https://blogs.wsj.com/law/category/supreme-court/'
@@ -155,6 +177,7 @@ def scrapeWSJ():
             urls.append(header.find('a').get('href'))
     return urls
 
+#Scrapes slate and returns list of urls
 def scrapeSlate():
     urls = []
     supreme_court_link = 'http://www.slate.com/articles/news_and_politics/supreme_court_dispatches.html'
@@ -169,6 +192,7 @@ def scrapeSlate():
             urls.append(link.get('href'))
     return urls
 
+#scrapes NYPost page and returns list of urls
 def scrapeNYPost():
     urls = []
     supreme_court_link = 'https://nypost.com/tag/supreme-court/'
@@ -180,6 +204,7 @@ def scrapeNYPost():
             urls.append(link.find('a').get('href'))
     return urls
 
+#Scrapes Huffington post section and returns list of urls
 def scrapeHuffPo():
     urls = []
     supreme_court_link = 'https://www.huffingtonpost.com/topic/supreme-court'

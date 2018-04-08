@@ -12,6 +12,7 @@
 from feedparser import *
 from newspaper import *
 import siteScraperFunctions as scraper
+import newsAPI as newsAPIClient
 import MySQLdb
 import MySQLdb.cursors
 import tldextract
@@ -447,9 +448,17 @@ def main():
     #Scrape articles from trusted news sections
     scrapedURLs = scraper.scrapeAll()
 
-    #Sift through articles
+    #Sift through articles; Do not check relevancy because from trusted sources
     for url in scrapedURLs:
-        parseURL(url,c)
+        parseURL(url,c, False)
+
+    #get newsAPI articles
+    newsAPIURLs = newsAPIClient.getLatestNews()
+
+    #Sift through NewsAPI; Do check relevancy
+    for url in newsAPIURLs:
+        parseURL(url, c, True)
+
 
     #Cleanup
     c.close()
