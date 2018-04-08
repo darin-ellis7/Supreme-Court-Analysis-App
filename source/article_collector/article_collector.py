@@ -385,6 +385,9 @@ def parseURL(URL, c, checkRelevancy=False):
         title = cleanTitle(a.title)
         source = getSource(URL)
         date = a.publish_date
+
+        if date is None:
+            date = d
         print('Title:', title)
         print('Source:', source)
         
@@ -433,16 +436,21 @@ def main():
     c = db.cursor(MySQLdb.cursors.DictCursor)
 
     # Google Alert custom feed links
-    feeds = ['https://www.google.com/alerts/feeds/16346142240605984801/8005087395970124365','https://www.google.com/alerts/feeds/16346142240605984801/12974548777403563412']
+    feeds = ['https://www.google.com/alerts/feeds/16607645132923191819/10371748129965602805', 'https://www.google.com/alerts/feeds/16607645132923191819/14723000309727640285', 'https://www.google.com/alerts/feeds/16607645132923191819/1276985364450614174', 'https://www.google.com/alerts/feeds/16607645132923191819/1276985364450612172']
     i = 1 # counter to show which feed is being scanned
     for feed in feeds:
         print("RSS Feed " + str(i))
         print()
         parseFeed(feed,c)
         i += 1
+    #Scrape articles from trusted news sections
     scrapedURLs = scraper.scrapeAll()
+
+    #Sift through articles
     for url in scrapedURLs:
         parseURL(url,c)
+
+    #Cleanup
     c.close()
     db.close()
 
