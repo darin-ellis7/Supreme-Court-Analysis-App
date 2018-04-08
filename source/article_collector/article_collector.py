@@ -440,7 +440,9 @@ def main():
         print()
         parseFeed(feed,c)
         i += 1
-
+    scrapedURLs = scrapeAll()
+    for url in scrapedURLs:
+        parseURL(url,c)
     c.close()
     db.close()
 

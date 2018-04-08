@@ -4,8 +4,29 @@ from bs4 import BeautifulSoup
 
 def grabPage(url):
     page = urllib.request.urlopen(url, cafile=certifi.where())
-    return BeautifulSoup(page, 'html.parser')
+    try:
+        soup = BeautifulSoup(page, 'html.parser')
+        return soup
+    except Exception as e:
+        print("Could not retrieve: " + url)
+        return "<html></html>"
 
+
+def scrapeAll():
+    urls = scrapeCNN()
+    urls += scrapeNYT()
+    urls +=scrapeWaPo()
+    urls +=scrapeFoxNews()
+    urls +=scrapeEconomist()
+    urls +=scrapeChiTrib()
+    urls +=scrapeReuters()
+    urls +=scrapePolitico()
+    urls +=scrapeNPR()
+    urls +=scrapeMSNBC()
+    urls +=scrapeWSJ()
+    urls +=scrapeSlate()
+    urls +=scrapeNYPost()
+    return urls
 
 #Scrapes CNN's supreme court section. Logic to scrape is correct as of 03/19/2018
 #Returns lists of urls of articles
@@ -168,6 +189,7 @@ def scrapeHuffPo():
     for art in articles:
         link = art.find('a')
         if link:
-            urls.append('https://www.huffingtonpost.com' + link.get('href'))
+            urls.append('http://www.huffingtonpost.com' + link.get('href'))
     return urls
+
 
