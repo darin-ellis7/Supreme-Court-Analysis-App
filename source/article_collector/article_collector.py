@@ -426,8 +426,7 @@ def parseURL(URL, c, checkRelevancy=False):
                         addToDatabase(URL,source,author,date,text,title,keywords,image,c)
                         print('Article successfully analyzed & added to database')
                 
-
-    except ArticleException:
+    except:
         print('Rejected - couldn\'t download article')
 
 def main():
