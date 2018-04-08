@@ -11,7 +11,7 @@
 # libraries that need to be downloaded (preferably using pip)
 from feedparser import *
 from newspaper import *
-from siteScraperFunctions import *
+import siteScraperFunctions as scraper
 import MySQLdb
 import MySQLdb.cursors
 import tldextract
@@ -440,7 +440,7 @@ def main():
         print()
         parseFeed(feed,c)
         i += 1
-    scrapedURLs = scrapeAll()
+    scrapedURLs = scraper.scrapeAll()
     for url in scrapedURLs:
         parseURL(url,c)
     c.close()
