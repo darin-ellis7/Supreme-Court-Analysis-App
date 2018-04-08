@@ -452,7 +452,7 @@ def main():
         parseURL(url,c, False)
 
     #get newsAPI articles
-    newsAPIURLs = newsAPIClient.getLatestNews()
+    newsAPIURLs = newsAPIClient.getLatestNewsAPI()
 
     #Sift through NewsAPI; Do check relevancy
     for url in newsAPIURLs:
