@@ -386,8 +386,9 @@ def parseURL(URL, c, checkRelevancy=False):
         source = getSource(URL)
         date = a.publish_date
 
+        #need date to save to database
         if date is None:
-            date = d
+            date = datetime.date.today()
         print('Title:', title)
         print('Source:', source)
         
