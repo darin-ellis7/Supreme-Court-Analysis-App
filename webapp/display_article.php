@@ -22,7 +22,7 @@
    </head>
    <body style=" height:100%; background-color: #fffacd">
 		 <!-- header -->
-	   <div style="background-color: #fffacd; padding: 30px; text-align: center;">
+	   <div style="background-color: #fffacd; padding: 30px; text-align: center; width: 100%;">
 
 	      <h1 style="font-size: 50px; font-family: monospace; font-weight: bold;">US Supreme Court Analysis Tool</h1>
 	      <hr>
