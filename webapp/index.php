@@ -58,6 +58,14 @@
 						document.getElementById("applyBut").style.backgroundColor =
 						"rgba(255, 255, 255, 0.7)" /*transparent white*/;
 					}
+					function changeMoreBut(){
+						document.getElementById("moreBut").style.backgroundColor =
+						"#87ceeb" /*sky blue*/;
+					}
+					function revertMoreBut(){ //revert style back to original for tab2
+						document.getElementById("moreBut").style.backgroundColor =
+						"rgba(255, 255, 255, 0.7)" /*transparent white*/;
+					}
 				</script>
     </head>
 
@@ -287,7 +295,13 @@
 
                                         if($i == 30) // after 30 sources, create source button and collapsible div
                                         {
-                                            echo "<br><a href='#more' class='btn btn-info' data-toggle='collapse'>More Sources</a><br><br>";
+                                            echo "<br><a href='#more' class='btn btn-default' id='moreBut' onmouseover='changeMoreBut()' onmouseout='revertMoreBut()' data-toggle='collapse'
+																						style='height: 30px;
+																						font-weight: bold;
+																						font-family: monospace;
+																						background-color: rgba(255, 255, 255, 0.45);
+																						border: solid 3px;
+																						border-radius: 10px;'>More Sources</a><br><br>";
                                             echo "<div id='more' class='collapse'>";
                                         }
 
