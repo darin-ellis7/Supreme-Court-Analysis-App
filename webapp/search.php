@@ -180,7 +180,7 @@
 					}
 				?>
 			</div>
-			<div class = "articleInfo">
+			<div style="width: 85%">
 				<table class = "articleTable">
 		    	<thead>
 		        <tr>
