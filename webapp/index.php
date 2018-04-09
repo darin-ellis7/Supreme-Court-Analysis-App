@@ -7,7 +7,7 @@
 	<script src="ourScript.js"></script>
 </head>
 
-<body onload = redirect()>
+<body onload = "redirect()">
 	<div class = "header">
 		<h1>US Supreme Court Analysis Tool</h1>
 	</div>
