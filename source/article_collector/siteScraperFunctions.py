@@ -62,6 +62,7 @@ def scrapeNYT():
     soup = grabPage(supreme_court_link)
     articles = soup.find('ol', {'class' : 'story-menu'})
     links = articles.find_all('a', {'class' : 'story-link'})
+    # For loop extracts links from the list tag and descendants
     for link in links:
         urls.append(link.get('href'))
     return urls
@@ -72,6 +73,7 @@ def scrapeWaPo():
     supreme_court_link = 'https://www.washingtonpost.com/politics/courts-law/'
     soup = grabPage(supreme_court_link)
     articles = soup.find_all('div', {'class' : 'story-headline'})
+    # For loop extracts links from the div tag and descendants
     for article in articles:
         headline = article.find('h3')
         link = headline.find('a')
@@ -85,6 +87,7 @@ def scrapeFoxNews():
     supreme_court_link = 'http://www.foxnews.com/category/politics/judiciary/supreme-court.html'
     soup = grabPage(supreme_court_link)
     articles = soup.find_all('header', {'class' : 'info-header'})
+    # For loop extracts links from the article header tag and descendants
     for article in articles:
         if article.find('span', {'class' : 'is-article'}):
             title = article.find('h2', {'class' : 'title'})
@@ -98,7 +101,7 @@ def scrapeEconomist():
     supreme_court_link = 'https://www.economist.com/topics/us-supreme-court-1'
     soup = grabPage(supreme_court_link)
     articles = soup.find_all('p', {'class': 'topic-item-title'})
-
+    # For loop extracts links from the p tag and descendants
     for article in articles:
         urls.append("https://economist.com" + article.find('a').get('href'))
     return urls
@@ -109,6 +112,7 @@ def scrapeChiTrib():
     supreme_court_link = 'http://www.chicagotribune.com/topic/crime-law-justice/justice-system/u.s.-supreme-court-ORGOV0000126-topic.html?target=stories'
     soup = grabPage(supreme_court_link)
     articles = soup.find_all('div', {'class': 'trb_search_result'})
+    # For loop extracts links from the tag and descendants
     for article in articles:
         if article.find('a', {'class' : 'trb_search_result_figure'}):
             urls.append("http://www.chicagotribune.com" + article.find('a', {'class' : 'trb_search_result_figure'}).get('href'))
@@ -120,6 +124,7 @@ def scrapeReuters():
     supreme_court_link = 'https://www.reuters.com/subjects/supreme-court'
     soup = grabPage(supreme_court_link)
     articles = soup.find_all('h2', {'class': 'headline_ZR_Fh'})
+    # For loop extracts links from the tag and descendants
     for article in articles:
         if article.find('a'):
             urls.append(article.find('a').get('href'))
@@ -132,6 +137,7 @@ def scrapePolitico():
     soup = grabPage(supreme_court_link)
 
     articles = soup.find_all('article', {'class': 'story-frag'})
+    # For loop extracts links from the article tag and descendants
     for article in articles:
         header = article.find('header')
         cat = header.find('p', {'class' : 'category'})
@@ -148,6 +154,7 @@ def scrapeNPR():
     supreme_court_link = 'https://www.npr.org/tags/125938785/supreme-court'
     soup = grabPage(supreme_court_link)
     articles = soup.find_all('article', {'class': 'item'})
+    # For loop extracts links from the article tag and descendants
     for article in articles:
         header = article.find('h2', {'class': 'title'})
         urls.append(header.find('a').get('href'))
@@ -159,6 +166,7 @@ def scrapeMSNBC():
     supreme_court_link = 'http://www.msnbc.com/topics/supreme-court'
     soup = grabPage(supreme_court_link)
     articles = soup.find_all('article', {'class': 'article'})
+    # For loop extracts links from the article tag and descendants
     for article in articles:
         header = article.find('h2', {'class': 'teaser__title'})
         if header:
@@ -171,6 +179,7 @@ def scrapeWSJ():
     supreme_court_link = 'https://blogs.wsj.com/law/category/supreme-court/'
     soup = grabPage(supreme_court_link)
     articles = soup.find_all('div', {'class': 'copy'})
+    # For loop extracts links from the article tag and descendants
     for article in articles:
         header = article.find('h4', {'class' : 'headline'})
         if header:
@@ -182,12 +191,14 @@ def scrapeSlate():
     urls = []
     supreme_court_link = 'http://www.slate.com/articles/news_and_politics/supreme_court_dispatches.html'
     soup = grabPage(supreme_court_link)
-    article = soup.find('section', {'class': 'full-width'})
-    if article:
-        urls.append(article.find('a').get('href'))
+    # Gets large headline article
+    largeArticle = soup.find('section', {'class': 'full-width'})
+    if largeArticle:
+        urls.append(largeArticle.find('a').get('href'))
     articles = soup.find_all('div', {'class': 'tile'})
-    for art in articles:
-        link = art.find('a')
+    # For loop extracts links from the tags and descendants
+    for article in articles:
+        link = article.find('a')
         if link:
             urls.append(link.get('href'))
     return urls
@@ -198,8 +209,9 @@ def scrapeNYPost():
     supreme_court_link = 'https://nypost.com/tag/supreme-court/'
     soup = grabPage(supreme_court_link)
     articles = soup.find_all('article', {'class': 'tag-supreme-court'})
-    for art in articles:
-        link = art.find('h3')
+    # For loop extracts links from the tags and descendants
+    for article in articles:
+        link = article.find('h3')
         if link:
             urls.append(link.find('a').get('href'))
     return urls
@@ -211,8 +223,9 @@ def scrapeHuffPo():
     soup = grabPage(supreme_court_link)
     zone = soup.find('div', {'class' : 'zone__content'})
     articles = zone.find_all('div', {'class': 'card__headline'})
-    for art in articles:
-        link = art.find('a')
+    # For loop extracts links from the tags and descendants
+    for article in articles:
+        link = article.find('a')
         if link:
             urls.append('http://www.huffingtonpost.com' + link.get('href'))
     return urls

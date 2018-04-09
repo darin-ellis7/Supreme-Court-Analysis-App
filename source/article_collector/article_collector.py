@@ -369,7 +369,7 @@ def parseFeed(RSS,c):
     print(successes,"/",total,"articles added to database.")
     print('=======================================================')
 
-#CS499s2018
+#CS499s2018 this whole function
 #Processes URLs returned by scraper functions
 #Doesn't check for relevancy because every URL from a scraper function is assumed relevant.
 def parseURL(URL, c, checkRelevancy=False):
@@ -447,7 +447,7 @@ def main():
         parseFeed(feed,c)
         i += 1
 
-#CS499s2018
+#CS499s2018 from here down has been added
     #Scrape articles from trusted news sections
     scrapedURLs = scraper.scrapeAll()
 
