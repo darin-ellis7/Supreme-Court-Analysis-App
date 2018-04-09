@@ -146,13 +146,14 @@
 
 	?>
 
+<div>
 	<div class = "sourceBar">
 		Sources (<?php echo mysqli_num_rows($source_query) ?>)
 		<hr>
 		<?php
 			if(mysqli_num_rows($source_query) == 0){echo "No sources";}
 			else{
-				$names = ['query','sFrom','sTo'];
+				$names = ['search_query','dateFrom','dateTo'];
 
 				//get list of sources from search query
 				$i = 0;
@@ -199,6 +200,7 @@
                     ?>
                 </table>
 	</div>
+</div>
 
 </body>
 
