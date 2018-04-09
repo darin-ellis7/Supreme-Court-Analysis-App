@@ -178,7 +178,7 @@
 		?>
 	</div>
 	<div class = "articleInfo">
-		<table id="results-table" style="background-color: white" width="92%" class="stripe hover"  align="center">
+		<table class = "articleTable">
                     <thead>
                         <tr align="center">
                         <td><strong>Title</strong></td>
