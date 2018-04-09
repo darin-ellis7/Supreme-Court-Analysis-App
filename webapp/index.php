@@ -242,7 +242,7 @@
             <div class="floatLeft" style="width: 18%; float:left">
                     <br>
                     <div class="panel panel-default">
-                        <div class="panel-heading" style="font-size:20px">
+                        <div class="panel-heading" style="font-size:20px; background-color: #e0eee0;">
                             Sources (<?php echo mysqli_num_rows($source_query) ?>)
                         </div>
                         <div class="panel-body" style="font-size: 16px; background-color: #e0eee0">
@@ -338,7 +338,7 @@
                         // build search results table
                         while ($row = mysqli_fetch_array($query))
                         {
-                            echo "<tr class='clickable-row' style='background-color: #c1cdc1' href='./display_article.php?idArticle="; echo $row['idArticle']; echo"'>";
+                            echo "<tr class='clickable-row' style='background-color: #e0eee0' href='./display_article.php?idArticle="; echo $row['idArticle']; echo"'>";
                                 echo "<td><button class=\"btn btn-link\" style='color:black;
 																font-weight: bold;'><a href=\"./display_article.php?idArticle="; echo $row['idArticle']; echo "\" style=\"color:black\">"; echo $row['title']; echo "</a></button></td>";
                                 echo "<td>&nbsp"; echo $row['source']; echo"</td>";
