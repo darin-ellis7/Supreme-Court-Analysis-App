@@ -8,11 +8,11 @@
 </head>
 
 <body onload = "redirect()">
-	<div class = "header">
+	<!--<div class = "header">
 		<h1>US Supreme Court Analysis Tool</h1>
 	</div>
 
-	<div class = "subheader"><!--this is the toolbar at the top-->
+	<div class = "subheader"><!this is the toolbar at the top>
 		<table class = "subH">
 			<tr>
 				<th id="sh1" class = "subH" onmouseover = "changeSH1()"
@@ -24,7 +24,7 @@
 		</table>
 	</div>
 
-	<div class = "searchbar"><!--the search fields-->
+	<div class = "searchbar"><!the search fields>
 		<form name = "keySearch" action = "search.php"
 		onsubmit = "return validateForm()" method = 'POST'>
 			<input class = "search" type = "text" name = "search_query"
@@ -39,7 +39,7 @@
 		</form>
 	</div>
 
-	<div id = "helpModal" class = "modal"><!--the popup to help user-->
+	<div id = "helpModal" class = "modal"><!the popup to help user>
 		<div class = "modal-content">
 			<span class = "modalClose">&times;</span>
 			<h3>Input Type<tab0><tab0>Description</h3>
@@ -53,7 +53,7 @@
 			e.g. (cars >2003)</p>
 		</div>
 	</div>
-
+-->
 </body>
 
 </html>
