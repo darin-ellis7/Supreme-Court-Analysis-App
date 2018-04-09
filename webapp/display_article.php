@@ -11,7 +11,7 @@
  			<h1>US Supreme Court Analysis Tool</h1>
 		</div>
       <?php
-         $connect = mysqli_connect("localhost", "root", "") or die(mysqli_connect_error());
+         $connect = mysqli_connect("localhost", "root", "cs499") or die(mysqli_connect_error());
          mysqli_set_charset($connect, "utf8");
          mysqli_select_db($connect, "SupremeCourtApp") or die(mysqli_connect_error());
          $search_term = $_GET['idArticle'];
