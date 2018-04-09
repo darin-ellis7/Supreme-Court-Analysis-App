@@ -1,5 +1,4 @@
 body {
-	height: 2000px;
 	background-color: #fffacd; /*Lemon Chiffon*/
 	font-family: monospace;
 	font-size: 15px;
@@ -9,7 +8,7 @@ table.subH {
 	width: 100%;
 }
 table.articleTable {
-	width: 50%;
+	width: 100%;
 	align: center;
 }
 th.subH {
