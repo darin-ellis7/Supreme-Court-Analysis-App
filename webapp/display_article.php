@@ -1,3 +1,4 @@
+<!--This page presents the article text and details about them. There is also a box including keywords in the article. At the bottom is a box for presenting images and entities of the articles.-->
 <!DOCTYPE html>
 <html>
    <head>

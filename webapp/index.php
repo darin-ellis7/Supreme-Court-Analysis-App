@@ -1,4 +1,5 @@
 <!-- //*** denotes new lines of code added -->
+<!--This is the homepage of the web application. It presents a search form with a datepicker. Sources are listed on the left, and article titles along with their source and date are presented. There is also a download button for a zip folder of the articles currently on the webpage.-->
 <!DOCTYPE html>
 
 <html>
@@ -34,7 +35,7 @@
                             $('.datebox').datepicker({clearBtn: true });
                           });
         </script>
-				<script>  //***
+				<script>  //***  change__But and revert__But are functions for events onmouseover and onmouseout of buttons in the webapp. When the user mouses over a button, it highlights the button, and unhighlights when leaving the button area
 					function changeSubBut(){  //***
 						document.getElementById("formBut").style.backgroundColor =  //***
 						"#87ceeb" /*sky blue*/;  //***
@@ -70,7 +71,7 @@
 				</script>
     </head>
 
-    <body style=" height:100%; background-color: #fffacd; font-family: monospace; font-weight: bold;">  <!--***-->
+    <body style=" height:100%; background-color: #fffacd; font-family: monospace; font-weight: bold;">  <!--***  changes appearance of webpage-->
 
         <!-- header -->
         <div style="background-color: #fffacd; padding: 30px; text-align: center;">  <!--***-->
@@ -141,7 +142,7 @@
                     {
                         $downloadURL .= "&sourcebox[]=" . $source;
                     }
-                }  //***
+                }  //***  button styling
                 echo "<button class=\"btn btn-default\" id=\"downBut\" onmouseover=\"changeDownBut()\" onmouseout=\"revertDownBut()\"
 								style=\"height: 30px;
 								font-weight: bold;
@@ -302,7 +303,7 @@
 																						font-family: monospace;
 																						background-color: rgba(255, 255, 255, 0.45);
 																						border: solid 3px;
-																						border-radius: 10px;'>More Sources</a><br><br>";  //***
+																						border-radius: 10px;'>More Sources</a><br><br>";  //*** button styling
                                             echo "<div id='more' class='collapse'>";
                                         }
 
@@ -339,7 +340,7 @@
                     </div>
                     <br>
             </div>
-
+						<!--style of table-->
             <div class="floatRight" style="width:81%; float: right; ">
                 <table id="results-table" style="background-color: #e0eee0" width="92%" class="stripe hover"  align="center">
                     <thead>
