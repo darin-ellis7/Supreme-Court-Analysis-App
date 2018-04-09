@@ -149,7 +149,7 @@
 	?>
 
 		<div class = "row">
-			<div style="width: 15%">
+			<div>
 				Sources (<?php echo mysqli_num_rows($source_query) ?>)
 				<hr>
 				<?php
@@ -180,7 +180,7 @@
 					}
 				?>
 			</div>
-			<div style="width: 85%">
+			<div>
 				<table class = "articleTable">
 		    	<thead>
 		        <tr>
