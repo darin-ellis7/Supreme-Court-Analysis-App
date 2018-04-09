@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html onload = "redirect()">
 <head>
 	<!-- css -->
 	<link rel="stylesheet" type="text/css" href="styles.css">
