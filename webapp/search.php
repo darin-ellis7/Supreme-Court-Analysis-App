@@ -60,13 +60,14 @@
 	<?php
 
 		//connect to database
-		$connect = mysqli_connect("localhost", "root", "cs499", "cs499SupremeCourt") or die(mysqli_connect_error());
+		$connect = mysqli_connect("localhost", "root", "cs499") or die(mysqli_connect_error());
     mysqli_set_charset($connect, "utf8");
+    mysqli_select_db($connect, "cs499SupremeCourt") or die(mysqli_connect_error());
 
 	?>
 
 	<div class = "sourceBar">
-		Sources (<?php echo mysqli_num_rows(mysqli_query($connect,$sql)) ?>)
+		Sources (<?php echo mysqli_num_rows(mysqli_query($connect, $sql)) ?>)
 		<hr>
 		<?php
 			if(mysqli_num_rows($source_query) == 0){echo "No sources";}
