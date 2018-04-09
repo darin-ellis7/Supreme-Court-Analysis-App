@@ -54,8 +54,8 @@
 		</div>
 	</div>
 
-	You searched for <?php echo $_POST['query']; ?><br>
-	From <?php echo $_POST['sFrom']; ?> To <?php echo $_POST['sTo']; ?>
+	You searched for <?php echo $_POST['search_query']; ?><br>
+	From <?php echo $_POST['dateFrom']; ?> To <?php echo $_POST['dateTo']; ?>
 
 	<?php
 
@@ -63,10 +63,91 @@
 		$connect = mysqli_connect("localhost", "root", "cs499", "SupremeCourtApp") or die(mysqli_connect_error());
     mysqli_set_charset($connect, "utf8");
 
+		// base sql query
+		            // default search includes entire database
+		            $sql = "SELECT DISTINCT date, title, source, idArticle FROM article NATURAL JOIN article_keywords NATURAL JOIN keyword_instances ";
+		            $source_sql = "SELECT DISTINCT source FROM article NATURAL JOIN article_keywords NATURAL JOIN keyword_instances ";
+		            $source_count_sql = "SELECT DISTINCT idArticle,title,source FROM article NATURAL JOIN article_keywords NATURAL JOIN keyword_instances "; // for displaying in filter sidebar how many occurrences of a specific source there are
+
+		            // build sql query based on search criteria
+		            if(isset($_GET['search_query']))
+		            {
+
+		                    $search_query = mysqli_real_escape_string($connect, trim($_GET['search_query']));
+		                    $query_str = "WHERE (title LIKE '%$search_query%' OR keyword LIKE '%$search_query%') ";
+		                    $sql .= $query_str;
+		                    $source_sql .= $query_str;
+		                    $source_count_sql .= $query_str;
+		            }
+
+		            // date range search - if no dates provided, ignore
+		            if(!empty($_GET['dateFrom']) && !empty($_GET['dateTo']))
+		            {
+		                // convert date input to Y-m-d format - this is because the bootstrap datepicker sends dates in Y/m/d while SQL only accepts as Y-m-d
+		            	$dateFrom = date("Y-m-d",strtotime($_GET['dateFrom']));
+		            	$dateTo = date("Y-m-d",strtotime($_GET['dateTo']));
+		                if(isset($_GET['search_query']))
+		                {
+		                    $date_str = "AND date BETWEEN '$dateFrom' AND '$dateTo' ";
+		                }
+		                else
+		                {
+		                    $date_str = "WHERE date BETWEEN '$dateFrom' AND '$dateTo' ";
+		                }
+
+		                $sql .= $date_str;
+		                $source_sql .= $date_str;
+		                $source_count_sql .= $date_str;
+
+		            }
+
+		            // if source filter has been applied and search parameters set, limit the sources to what has been checked
+		            if(isset($_GET['sourcebox']))
+		            {
+		                if(!isset($_GET['search_query']) && !isset($_GET['dateFrom']) && !isset($_GET['dateTo']))
+		                {
+		                    $sourceFilter_str = "WHERE source in (";
+		                }
+		                else
+		                {
+		                    $sourceFilter_str = "AND source in (";
+
+		                }
+
+		                foreach($_GET['sourcebox'] as $source)
+		                {
+
+		                    $sourceFilter_str .= "'" . $source . "'";
+		                    if($source != end($_GET['sourcebox']))
+		                    {
+		                        $sourceFilter_str .= ",";
+		                    }
+		                }
+
+		                $sourceFilter_str .= ") ";
+
+		                $sql .= $sourceFilter_str;
+		            }
+
+		            $sql .= "ORDER BY date DESC";
+		            $source_sql .= "ORDER BY source ASC";
+		            if(!isset($_GET['search_query']) && !isset($_GET['dateFrom']) && !isset($_GET['dateTo']))
+		            {
+		                $source_count_sql .= "WHERE source = ";
+
+		            }
+		            else
+		            {
+		                $source_count_sql .= "AND source = ";
+		            }
+
+		            $query = mysqli_query($connect, $sql) or die(mysqli_connect_error()); // execute search query
+		            $source_query = mysqli_query($connect, $source_sql) or die(mysqli_connect_error()); // execute source sidebar query
+
 	?>
 
 	<div class = "sourceBar">
-		Sources (<?php echo mysqli_num_rows(mysqli_query($connect, $sql)) ?>)
+		Sources (<?php echo mysqli_num_rows($source_query) ?>)
 		<hr>
 		<?php
 			if(mysqli_num_rows($source_query) == 0){echo "No sources";}

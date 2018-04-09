@@ -27,13 +27,13 @@
 	<div class = "searchbar"><!--the search fields-->
 		<form name = "keySearch" action = "search.php"
 		onsubmit = "return validateForm()" method = 'POST'>
-			<input class = "search" type = "text" name = "query"
+			<input class = "search" type = "text" name = "search_query"
 			placeholder = "Enter keyword[s]">
 			<p id="helpSearch" class="helpB" onmouseover = "onSHelp()"
 			onmouseout = "outSHelp()" onclick = "helpAlert()"><tab1>Help<tab1></p>
 			<br><br>
-			From <input type = "date" name = "sFrom"> <tab0>
-			To <input type = "date" name = "sTo">
+			From <input type = "date" name = "dateFrom"> <tab0>
+			To <input type = "date" name = "dateTo">
 			<input id = "formBut" class = "subBut" type = "submit" value = "Submit"
 			onmouseover = "changeSubBut()" onmouseout = "revertSubBut()">
 		</form>
