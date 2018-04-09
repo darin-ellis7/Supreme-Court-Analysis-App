@@ -4,7 +4,12 @@
 	<!-- css -->
 	<link rel="stylesheet" type="text/css" href="styles.css">
 	<!-- javascript -->
-	<script src="ourScript.js"></script>
+	<script src="ourScript.js">
+	window.onload = function() {
+	// similar behavior as an HTTP redirect
+	window.location.replace("search.php");
+}
+	</script>
 </head>
 
 <body>
