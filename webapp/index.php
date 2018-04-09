@@ -37,10 +37,10 @@
 
     <body style=" height:100%; background-color: #fffacd">
 
-        <!-- image header -->
+        <!-- header -->
         <div style="background-color: #fffacd">
 
-            <p><font size="8">&nbsp;Supreme Court Coverage/Analytics Application</font></p>
+            <h1 style="font-family: monospace">US Supreme Court Analysis Tool</h1>
             <hr>
         </div>
 
