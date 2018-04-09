@@ -177,6 +177,28 @@
 			}
 		?>
 	</div>
+	<div class = "articleInfo">
+		<table id="results-table" style="background-color: white" width="92%" class="stripe hover"  align="center">
+                    <thead>
+                        <tr align="center">
+                        <td><strong>Title</strong></td>
+                        <td><strong>Source</strong></td>
+                        <td><strong>Date</strong></td>
+                        </tr>
+                    </thead>
+                    <?php
+                        // build search results table
+                        while ($row = mysqli_fetch_array($query))
+                        {
+                            echo "<tr class='clickable-row' href='./display_article.php?idArticle="; echo $row['idArticle']; echo"'>";
+                                echo "<td><button class=\"btn btn-link\" style=\"color:black\"><a href=\"./display_article.php?idArticle="; echo $row['idArticle']; echo "\" style=\"color:black\">"; echo $row['title']; echo "</a></button></td>";
+                                echo "<td>&nbsp"; echo $row['source']; echo"</td>";
+                                echo "<td>"; echo $row['date']; echo "</td>";
+                            echo "</tr>";
+                        }
+                    ?>
+                </table>
+	</div>
 
 </body>
 
