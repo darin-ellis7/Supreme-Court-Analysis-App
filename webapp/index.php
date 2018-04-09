@@ -258,7 +258,7 @@
                                 else
                                 {
                                     echo "<form action='' method='GET'>";
-                                    echo "<button type='submit' class='btn btn-primary' id='applyBut' name='submit' onmouseover='changeApplyBut()' onmouseout='revertApplyBut()'
+                                    echo "<button type='submit' class='btn btn-default' id='applyBut' name='submit' onmouseover='changeApplyBut()' onmouseout='revertApplyBut()'
 																		style='height: 30px;
 																		font-weight: bold;
 																		font-family: monospace;
