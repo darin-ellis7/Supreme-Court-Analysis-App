@@ -151,7 +151,7 @@
 		<div class = "row">
 			<div class = "sourceBar">
 				Sources (<?php echo mysqli_num_rows($source_query) ?>)
-				
+				<hr>
 				<?php
 					if(mysqli_num_rows($source_query) == 0){echo "No sources";}
 					else{
