@@ -178,10 +178,10 @@
 					}
 				?>
 			</div>
-
+			<div class = "articleInfo">
 				<table class = "articleTable">
 		                    <thead>
-		                        <tr align="center">
+		                        <tr>
 		                        <td><strong>Title</strong></td>
 		                        <td><strong>Source</strong></td>
 		                        <td><strong>Date</strong></td>
@@ -199,7 +199,7 @@
 		                        }
 		                    ?>
 		                </table>
-			
+			</div>
 
 </body>
 

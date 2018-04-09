@@ -94,8 +94,9 @@ p.helpB{ /*change help 'button' to web theme*/
 }
 .sourceBar {
 	float: left;
-	
+	border: solid 3px;
+	border-radius: 10px;
 }
 .articleInfo {
-	margin-left: 200px;
+	float: right;
 }
