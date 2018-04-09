@@ -30,20 +30,20 @@
    </div>
    <body style=" height:100%; background: linear-gradient(0deg, rgb(153, 204, 255), rgb(255, 255, 255)) no-repeat;">
       <?php
-         $connect = mysqli_connect("localhost", "root", "") or die(mysqli_connect_error());
+         $connect = mysqli_connect("localhost", "root", "cs499") or die(mysqli_connect_error());
          mysqli_set_charset($connect, "utf8");
          mysqli_select_db($connect, "SupremeCourtApp") or die(mysqli_connect_error());
          $search_term = $_GET['idArticle'];
          $sql = "SELECT date, title, source, url, FROM article WHERE idArticle='%{$search_term}%'";
          //keep it for keyword
          //$keyword = "SELECT title,source, date FROM article NATURAL JOIN article_keywords NATURAL JOIN keyword_instances";
-         
-         
-         
+
+
+
          if (isset($_POST['search'])) {
-             
+
              $search_term = $_GET['idArticle'];
-             
+
              $sql .= "WHERE idArticle='%{$search_term}%'";
             //echo $sql;
          }
@@ -55,18 +55,18 @@
 
             $imageSQL = "SELECT path FROM image WHERE idArticle IN ('{$search_term}')";
             $imgEntity = "SELECT idEntity, score FROM entity_instances WHERE idImage IN (SELECT idImage FROM image WHERE idArticle IN ('{$search_term}'))";
-            
 
-               
+
+
                }
          $query = mysqli_query($connect, $sql) or die(mysqli_connect_error());
          $keywords = mysqli_query($connect, $keywordSQL) or die(mysqli_connect_error());
          $images = mysqli_query($connect, $imageSQL) or die(mysqli_connect_error());
          $entities = mysqli_query($connect, $imgEntity) or die(mysqli_connect_error());
 
-         
 
-         
+
+
          ?>
       <div class='container'>
       <div class='content-wrapper'>
@@ -86,14 +86,14 @@
                   </big>
                </b>
                <a href="<?php echo $row['url']; ?>"><?php echo substr($row['url'], 0, 30); echo"...";?></a></br></br>
-               <b><big>Sentiment Score: <?php echo $row['score']; ?></big></b></br> 
+               <b><big>Sentiment Score: <?php echo $row['score']; ?></big></b></br>
                <b><big>Magnitude: <?php echo $row['magnitude']; ?></big></b></br>
             </div>
         </br>
             <div>
                 <div id="rectangle" style="width:number px; height:number px; background-color:white; border-radius: 25px; padding: 20px; border: 2px solid #000000;">
                     <b><big><big><big>Key Words</big></big></big></b></br></br>
-                   <?php $keywords = mysqli_query($connect, $keywordSQL) or die(mysqli_connect_error()); 
+                   <?php $keywords = mysqli_query($connect, $keywordSQL) or die(mysqli_connect_error());
                        while ($row = mysqli_fetch_array($keywords)){
                           echo $row['keyword']; echo "</br>";
                        }
@@ -122,7 +122,7 @@
                         $images = mysqli_query($connect, $imageSQL) or die(mysqli_connect_error());
                        $row = mysqli_fetch_array($images);
                        if ($row){
-                    
+
                           echo "<img src=\"images/"; echo $row['path']; echo "\" style=\"max-width:84%;\"></br>";
                        }
                        else{
@@ -159,7 +159,7 @@
             </div>
             </div>
          </div>
-         
+
      </div>
       <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -170,7 +170,7 @@
       <script src="js/dataTables.bootstrap.min.js"></script>
       <script>
          $('#mydata').DataTable();
-         
+
       </script>
       </br></br></br></br></br></br></br></br></br></br>
    </body>

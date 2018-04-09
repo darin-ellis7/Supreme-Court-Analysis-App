@@ -3,23 +3,23 @@
     // everything is stored inside a .zip file
 
     // connect to database (or not)
-    $connect = mysqli_connect("localhost", "root", "") or die(mysqli_connect_error());
+    $connect = mysqli_connect("localhost", "root", "cs499") or die(mysqli_connect_error());
     mysqli_set_charset($connect, "utf8");
     mysqli_select_db($connect, "SupremeCourtApp") or die(mysqli_connect_error());
 
     // base sql query
     // default search includes entire database
     $sql = "SELECT DISTINCT title, date, source, article.idArticle, article.score, magnitude, entity, article_text, MAX(entity_instances.score) FROM (article NATURAL JOIN article_keywords NATURAL JOIN keyword_instances) LEFT JOIN (image NATURAL JOIN image_entities NATURAL JOIN entity_instances) ON article.idArticle = image.idArticle ";
-   
+
     // build sql query based on search criteria
     if(isset($_GET['search_query']))
     {
 
             $search_query = mysqli_real_escape_string($connect, trim($_GET['search_query']));
             $query_str = "WHERE (title LIKE '%$search_query%' OR keyword LIKE '%$search_query%') ";
-            $sql .= $query_str; 
+            $sql .= $query_str;
     }
-    
+
     // date range search - if no dates provided, ignore
     if(!empty($_GET['dateFrom']) && !empty($_GET['dateTo']))
     {
@@ -43,14 +43,14 @@
     {
         if(!isset($_GET['search_query']) && !isset($_GET['dateFrom']) && !isset($_GET['dateTo']))
         {
-            $sourceFilter_str = "WHERE source in ("; 
+            $sourceFilter_str = "WHERE source in (";
         }
         else
         {
-            $sourceFilter_str = "AND source in ("; 
+            $sourceFilter_str = "AND source in (";
 
         }
-    
+
         foreach($_GET['sourcebox'] as $source)
         {
 
@@ -63,7 +63,7 @@
 
         $sourceFilter_str .= ") ";
 
-        $sql .= $sourceFilter_str;    
+        $sql .= $sourceFilter_str;
     }
 
     $sql .= "GROUP BY article.idArticle"; // finish query string
@@ -84,8 +84,8 @@
         $txtFiles = array();
 
         // build files to go into zip
-        while ($row = mysqli_fetch_array($query)) 
-        { 
+        while ($row = mysqli_fetch_array($query))
+        {
            $arr = array($row['idArticle'],$row['date'], $row['source'], $row['title'], $row['score'],$row['magnitude'],$row['entity'],$row['MAX(entity_instances.score)']);
 
            fputcsv($csv, $arr); // insert row in CSV
@@ -94,10 +94,10 @@
            $txtName .= ".txt";
            $txtFile = fopen($txtName, "w") or die("Unable to open file!");
            $txt = $row['article_text'];
-           fwrite($txtFile, $txt); 
-           fclose($txtFile); 
+           fwrite($txtFile, $txt);
+           fclose($txtFile);
            $zip->addFile($txtName, $txtName); // add text file to zip
-           array_push($txtFiles,$txtName); // save  text file titles so we can delete them at the end (for some reason we had to do this ev)    
+           array_push($txtFiles,$txtName); // save  text file titles so we can delete them at the end (for some reason we had to do this ev)
         }
 
         fclose($csv); // CSV finished - all rows inserted

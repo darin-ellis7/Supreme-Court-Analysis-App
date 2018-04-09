@@ -26,7 +26,7 @@
         <script>
             $(document).ready(function() {
                             $("#results-table").DataTable({
-                            		"searching":false, 
+                            		"searching":false,
                             		"order": [[2,"desc"]],
                                     "pageLength": 25
                                 });
@@ -36,7 +36,7 @@
     </head>
 
     <body style=" height:100%; background: linear-gradient(0deg, rgb(153, 204, 255), rgb(208, 230, 255)) no-repeat;">
-        
+
         <!-- image header -->
         <div style="background: white">
             <img class="flagimgs first" src="CAS.png" width=100% height=10%></img>
@@ -61,10 +61,10 @@
                                     <span class='glyphicon glyphicon-search'></span>
                                 </button>
                             </span>
-                            
+
                             <br>
 
-                            From: <input data-provide="datepicker" class="datebox" type="text" name="dateFrom" <?php if(!empty($_GET['dateFrom']) && !empty($_GET['dateTo'])) { echo " value = '{$_GET['dateFrom']}'"; } ?> > 
+                            From: <input data-provide="datepicker" class="datebox" type="text" name="dateFrom" <?php if(!empty($_GET['dateFrom']) && !empty($_GET['dateTo'])) { echo " value = '{$_GET['dateFrom']}'"; } ?> >
                             To: <input data-provide="datepicker" class="datebox" type="text" name="dateTo" <?php if(!empty($_GET['dateFrom']) && !empty($_GET['dateTo'])) { echo " value = '{$_GET['dateTo']}'";} ?> >
                         </form>
                     </div>
@@ -101,8 +101,8 @@
                     {
                         $downloadURL .= "&sourcebox[]=" . $source;
                     }
-                }   
-                echo "<button class=\"btn btn-default\"><a style=\"color:black; text-decoration:none\" href=\""; echo $downloadURL; echo "\">Download Results</a></button> &nbsp;"; 
+                }
+                echo "<button class=\"btn btn-default\"><a style=\"color:black; text-decoration:none\" href=\""; echo $downloadURL; echo "\">Download Results</a></button> &nbsp;";
             ?>
         </div>
 
@@ -111,17 +111,17 @@
         <?php
 
             // connect to database (or not)
-            $connect = mysqli_connect("localhost", "root", "") or die(mysqli_connect_error());
+            $connect = mysqli_connect("localhost", "root", "cs499") or die(mysqli_connect_error());
             mysqli_set_charset($connect, "utf8");
             mysqli_select_db($connect, "SupremeCourtApp") or die(mysqli_connect_error());
-            
+
 
             // base sql query
             // default search includes entire database
             $sql = "SELECT DISTINCT date, title, source, idArticle FROM article NATURAL JOIN article_keywords NATURAL JOIN keyword_instances ";
             $source_sql = "SELECT DISTINCT source FROM article NATURAL JOIN article_keywords NATURAL JOIN keyword_instances ";
             $source_count_sql = "SELECT DISTINCT idArticle,title,source FROM article NATURAL JOIN article_keywords NATURAL JOIN keyword_instances "; // for displaying in filter sidebar how many occurrences of a specific source there are
-           
+
             // build sql query based on search criteria
             if(isset($_GET['search_query']))
             {
@@ -129,10 +129,10 @@
                     $search_query = mysqli_real_escape_string($connect, trim($_GET['search_query']));
                     $query_str = "WHERE (title LIKE '%$search_query%' OR keyword LIKE '%$search_query%') ";
                     $sql .= $query_str;
-                    $source_sql .= $query_str;   
+                    $source_sql .= $query_str;
                     $source_count_sql .= $query_str;
             }
-            
+
             // date range search - if no dates provided, ignore
             if(!empty($_GET['dateFrom']) && !empty($_GET['dateTo']))
             {
@@ -145,13 +145,13 @@
                 }
                 else
                 {
-                    $date_str = "WHERE date BETWEEN '$dateFrom' AND '$dateTo' "; 
+                    $date_str = "WHERE date BETWEEN '$dateFrom' AND '$dateTo' ";
                 }
 
                 $sql .= $date_str;
                 $source_sql .= $date_str;
                 $source_count_sql .= $date_str;
-          
+
             }
 
             // if source filter has been applied and search parameters set, limit the sources to what has been checked
@@ -159,14 +159,14 @@
             {
                 if(!isset($_GET['search_query']) && !isset($_GET['dateFrom']) && !isset($_GET['dateTo']))
                 {
-                    $sourceFilter_str = "WHERE source in ("; 
+                    $sourceFilter_str = "WHERE source in (";
                 }
                 else
                 {
-                    $sourceFilter_str = "AND source in ("; 
+                    $sourceFilter_str = "AND source in (";
 
                 }
-            
+
                 foreach($_GET['sourcebox'] as $source)
                 {
 
@@ -179,9 +179,9 @@
 
                 $sourceFilter_str .= ") ";
 
-                $sql .= $sourceFilter_str;    
+                $sql .= $sourceFilter_str;
             }
-            
+
             $sql .= "ORDER BY date DESC";
             $source_sql .= "ORDER BY source ASC";
             if(!isset($_GET['search_query']) && !isset($_GET['dateFrom']) && !isset($_GET['dateTo']))
@@ -235,7 +235,7 @@
 
                                     // get list of sources from search query
                                     $i = 0;
-                                    while ($row = mysqli_fetch_array($source_query)) 
+                                    while ($row = mysqli_fetch_array($source_query))
                                     {
                                         $source = $row['source'];
 
@@ -276,7 +276,7 @@
                                     echo "</form>";
                                 }
                             ?>
-                        </div>   
+                        </div>
                     </div>
                     <br>
             </div>
@@ -292,13 +292,13 @@
                     </thead>
                     <?php
                         // build search results table
-                        while ($row = mysqli_fetch_array($query)) 
-                        { 
+                        while ($row = mysqli_fetch_array($query))
+                        {
                             echo "<tr class='clickable-row' href='./display_article.php?idArticle="; echo $row['idArticle']; echo"'>";
                                 echo "<td><button class=\"btn btn-link\" style=\"color:black\"><a href=\"./display_article.php?idArticle="; echo $row['idArticle']; echo "\" style=\"color:black\">"; echo $row['title']; echo "</a></button></td>";
                                 echo "<td>&nbsp"; echo $row['source']; echo"</td>";
                                 echo "<td>"; echo $row['date']; echo "</td>";
-                            echo "</tr>"; 
+                            echo "</tr>";
                         }
                     ?>
                 </table>
