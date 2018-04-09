@@ -100,10 +100,9 @@ p.helpB{ /*change help 'button' to web theme*/
 	border-radius: 10px;
 }
 .sourceBar {
-	float: left;
 	border: solid 3px;
 	border-radius: 10px;
-	width: 15%;
+	width: 100%;
 }
 .articleInfo {
 	float: right;
