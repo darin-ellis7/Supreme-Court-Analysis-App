@@ -125,7 +125,7 @@
                         $downloadURL .= "&sourcebox[]=" . $source;
                     }
                 }
-                echo "<button class=\"btn btn-default\" id=\"downBut\" onmouseover=\"changeDownBut()\" onmouseout=\"revertDownBut\"
+                echo "<button class=\"btn btn-default\" id=\"downBut\" onmouseover=\"changeDownBut()\" onmouseout=\"revertDownBut()\"
 								style=\"height: 30px;
 								font-weight: bold;
 								font-family: monospace;
