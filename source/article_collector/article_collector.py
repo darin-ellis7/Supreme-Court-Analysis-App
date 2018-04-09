@@ -1,7 +1,8 @@
-# CS499 Fall 2017 Supreme Court Coverage/Analytics Application - Evan Cole, Darin Ellis, Connor Martin, Abdullah Alosail
-# This is the data collection script - ideally, this should be scheduled to run on the hosting server periodically in order to collect new articles
+# CS499 Fall 2018 Supreme Court Application John Tompkins, Jonathan Dingess, Mauricio Sanchez. Modified from Fall 2017 Supreme Court Coverage/Analytics Application - Evan Cole, Darin Ellis, Connor Martin, Abdullah Alosail
+#Article collection script - ideally, this should be scheduled to run on the hosting server periodically in order to collect new articles
 # Data is collected by checking and parsing two custom RSS feeds we have 
-# To-do: perhaps refine the relevancy check a little more + minor stuff? (last successful run timestamp, little more error checking, verifying Google API isn't over quota, etc.)
+# To-do: perhaps refine the relevancy check a little more
+# TODO: Fix image downloading to download more images
 # Known defects: 
         # Only one image (if there) is added to database per article - this isn't a "defect" per se, more a limitation - Newspaper can scrape all the images from an article but it often results in multiple irrelevant or duplicate images - we take the article's top image, which is usually the headline image and generally the one we want (and reasonably speaking, most articles won't have more than a headline image)
 
@@ -368,6 +369,7 @@ def parseFeed(RSS,c):
     print(successes,"/",total,"articles added to database.")
     print('=======================================================')
 
+#CS499s2018
 #Processes URLs returned by scraper functions
 #Doesn't check for relevancy because every URL from a scraper function is assumed relevant.
 def parseURL(URL, c, checkRelevancy=False):
@@ -383,11 +385,11 @@ def parseURL(URL, c, checkRelevancy=False):
         a.download()
         a.parse()
 
-        title = cleanTitle(a.title)
+        title = a.title
         source = getSource(URL)
         date = a.publish_date
 
-        #need date to save to database
+        #need date to save to database. if date not present, save as today's date
         if date is None:
             date = datetime.date.today()
         print('Title:', title)
@@ -444,6 +446,8 @@ def main():
         print()
         parseFeed(feed,c)
         i += 1
+
+#CS499s2018
     #Scrape articles from trusted news sections
     scrapedURLs = scraper.scrapeAll()
 
