@@ -60,9 +60,8 @@
 	<?php
 
 		//connect to database
-		$connect = mysqli_connect("localhost", "root", "cs499") or die(mysqli_connect_error());
+		$connect = mysqli_connect("localhost", "root", "cs499", "SupremeCourtApp") or die(mysqli_connect_error());
     mysqli_set_charset($connect, "utf8");
-		echo mysqli_get_host_info($connect);
 
 	?>
 
