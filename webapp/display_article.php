@@ -63,8 +63,8 @@
       <div class='container'>
       <div class='content-wrapper'>
       <div>
-         <div style="float:left;" class='col-xs-3 col-md-3'>
-            <div id="rectangle" style="width:number px; height:number px; background-color:white; border-radius: 25px; padding: 20px; border: 2px solid #000000;">
+         <div>
+            <div>
                <b><big><big><big>Details</big></big></big></b></br></br>
                <b><big>Author</big></b></br>
                <?php ($row = mysqli_fetch_array($query)); echo $row['author']; ?></br></br>
