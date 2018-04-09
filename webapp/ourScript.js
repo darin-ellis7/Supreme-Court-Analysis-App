@@ -58,3 +58,6 @@ function validateForm(){ /*validates user input*/
 		return false;
 	}
 }
+function redirect(){
+	window.location.href = "search.php";
+}
