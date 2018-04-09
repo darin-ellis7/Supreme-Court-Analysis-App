@@ -146,61 +146,67 @@
 
 	?>
 
-<div style = "overflow: hidden;">
-	<div class = "sourceBar" style = "width: 15%; float: left;">
-		Sources (<?php echo mysqli_num_rows($source_query) ?>)
-		<hr>
-		<?php
-			if(mysqli_num_rows($source_query) == 0){echo "No sources";}
-			else{
-				$names = ['search_query','dateFrom','dateTo'];
+	<table class = "wrapper">
+	<tr>
+		<td>
+			<div class = "sourceBar">
+				Sources (<?php echo mysqli_num_rows($source_query) ?>)
+				<hr>
+				<?php
+					if(mysqli_num_rows($source_query) == 0){echo "No sources";}
+					else{
+						$names = ['search_query','dateFrom','dateTo'];
 
-				//get list of sources from search query
-				$i = 0;
-				while($row = mysqli_fetch_array($source_query)){
-					$source = $row['source'];
+						//get list of sources from search query
+						$i = 0;
+						while($row = mysqli_fetch_array($source_query)){
+							$source = $row['source'];
 
-					// get and display the number of articles from each specific source that meet the search criteria
-          $temp_count_sql = $source_count_sql . "'$source'";
-          $count_query = mysqli_query($connect,$temp_count_sql) or die(mysqli_connect_error());
-          $count = mysqli_num_rows($count_query);
+							// get and display the number of articles from each specific source that meet the search criteria
+		          $temp_count_sql = $source_count_sql . "'$source'";
+		          $count_query = mysqli_query($connect,$temp_count_sql) or die(mysqli_connect_error());
+		          $count = mysqli_num_rows($count_query);
 
-  				echo "$source ($count) <input type='checkbox' name='sourcebox[]' ";
-          if(isset($_GET['sourcebox'])){
-            if(in_array($source,$_GET['sourcebox'])){
-              echo "checked = 'checked' ";
-            }
+		  				echo "$source ($count) <input type='checkbox' name='sourcebox[]' ";
+		          if(isset($_GET['sourcebox'])){
+		            if(in_array($source,$_GET['sourcebox'])){
+		              echo "checked = 'checked' ";
+		            }
 
-          }
+		          }
 
-					$i += 1;
-				}
-			}
-		?>
-	</div>
-	<div class = "articleInfo" style = "width: 84%; float: right;">
-		<table class = "articleTable">
-                    <thead>
-                        <tr align="center">
-                        <td><strong>Title</strong></td>
-                        <td><strong>Source</strong></td>
-                        <td><strong>Date</strong></td>
-                        </tr>
-                    </thead>
-                    <?php
-                        // build search results table
-                        while ($row = mysqli_fetch_array($query))
-                        {
-                            echo "<tr class='clickable-row' href='./display_article.php?idArticle="; echo $row['idArticle']; echo"'>";
-                                echo "<td><button class=\"btn btn-link\" style=\"color:black\"><a href=\"./display_article.php?idArticle="; echo $row['idArticle']; echo "\" style=\"color:black\">"; echo $row['title']; echo "</a></button></td>";
-                                echo "<td>&nbsp"; echo $row['source']; echo"</td>";
-                                echo "<td>"; echo $row['date']; echo "</td>";
-                            echo "</tr>";
-                        }
-                    ?>
-                </table>
-	</div>
-</div>
+							$i += 1;
+						}
+					}
+				?>
+			</div>
+		</td>
+		<td>
+			<div class = "articleInfo">
+				<table class = "articleTable">
+		                    <thead>
+		                        <tr align="center">
+		                        <td><strong>Title</strong></td>
+		                        <td><strong>Source</strong></td>
+		                        <td><strong>Date</strong></td>
+		                        </tr>
+		                    </thead>
+		                    <?php
+		                        // build search results table
+		                        while ($row = mysqli_fetch_array($query))
+		                        {
+		                            echo "<tr class='clickable-row' href='./display_article.php?idArticle="; echo $row['idArticle']; echo"'>";
+		                                echo "<td><button class=\"btn btn-link\" style=\"color:black\"><a href=\"./display_article.php?idArticle="; echo $row['idArticle']; echo "\" style=\"color:black\">"; echo $row['title']; echo "</a></button></td>";
+		                                echo "<td>&nbsp"; echo $row['source']; echo"</td>";
+		                                echo "<td>"; echo $row['date']; echo "</td>";
+		                            echo "</tr>";
+		                        }
+		                    ?>
+		                </table>
+			</div>
+		</td>
+	</tr>
+	</table>
 
 </body>
 

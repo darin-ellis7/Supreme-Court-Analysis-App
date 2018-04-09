@@ -12,6 +12,9 @@ table.articleTable {
 	width: 80%;
 	align: center;
 }
+table.wrapper {
+	width: 100%;
+}
 th.subH {
 	width: 50%; /*changes depending on how many subheader tabs there are*/
 	border: solid;
@@ -94,6 +97,12 @@ p.helpB{ /*change help 'button' to web theme*/
 	border-radius: 10px;
 }
 .sourceBar {
+	float: left;
 	border: solid 3px;
 	border-radius: 10px;
+	width: 15%;
+}
+.articleInfo {
+	float: right;
+	width: 84%;
 }
