@@ -9,7 +9,7 @@ table.subH {
 	width: 100%;
 }
 table.articleTable {
-	width: 80%;
+	width: 50%;
 	align: center;
 }
 table.wrapper {
@@ -105,6 +105,5 @@ p.helpB{ /*change help 'button' to web theme*/
 	width: 100%;
 }
 .articleInfo {
-	float: right;
-	width: 84%;
+	width: 50%;
 }
