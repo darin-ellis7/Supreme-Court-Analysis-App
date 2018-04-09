@@ -35,10 +35,10 @@
         </script>
     </head>
 
-    <body style=" height:100%; background-color: #fffacd">
+    <body style=" height:100%; background-color: #fffacd; font-family: monospace; font-weight: bold;">
 
         <!-- header -->
-        <div style="background-color: #fffacd; padding: 30px; text-align: center; width: 100%;">
+        <div style="background-color: #fffacd; padding: 30px; text-align: center;">
 
             <h1 style="font-size: 50px; font-family: monospace; font-weight: bold;">US Supreme Court Analysis Tool</h1>
             <hr>
