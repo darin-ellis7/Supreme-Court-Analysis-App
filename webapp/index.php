@@ -38,7 +38,7 @@
     <body style=" height:100%; background-color: #fffacd">
 
         <!-- header -->
-        <div style="background-color: #fffacd">
+        <div style="background-color: #fffacd; padding: 30px; text-align: center; font-size: 35px;">
 
             <h1 style="font-family: monospace">US Supreme Court Analysis Tool</h1>
             <hr>

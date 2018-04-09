@@ -20,13 +20,13 @@
       <script src="js/jquery-latest.js"></script>
       <script src="js/jquery.tablesorter.js"></script>
    </head>
-   <!--background; color: lemon Chiffon -->
-   <div style="background-color: #fffacd">
-
-      <h1 style="font-family: monospace">US Supreme Court Analysis Tool</h1>
-      <hr>
-   </div>
    <body style=" height:100%; background-color: #fffacd">
+		 <!-- header -->
+	   <div style="background-color: #fffacd; padding: 30px; text-align: center; font-size: 35px;">
+
+	      <h1 style="font-family: monospace">US Supreme Court Analysis Tool</h1>
+	      <hr>
+	   </div>
       <?php
          $connect = mysqli_connect("localhost", "root", "cs499") or die(mysqli_connect_error());
          mysqli_set_charset($connect, "utf8");
