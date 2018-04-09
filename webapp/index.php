@@ -338,7 +338,7 @@
                         // build search results table
                         while ($row = mysqli_fetch_array($query))
                         {
-                            echo "<tr class='clickable-row' href='./display_article.php?idArticle="; echo $row['idArticle']; echo"'>";
+                            echo "<tr class='clickable-row' style='background-color: #c1cdc1' href='./display_article.php?idArticle="; echo $row['idArticle']; echo"'>";
                                 echo "<td><button class=\"btn btn-link\" style='color:black;
 																font-weight: bold;'><a href=\"./display_article.php?idArticle="; echo $row['idArticle']; echo "\" style=\"color:black\">"; echo $row['title']; echo "</a></button></td>";
                                 echo "<td>&nbsp"; echo $row['source']; echo"</td>";
