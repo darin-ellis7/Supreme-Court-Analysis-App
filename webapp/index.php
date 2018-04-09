@@ -50,6 +50,14 @@
 						document.getElementById("downBut").style.backgroundColor =
 						"rgba(255, 255, 255, 0.7)" /*transparent white*/;
 					}
+					function changeApplyBut(){
+						document.getElementById("applyBut").style.backgroundColor =
+						"#87ceeb" /*sky blue*/;
+					}
+					function revertApplyBut(){ //revert style back to original for tab2
+						document.getElementById("applyBut").style.backgroundColor =
+						"rgba(255, 255, 255, 0.7)" /*transparent white*/;
+					}
 				</script>
     </head>
 
@@ -250,7 +258,13 @@
                                 else
                                 {
                                     echo "<form action='' method='GET'>";
-                                    echo "<button type='submit' class='btn btn-primary' name='submit'>Apply Filter</button><br><br>";
+                                    echo "<button type='submit' class='btn btn-primary' id='applyBut' name='submit' onmouseover='changeApplyBut()' onmouseout='revertApplyBut()'
+																		style='height: 30px;
+																		font-weight: bold;
+																		font-family: monospace;
+																		background-color: rgba(255, 255, 255, 0.45);
+																		border: solid 3px;
+																		border-radius: 10px;'>Apply Filter</button><br><br>";
 
                                     $names = ['search_query','dateFrom','dateTo'];
 
