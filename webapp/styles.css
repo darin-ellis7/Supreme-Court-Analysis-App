@@ -96,9 +96,7 @@ p.helpB{ /*change help 'button' to web theme*/
 	float: left;
 	border: solid 3px;
 	border-radius: 10px;
-	width: 100%;
 }
 .articleInfo {
 	margin-left: 200px;
-	width: 50%;
 }
