@@ -10,6 +10,7 @@
 # DEPENDENCIES
 
 # libraries that need to be downloaded (preferably using pip)
+from sys import argv
 from feedparser import *
 from newspaper import *
 import siteScraperFunctions as scraper
@@ -432,40 +433,48 @@ def parseURL(URL, c, checkRelevancy=False):
         print('Rejected - couldn\'t download article')
 
 def main():
-
+    
     # connect to database
     db = MySQLdb.connect(host="127.0.0.1",port=3306,user="root",password="cs499",db="SupremeCourtApp",use_unicode=True,charset="utf8")
     db.autocommit(True)
     c = db.cursor(MySQLdb.cursors.DictCursor)
 
-    # Google Alert custom feed links
-    feeds = ['https://www.google.com/alerts/feeds/16607645132923191819/10371748129965602805', 'https://www.google.com/alerts/feeds/16607645132923191819/14723000309727640285', 'https://www.google.com/alerts/feeds/16607645132923191819/1276985364450614174', 'https://www.google.com/alerts/feeds/16607645132923191819/1276985364450612172']
-    i = 1 # counter to show which feed is being scanned
-    for feed in feeds:
-        print("RSS Feed " + str(i))
-        print()
-        parseFeed(feed,c)
-        i += 1
+    if (len(argv) == 1):
 
-#CS499s2018 from here down has been added
-    #Scrape articles from trusted news sections
-    scrapedURLs = scraper.scrapeAll()
+        # Google Alert custom feed links
+        feeds = ['https://www.google.com/alerts/feeds/16607645132923191819/10371748129965602805', 'https://www.google.com/alerts/feeds/16607645132923191819/14723000309727640285', 'https://www.google.com/alerts/feeds/16607645132923191819/1276985364450614174', 'https://www.google.com/alerts/feeds/16607645132923191819/1276985364450612172']
+        i = 1 # counter to show which feed is being scanned
+        for feed in feeds:
+            print("RSS Feed " + str(i))
+            print()
+            parseFeed(feed,c)
+            i += 1
 
-    #Sift through articles; Do not check relevancy because from trusted sources
-    for url in scrapedURLs:
-        parseURL(url,c, False)
+    #CS499s2018 from here down has been added
+        #Scrape articles from trusted news sections
+        scrapedURLs = scraper.scrapeAll()
 
-    #get newsAPI articles
-    newsAPIURLs = newsAPIClient.getLatestNewsAPI()
+        #Sift through articles; Do not check relevancy because from trusted sources
+        for url in scrapedURLs:
+            parseURL(url,c, False)
 
-    #Sift through NewsAPI; Do check relevancy
-    for url in newsAPIURLs:
-        parseURL(url, c, True)
+        #get newsAPI articles
+        newsAPIURLs = newsAPIClient.getLatestNewsAPI()
 
+        #Sift through NewsAPI; Do check relevancy
+        for url in newsAPIURLs:
+            parseURL(url, c, True)
+
+    
+    else:
+        for url in argv[1:]:
+            parseURL(url, c, True)
+    
 
     #Cleanup
     c.close()
     db.close()
+
 
 main()
 # *** END OF SCRIPT ***
