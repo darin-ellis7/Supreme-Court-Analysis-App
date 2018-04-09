@@ -149,7 +149,7 @@
 	?>
 
 		<div class = "row">
-			<div class = "sourceBar">
+			<div>
 				Sources (<?php echo mysqli_num_rows($source_query) ?>)
 				<hr>
 				<?php
