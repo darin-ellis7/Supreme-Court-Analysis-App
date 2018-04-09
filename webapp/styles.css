@@ -37,7 +37,7 @@ tab3 {
 }
 .subheader { /*the toolbar, which will follow user for convenience*/
 	top: 0;
-	position: sticky;
+	position: sticky !important;
 }
 .searchbar {
 	padding: 50px;
