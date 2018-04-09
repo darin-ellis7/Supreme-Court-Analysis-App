@@ -8,6 +8,9 @@ body {
 table.subH {
 	width: 100%;
 }
+table.articleTable {
+	width: 100%;
+}
 th.subH {
 	width: 50%; /*changes depending on how many subheader tabs there are*/
 	border: solid;
@@ -90,7 +93,7 @@ p.helpB{ /*change help 'button' to web theme*/
 	border-radius: 10px;
 }
 .sourceBar {
-	left: 0;
+	float: left;
 	overflow: auto;
 	border: solid 3px;
 	border-radius: 10px;
