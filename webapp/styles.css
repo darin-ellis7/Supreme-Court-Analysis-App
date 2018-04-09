@@ -17,6 +17,10 @@ table.wrapper {
 }
 td.sourceTD {
 	vertical-align: top;
+	width: 15%;
+}
+td.articleTD {
+	text-align: right;
 }
 th.subH {
 	width: 50%; /*changes depending on how many subheader tabs there are*/
