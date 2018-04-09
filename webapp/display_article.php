@@ -22,9 +22,9 @@
    </head>
    <body style=" height:100%; background-color: #fffacd">
 		 <!-- header -->
-	   <div style="background-color: #fffacd; padding: 30px; text-align: center; font-size: 35px;">
+	   <div style="background-color: #fffacd; padding: 30px; text-align: center; font-size: 35px; font-family: monospace; font-weight: bold;">
 
-	      <h1 style="font-family: monospace">US Supreme Court Analysis Tool</h1>
+	      <h1>US Supreme Court Analysis Tool</h1>
 	      <hr>
 	   </div>
       <?php
