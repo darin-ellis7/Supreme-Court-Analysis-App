@@ -146,9 +146,7 @@
 
 	?>
 
-	<table class = "wrapper">
-	<tr>
-		<td class = "sourceTD">
+
 			<div class = "sourceBar">
 				Sources (<?php echo mysqli_num_rows($source_query) ?>)
 				<hr>
@@ -180,8 +178,6 @@
 					}
 				?>
 			</div>
-		</td>
-		<td>
 			<div class = "articleInfo">
 				<table class = "articleTable">
 		                    <thead>
@@ -204,9 +200,6 @@
 		                    ?>
 		                </table>
 			</div>
-		</td>
-	</tr>
-	</table>
 
 </body>
 
