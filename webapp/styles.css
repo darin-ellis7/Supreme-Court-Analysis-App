@@ -9,7 +9,8 @@ table.subH {
 	width: 100%;
 }
 table.articleTable {
-	width: 100%;
+	width: 80%;
+	align: center;
 }
 th.subH {
 	width: 50%; /*changes depending on how many subheader tabs there are*/
