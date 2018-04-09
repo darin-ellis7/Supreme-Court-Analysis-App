@@ -26,6 +26,7 @@
          $connect = mysqli_connect("localhost", "root", "cs499", "SupremeCourtApp") or die(mysqli_connect_error());
          mysqli_set_charset($connect, "utf8");
          $search_term = $_GET['idArticle'];
+				 echo $search_term;
          $sql = "SELECT date, title, source, url, FROM article WHERE idArticle='%{$search_term}%'";
          //keep it for keyword
          //$keyword = "SELECT title,source, date FROM article NATURAL JOIN article_keywords NATURAL JOIN keyword_instances";
@@ -60,7 +61,6 @@
 
 
          ?>
-      <div>
       <div>
       <div>
          <div>
