@@ -354,7 +354,7 @@
                         {
                             echo "<tr class='clickable-row' style='background-color: #e0eee0' href='./display_article.php?idArticle="; echo $row['idArticle']; echo"'>";
                                 echo "<td><button class=\"btn btn-default\" style='color:black;
-																font-weight: bold;'><a href=\"./display_article.php?idArticle="; echo $row['idArticle']; echo "\" style=\"color:black\">"; echo $row['title']; echo "</a></button></td>";
+																font-weight: bold; background-color: #e0eee0;' onclick='location.href='./display_article.php?idArticle="; echo $row['idArticle']; echo "';'>"; echo $row['title']; echo "</button></td>";
                                 echo "<td>&nbsp"; echo $row['source']; echo"</td>";
                                 echo "<td>"; echo $row['date']; echo "</td>";
                             echo "</tr>";
