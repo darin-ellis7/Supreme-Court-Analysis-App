@@ -245,7 +245,7 @@
                         <div class="panel-heading" style="font-size:20px">
                             Sources (<?php echo mysqli_num_rows($source_query) ?>)
                         </div>
-                        <div class="panel-body" style="font-size: 16px; background-color: #c1cdc1">
+                        <div class="panel-body" style="font-size: 16px; background-color: #e0eee0">
                             <?php
                                 // build search filter panel (list of sources with checkboxes)
                                 // Known "defect" - because we're using two forms (the search form and filter form), any changes to the search parameters after a filter has been applied will be ignored (like changing the date range after selecting specific sources) - a new search will have to be done
@@ -326,7 +326,7 @@
             </div>
 
             <div class="floatRight" style="width:81%; float: right; ">
-                <table id="results-table" style="background-color: #c1cdc1" width="92%" class="stripe hover"  align="center">
+                <table id="results-table" style="background-color: #e0eee0" width="92%" class="stripe hover"  align="center">
                     <thead>
                         <tr align="center">
                         <td><strong>Title</strong></td>
@@ -339,7 +339,8 @@
                         while ($row = mysqli_fetch_array($query))
                         {
                             echo "<tr class='clickable-row' href='./display_article.php?idArticle="; echo $row['idArticle']; echo"'>";
-                                echo "<td><button class=\"btn btn-link\" style=\"color:black\"><a href=\"./display_article.php?idArticle="; echo $row['idArticle']; echo "\" style=\"color:black\">"; echo $row['title']; echo "</a></button></td>";
+                                echo "<td><button class=\"btn btn-link\" style='color:black;
+																font-weight: bold;'><a href=\"./display_article.php?idArticle="; echo $row['idArticle']; echo "\" style=\"color:black\">"; echo $row['title']; echo "</a></button></td>";
                                 echo "<td>&nbsp"; echo $row['source']; echo"</td>";
                                 echo "<td>"; echo $row['date']; echo "</td>";
                             echo "</tr>";
