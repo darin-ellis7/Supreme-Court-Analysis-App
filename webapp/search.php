@@ -178,7 +178,7 @@
 					}
 				?>
 			</div>
-			<div class = "articleInfo">
+
 				<table class = "articleTable">
 		                    <thead>
 		                        <tr align="center">
@@ -199,7 +199,7 @@
 		                        }
 		                    ?>
 		                </table>
-			</div>
+			
 
 </body>
 
