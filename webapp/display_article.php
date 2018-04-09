@@ -20,13 +20,13 @@
       <script src="js/jquery-latest.js"></script>
       <script src="js/jquery.tablesorter.js"></script>
    </head>
-   <!--background -->
-   <div style="background: white">
-      
+   <!--background; color: lemon Chiffon -->
+   <div style="background-color: #fffacd">
+
       <p><font size="8">&nbsp;Supreme Court Coverage/Analytics Application</font></p>
       <hr>
    </div>
-   <body style=" height:100%; background: linear-gradient(0deg, rgb(153, 204, 255), rgb(255, 255, 255)) no-repeat;">
+   <body style=" height:100%; background-color: #fffacd">
       <?php
          $connect = mysqli_connect("localhost", "root", "cs499") or die(mysqli_connect_error());
          mysqli_set_charset($connect, "utf8");

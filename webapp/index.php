@@ -35,11 +35,11 @@
         </script>
     </head>
 
-    <body style=" height:100%; background: linear-gradient(0deg, rgb(153, 204, 255), rgb(208, 230, 255)) no-repeat;">
+    <body style=" height:100%; background-color: #fffacd">
 
         <!-- image header -->
-        <div style="background: white">
-            
+        <div style="background-color: #fffacd">
+
             <p><font size="8">&nbsp;Supreme Court Coverage/Analytics Application</font></p>
             <hr>
         </div>
