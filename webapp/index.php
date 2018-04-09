@@ -245,7 +245,7 @@
                         <div class="panel-heading" style="font-size:20px">
                             Sources (<?php echo mysqli_num_rows($source_query) ?>)
                         </div>
-                        <div class="panel-body" style="font-size: 16px">
+                        <div class="panel-body" style="font-size: 16px; background-color: #c1cdc1">
                             <?php
                                 // build search filter panel (list of sources with checkboxes)
                                 // Known "defect" - because we're using two forms (the search form and filter form), any changes to the search parameters after a filter has been applied will be ignored (like changing the date range after selecting specific sources) - a new search will have to be done
@@ -326,7 +326,7 @@
             </div>
 
             <div class="floatRight" style="width:81%; float: right; ">
-                <table id="results-table" style="background-color: white" width="92%" class="stripe hover"  align="center">
+                <table id="results-table" style="background-color: #c1cdc1" width="92%" class="stripe hover"  align="center">
                     <thead>
                         <tr align="center">
                         <td><strong>Title</strong></td>
