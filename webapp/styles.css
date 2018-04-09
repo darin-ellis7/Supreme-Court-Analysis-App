@@ -104,3 +104,8 @@ p.helpB{ /*change help 'button' to web theme*/
 	padding: 5px;
 	width: 85%;
 }
+.row:after {
+	content: "";
+	display: table;
+	clear: both;
+}

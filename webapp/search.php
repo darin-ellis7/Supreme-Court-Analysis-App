@@ -148,7 +148,7 @@
 
 	?>
 
-
+		<div class = "row">
 			<div class = "sourceBar">
 				Sources (<?php echo mysqli_num_rows($source_query) ?>)
 				<hr>
@@ -202,6 +202,7 @@
 		                    ?>
 		                </table>
 			</div>
+		</div>
 
 </body>
 
