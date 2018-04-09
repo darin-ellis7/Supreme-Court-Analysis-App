@@ -33,6 +33,16 @@
                             $('.datebox').datepicker({clearBtn: true });
                           });
         </script>
+				<script>
+					function changeSubBut(){
+						document.getElementById("formBut").style.backgroundColor =
+						"#87ceeb" /*sky blue*/;
+					}
+					function revertSubBut(){ //revert style back to original for tab2
+						document.getElementById("formBut").style.backgroundColor =
+						"rgba(255, 255, 255, 0.7)" /*transparent white*/;
+					}
+				</script>
     </head>
 
     <body style=" height:100%; background-color: #fffacd; font-family: monospace; font-weight: bold;">
@@ -56,7 +66,8 @@
                             <!-- php code within these input tags are to remember user input after search is done -->
                             <span class="input-group-btn">
                                 <input class='form-control' type="text" name="search_query" style="width: 430px !important;" placeholder='Type search query here... (leave empty to see all)' <?php if(isset($_GET['search_query'])) echo " value='{$_GET['search_query']}'"; ?> >
-                                <button type='submit' class='btn btn-default' style = "height: 30px;
+                                <button id="formBut" type='submit' class='btn btn-default' onmouseover='changeSubBut()' onmouseout='reverseSubBut()'
+																style = "height: 30px;
 																font-weight: bold;
 																font-family: monospace;
 																background-color: rgba(255, 255, 255, 0.45);
