@@ -10,6 +10,18 @@
 		<div class = "header">
  			<h1>US Supreme Court Analysis Tool</h1>
 		</div>
+		<div class = "subheader"><!--this is the toolbar at the top-->
+			<table class = "subH">
+				<tr>
+					<th id="sh1" class = "subH" onmouseover = "changeSH1()"
+					onmouseout = "revertSH1()"
+					onclick = "restartPage()">Restart</th>
+					<th id="sh2" class = "subH" onmouseover = "changeSH2()"
+					onmouseout = "revertSH2()">Explore</th>
+				</tr>
+			</table>
+		</div>
+
       <?php
          $connect = mysqli_connect("localhost", "root", "cs499", "SupremeCourtApp") or die(mysqli_connect_error());
          mysqli_set_charset($connect, "utf8");
