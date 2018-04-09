@@ -1,3 +1,4 @@
+<!-- //*** denotes new lines of code added -->
 <!DOCTYPE html>
 
 <html>
@@ -33,48 +34,48 @@
                             $('.datebox').datepicker({clearBtn: true });
                           });
         </script>
-				<script>
-					function changeSubBut(){
-						document.getElementById("formBut").style.backgroundColor =
-						"#87ceeb" /*sky blue*/;
+				<script>  //***
+					function changeSubBut(){  //***
+						document.getElementById("formBut").style.backgroundColor =  //***
+						"#87ceeb" /*sky blue*/;  //***
 					}
-					function revertSubBut(){ //revert style back to original for tab2
-						document.getElementById("formBut").style.backgroundColor =
-						"rgba(255, 255, 255, 0.7)" /*transparent white*/;
+					function revertSubBut(){ //revert style back to original for tab2//***
+						document.getElementById("formBut").style.backgroundColor =  //***
+						"rgba(255, 255, 255, 0.7)" /*transparent white*/;  //***
 					}
-					function changeDownBut(){
-						document.getElementById("downBut").style.backgroundColor =
-						"#87ceeb" /*sky blue*/;
+					function changeDownBut(){  //***
+						document.getElementById("downBut").style.backgroundColor =  //***
+						"#87ceeb" /*sky blue*/;  //***
 					}
 					function revertDownBut(){ //revert style back to original for tab2
-						document.getElementById("downBut").style.backgroundColor =
-						"rgba(255, 255, 255, 0.7)" /*transparent white*/;
+						document.getElementById("downBut").style.backgroundColor =  //***
+						"rgba(255, 255, 255, 0.7)" /*transparent white*/;  //***
 					}
-					function changeApplyBut(){
-						document.getElementById("applyBut").style.backgroundColor =
-						"#87ceeb" /*sky blue*/;
+					function changeApplyBut(){  //***
+						document.getElementById("applyBut").style.backgroundColor =  //***
+						"#87ceeb" /*sky blue*/;  //***
 					}
 					function revertApplyBut(){ //revert style back to original for tab2
-						document.getElementById("applyBut").style.backgroundColor =
-						"rgba(255, 255, 255, 0.7)" /*transparent white*/;
+						document.getElementById("applyBut").style.backgroundColor =  //***
+						"rgba(255, 255, 255, 0.7)" /*transparent white*/;  //***
 					}
-					function changeMoreBut(){
-						document.getElementById("moreBut").style.backgroundColor =
-						"#87ceeb" /*sky blue*/;
+					function changeMoreBut(){  //***
+						document.getElementById("moreBut").style.backgroundColor =  //***
+						"#87ceeb" /*sky blue*/;  //***
 					}
 					function revertMoreBut(){ //revert style back to original for tab2
-						document.getElementById("moreBut").style.backgroundColor =
-						"rgba(255, 255, 255, 0.7)" /*transparent white*/;
+						document.getElementById("moreBut").style.backgroundColor =  //***
+						"rgba(255, 255, 255, 0.7)" /*transparent white*/;  //***
 					}
 				</script>
     </head>
 
-    <body style=" height:100%; background-color: #fffacd; font-family: monospace; font-weight: bold;">
+    <body style=" height:100%; background-color: #fffacd; font-family: monospace; font-weight: bold;">  <!--***-->
 
         <!-- header -->
-        <div style="background-color: #fffacd; padding: 30px; text-align: center;">
+        <div style="background-color: #fffacd; padding: 30px; text-align: center;">  <!--***-->
 
-            <h1 style="font-size: 50px; font-family: monospace; font-weight: bold;">US Supreme Court Analysis Tool</h1>
+            <h1 style="font-size: 50px; font-family: monospace; font-weight: bold;">US Supreme Court Analysis Tool</h1>  <!--***-->
             <hr>
         </div>
 
@@ -97,7 +98,7 @@
 																background-color: rgba(255, 255, 255, 0.45);
 																border: solid 3px;
 																border-radius: 10px;">
-                                    Submit
+                                    Submit  <!--***-->
                                 </button>
                             </span>
 
@@ -140,7 +141,7 @@
                     {
                         $downloadURL .= "&sourcebox[]=" . $source;
                     }
-                }
+                }  //***
                 echo "<button class=\"btn btn-default\" id=\"downBut\" onmouseover=\"changeDownBut()\" onmouseout=\"revertDownBut()\"
 								style=\"height: 30px;
 								font-weight: bold;
@@ -148,7 +149,7 @@
 								background-color: rgba(255, 255, 255, 0.45);
 								border: solid 3px;
 								border-radius: 10px;\"><a style=\"color:black; text-decoration:none;
-								\" href=\""; echo $downloadURL; echo "\">Download Results</a></button> &nbsp;";
+								\" href=\""; echo $downloadURL; echo "\">Download Results</a></button> &nbsp;";  //***
             ?>
         </div>
 
@@ -250,10 +251,10 @@
             <div class="floatLeft" style="width: 18%; float:left">
                     <br>
                     <div class="panel panel-default">
-                        <div class="panel-heading" style="font-size:20px; background-color: #e0eee0;">
+                        <div class="panel-heading" style="font-size:20px; background-color: #e0eee0;">  <!--***-->
                             Sources (<?php echo mysqli_num_rows($source_query) ?>)
                         </div>
-                        <div class="panel-body" style="font-size: 16px; background-color: #e0eee0">
+                        <div class="panel-body" style="font-size: 16px; background-color: #e0eee0">  <!--***-->
                             <?php
                                 // build search filter panel (list of sources with checkboxes)
                                 // Known "defect" - because we're using two forms (the search form and filter form), any changes to the search parameters after a filter has been applied will be ignored (like changing the date range after selecting specific sources) - a new search will have to be done
@@ -272,7 +273,7 @@
 																		font-family: monospace;
 																		background-color: rgba(255, 255, 255, 0.45);
 																		border: solid 3px;
-																		border-radius: 10px;'>Apply Filter</button><br><br>";
+																		border-radius: 10px;'>Apply Filter</button><br><br>";  //***
 
                                     $names = ['search_query','dateFrom','dateTo'];
 
@@ -301,7 +302,7 @@
 																						font-family: monospace;
 																						background-color: rgba(255, 255, 255, 0.45);
 																						border: solid 3px;
-																						border-radius: 10px;'>More Sources</a><br><br>";
+																						border-radius: 10px;'>More Sources</a><br><br>";  //***
                                             echo "<div id='more' class='collapse'>";
                                         }
 
@@ -352,9 +353,11 @@
                         // build search results table
                         while ($row = mysqli_fetch_array($query))
                         {
-                            echo "<tr class='clickable-row' style='background-color: #e0eee0' href='./display_article.php?idArticle="; echo $row['idArticle']; echo"'>";
+                            echo "<tr class='clickable-row' style='background-color: #e0eee0' href='./display_article.php?idArticle="; //***
+														echo $row['idArticle']; echo"'>";
                                 echo "<td><button class=\"btn btn-default\" style='color:black;
-																font-weight: bold; background-color: #e0eee0;' onclick='location.href=\"./display_article.php?idArticle="; echo $row['idArticle']; echo "\";'>"; echo $row['title']; echo "</button></td>";
+																font-weight: bold; background-color: #e0eee0;' onclick='location.href=\"./display_article.php?idArticle="; //***
+																echo $row['idArticle']; echo "\";'>"; echo $row['title']; echo "</button></td>";
                                 echo "<td>&nbsp"; echo $row['source']; echo"</td>";
                                 echo "<td>"; echo $row['date']; echo "</td>";
                             echo "</tr>";
