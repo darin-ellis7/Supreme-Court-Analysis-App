@@ -37,7 +37,7 @@
              $search_term = $_GET['idArticle'];
 
              $sql .= "WHERE idArticle='%{$search_term}%'";
-            //echo $sql;
+            echo $sql;
          }
          else {
             $search_term = $_GET['idArticle'];
@@ -60,8 +60,8 @@
 
 
          ?>
-      <div class='container'>
-      <div class='content-wrapper'>
+      <div>
+      <div>
       <div>
          <div>
             <div>
