@@ -54,8 +54,10 @@
 		</div>
 	</div>
 
+	<div>
 	You searched for <?php echo $_POST['search_query']; ?><br>
 	From <?php echo $_POST['dateFrom']; ?> To <?php echo $_POST['dateTo']; ?>
+	</div>
 
 	<?php
 
