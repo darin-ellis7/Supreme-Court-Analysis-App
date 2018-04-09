@@ -148,7 +148,7 @@
 
 	<table class = "wrapper">
 	<tr>
-		<td>
+		<td class = "sourceTD">
 			<div class = "sourceBar">
 				Sources (<?php echo mysqli_num_rows($source_query) ?>)
 				<hr>
