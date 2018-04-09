@@ -100,5 +100,6 @@ p.helpB{ /*change help 'button' to web theme*/
 	width: 100%;
 }
 .articleInfo {
+	margin-left: 200px;
 	width: 50%;
 }
