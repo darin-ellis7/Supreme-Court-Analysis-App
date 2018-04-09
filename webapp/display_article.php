@@ -22,10 +22,8 @@
    </head>
    <!--background -->
    <div style="background: white">
-      <img class="flagimgs first" src="CAS.png" width=100% height=10%>
-      <img class="flagimgs first" src="PS.png" width=500 height=150 style="background: white">
+      
       <p><font size="8">&nbsp;Supreme Court Coverage/Analytics Application</font></p>
-      </img></img>
       <hr>
    </div>
    <body style=" height:100%; background: linear-gradient(0deg, rgb(153, 204, 255), rgb(255, 255, 255)) no-repeat;">

@@ -39,8 +39,7 @@
 
         <!-- image header -->
         <div style="background: white">
-            <img class="flagimgs first" src="CAS.png" width=100% height=10%></img>
-            <img class="flagimgs first" src="PS.png" width=500 height=150 style="background: white"></img>
+            
             <p><font size="8">&nbsp;Supreme Court Coverage/Analytics Application</font></p>
             <hr>
         </div>
