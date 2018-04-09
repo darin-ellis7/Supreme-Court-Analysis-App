@@ -11,9 +11,8 @@
  			<h1>US Supreme Court Analysis Tool</h1>
 		</div>
       <?php
-         $connect = mysqli_connect("localhost", "root", "cs499") or die(mysqli_connect_error());
+         $connect = mysqli_connect("localhost", "root", "cs499", "SupremeCourtApp") or die(mysqli_connect_error());
          mysqli_set_charset($connect, "utf8");
-         mysqli_select_db($connect, "SupremeCourtApp") or die(mysqli_connect_error());
          $search_term = $_GET['idArticle'];
          $sql = "SELECT date, title, source, url, FROM article WHERE idArticle='%{$search_term}%'";
          //keep it for keyword
@@ -142,17 +141,5 @@
          </div>
 
      </div>
-      <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-      <script src="js/jquery.js"></script>
-      <!-- Include all compiled plugins (below), or include individual files as needed -->
-      <script src="js/bootstrap.min.js"></script>
-      <script src="js/jquery.dataTables.min.js"></script>
-      <script src="js/dataTables.bootstrap.min.js"></script>
-      <script>
-         $('#mydata').DataTable();
-
-      </script>
-      </br></br></br></br></br></br></br></br></br></br>
    </body>
 </html>
