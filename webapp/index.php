@@ -56,8 +56,13 @@
                             <!-- php code within these input tags are to remember user input after search is done -->
                             <span class="input-group-btn">
                                 <input class='form-control' type="text" name="search_query" style="width: 430px !important;" placeholder='Type search query here... (leave empty to see all)' <?php if(isset($_GET['search_query'])) echo " value='{$_GET['search_query']}'"; ?> >
-                                <button type='submit' class='btn btn-default'>
-                                    <span class='glyphicon glyphicon-search'></span>
+                                <button type='submit' class='btn btn-default' style = "height: 26px;
+																font-weight: bold;
+																font-family: monospace;
+																background-color: rgba(255, 255, 255, 0.45);
+																border: solid 3px;
+																border-radius: 10px;">
+                                    Submit
                                 </button>
                             </span>
 
