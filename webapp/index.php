@@ -40,7 +40,7 @@
         <!-- header -->
         <div style="background-color: #fffacd; padding: 30px; text-align: center">
 
-            <h1 style="font-size: 35px; font-family: monospace; font-weight: bold;">US Supreme Court Analysis Tool</h1>
+            <h1 style="font-size: 50px; font-family: monospace; font-weight: bold;">US Supreme Court Analysis Tool</h1>
             <hr>
         </div>
 
