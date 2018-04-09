@@ -96,3 +96,7 @@ p.helpB{ /*change help 'button' to web theme*/
 	border-radius: 10px;
 	width: 15%;
 }
+.articleInfo {
+	float: right;
+	width: 80%;
+}
