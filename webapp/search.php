@@ -146,8 +146,8 @@
 
 	?>
 
-<div>
-	<div class = "sourceBar">
+<div style = "overflow: hidden;">
+	<div class = "sourceBar" style = "width: 15%; float: left;">
 		Sources (<?php echo mysqli_num_rows($source_query) ?>)
 		<hr>
 		<?php
@@ -178,7 +178,7 @@
 			}
 		?>
 	</div>
-	<div class = "articleInfo">
+	<div class = "articleInfo" style = "width: 84%; float: right;">
 		<table class = "articleTable">
                     <thead>
                         <tr align="center">
