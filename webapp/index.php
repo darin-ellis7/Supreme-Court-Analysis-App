@@ -61,7 +61,8 @@
 																font-family: monospace;
 																background-color: rgba(255, 255, 255, 0.45);
 																border: solid 3px;
-																border-radius: 10px;">
+																border-radius: 10px;
+																text-align: center;">
                                     Submit
                                 </button>
                             </span>
