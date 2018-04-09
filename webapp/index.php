@@ -42,6 +42,14 @@
 						document.getElementById("formBut").style.backgroundColor =
 						"rgba(255, 255, 255, 0.7)" /*transparent white*/;
 					}
+					function changeDownBut(){
+						document.getElementById("downBut").style.backgroundColor =
+						"#87ceeb" /*sky blue*/;
+					}
+					function revertDownBut(){ //revert style back to original for tab2
+						document.getElementById("downBut").style.backgroundColor =
+						"rgba(255, 255, 255, 0.7)" /*transparent white*/;
+					}
 				</script>
     </head>
 
@@ -117,7 +125,14 @@
                         $downloadURL .= "&sourcebox[]=" . $source;
                     }
                 }
-                echo "<button class=\"btn btn-default\"><a style=\"color:black; text-decoration:none\" href=\""; echo $downloadURL; echo "\">Download Results</a></button> &nbsp;";
+                echo "<button class=\"btn btn-default\" id=\"downBut\" onmouseover=\"changeDownBut()\" onmouseout=\"revertDownBut\"
+								style=\"height: 30px;
+								font-weight: bold;
+								font-family: monospace;
+								background-color: rgba(255, 255, 255, 0.45);
+								border: solid 3px;
+								border-radius: 10px;\"><a style=\"color:black; text-decoration:none;
+								\" href=\""; echo $downloadURL; echo "\">Download Results</a></button> &nbsp;";
             ?>
         </div>
 
