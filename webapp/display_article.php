@@ -20,6 +20,16 @@
       <script src="js/pdfFromHTML.js"></script>
       <script src="js/jquery-latest.js"></script>
       <script src="js/jquery.tablesorter.js"></script>
+			<script>
+			function changeResBut(){  //***
+				document.getElementById("resBut").style.backgroundColor =  //***
+				"#87ceeb" /*sky blue*/;  //***
+			}
+			function revertResBut(){ //revert style back to original for tab2
+				document.getElementById("resBut").style.backgroundColor =  //***
+				"rgba(255, 255, 255, 0.7)" /*transparent white*/;  //***
+			}
+			</script>
    </head>
    <body style=" height:100%; background-color: #fffacd; font-family: monospace; font-weight: bold;">  <!--***-->
 		 <!-- header -->
