@@ -102,7 +102,7 @@ def addImage(image_url,idArticle,c):
 # if error occurs during download, return None
 def download_image(url,idImage):
     try:
-        path = "./images/" # for this to work the images folder must be in the same directory as this script
+        path = "../../webapp/images/" # for this to work the images folder must be in the same directory as this script
         filename = "id" + str(idImage) + ".jpg" # image file is named according to its idImage in the database
         full = path + filename
         urllib.request.urlretrieve(url,full) # save image as a jpg even if it isn't (this probably isn't ideal but it seems to work) 
