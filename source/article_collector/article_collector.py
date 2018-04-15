@@ -10,7 +10,6 @@
 # DEPENDENCIES
 
 # libraries that need to be downloaded (preferably using pip)
-from sys import argv
 from feedparser import *
 from newspaper import *
 import siteScraperFunctions as scraper
@@ -28,6 +27,7 @@ from google.cloud.language import enums
 from google.cloud.language import types
 
 # libraries that should be built into Python (don't need to be downloaded)
+from sys import argv
 from urllib import parse as urlparse
 import re
 import html
@@ -219,6 +219,16 @@ def addToDatabase(url,source,author,date,text,title,keywords,image,c):
     if image != None:
         addImage(image,idArticle,c)
 
+    # finally, insert a success into statistics
+    # Check if statistics exist for this date and source already:
+    c.execute("""SELECT * FROM source_statistics WHERE source = %s AND date = %s""",(source, datetime.date.today()))
+    if c.rowcount == 0:
+        #TODO: Insert new row into source_statistics
+        pass
+    else:
+        #TODO: Increment successed attribute of selection
+        pass
+
 # checks whether the title of an article is already in the database, avoiding duplicates
 # we only check for title because the likeliness of identical titles is crazy low, and it cuts down on reposts from other sites
 def ArticleIsDuplicate(title,c):
@@ -404,6 +414,7 @@ def parseURL(URL, c, checkRelevancy=False):
             #exclude small articles (See justification above in ParseFeed)
             text = a.text
             if len(text) < 500:
+                #TODO: Add Statistics
                 print("Rejected - article too short")
             else:
                 if(len(a.authors) > 0):
@@ -424,6 +435,7 @@ def parseURL(URL, c, checkRelevancy=False):
                     print('Article rejected - source known to have a paywall')
                 else:
                     if checkRelevancy and not relevant(keywords, title, source):
+                        #TODO: Add statistics
                         print('Article rejected - deemed irrelevant')
                     else:
                         addToDatabase(URL,source,author,date,text,title,keywords,image,c)
