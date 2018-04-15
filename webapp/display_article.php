@@ -28,6 +28,12 @@
 	      <h1 style="font-size: 50px; font-family: monospace; font-weight: bold;">US Supreme Court Analysis Tool</h1>  <!--***-->
 	      <hr>
 	   </div>
+		 <div align="right">
+			 <button class="btn btn-default" id="resBut" onmouseover="changeResBut()" onmouseout="revertResBut()" style="height: 30px; font-weight: bold; font-family: monospace; background-color: rgba(255, 255, 255, 0.45); border: solid 3px; border-radius: 10px;">
+			 <a style="color:black; text-decoration:none;
+				 href="index.php">Restart</a>
+		   </button>
+		 </div>
       <?php
          $connect = mysqli_connect("localhost", "root", "cs499") or die(mysqli_connect_error());
          mysqli_set_charset($connect, "utf8");

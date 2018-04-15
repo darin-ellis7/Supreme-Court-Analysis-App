@@ -52,6 +52,14 @@
 						document.getElementById("downBut").style.backgroundColor =  //***
 						"rgba(255, 255, 255, 0.7)" /*transparent white*/;  //***
 					}
+					function changeResBut(){  //***
+						document.getElementById("resBut").style.backgroundColor =  //***
+						"#87ceeb" /*sky blue*/;  //***
+					}
+					function revertResBut(){ //revert style back to original for tab2
+						document.getElementById("resBut").style.backgroundColor =  //***
+						"rgba(255, 255, 255, 0.7)" /*transparent white*/;  //***
+					}
 					function changeApplyBut(){  //***
 						document.getElementById("applyBut").style.backgroundColor =  //***
 						"#87ceeb" /*sky blue*/;  //***
@@ -142,7 +150,16 @@
                     {
                         $downloadURL .= "&sourcebox[]=" . $source;
                     }
-                }  //***  button styling
+                }
+								echo "<button class=\"btn btn-default\" id=\"resBut\" onmouseover=\"changeResBut()\" onmouseout=\"revertResBut()\"
+								style=\"height: 30px;
+								font-weight: bold;
+								font-family: monospace;
+								background-color: rgba(255, 255, 255, 0.45);
+								border: solid 3px;
+								border-radius: 10px;\"><a style=\"color:black; text-decoration:none;
+								\" href=\""; echo "index.php"; echo "\">Restart</a></button>";
+
                 echo "<button class=\"btn btn-default\" id=\"downBut\" onmouseover=\"changeDownBut()\" onmouseout=\"revertDownBut()\"
 								style=\"height: 30px;
 								font-weight: bold;
