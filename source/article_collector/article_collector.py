@@ -119,7 +119,7 @@ def analyzeImage(filename,idImage,c):
     client = vision.ImageAnnotatorClient() # start API
 
     # read image and detect web entities on the image
-    path = "./images/" + filename
+    path = "../../webapp/images/" + filename
     with io.open(path,'rb') as image_file:
         content = image_file.read()
 
