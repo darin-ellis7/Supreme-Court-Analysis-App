@@ -180,6 +180,21 @@ def getKeywords(article):
     article.nlp()
     return article.keywords
 
+# updates SQL source_statistics table with information
+def updateStatistics(c, source, accepted):
+    if (accepted):
+        s = 1
+        f = 0
+    else:
+        s = 0
+        f = 1
+    t = (source, s, f, datetime.date.today(), s, f);
+    c.execute("""INSERT INTO source_statistics(source, successes, failures, date)
+        VALUES (%s, %s, %s, %s)
+        ON DUPLICATE KEY UPDATE 
+        `successes` = `successes` + %s,
+        `failures` = `failures` + %s""", t)
+
 # inserts keywords from the Article keyword array into the database one-by-one 
 def addKeywords(keywords,idArticle,c):
     # if keyword is a first occurrence, insert it into article_keywords
@@ -220,14 +235,7 @@ def addToDatabase(url,source,author,date,text,title,keywords,image,c):
         addImage(image,idArticle,c)
 
     # finally, insert a success into statistics
-    # Check if statistics exist for this date and source already:
-    c.execute("""SELECT * FROM source_statistics WHERE source = %s AND date = %s""",(source, datetime.date.today()))
-    if c.rowcount == 0:
-        #TODO: Insert new row into source_statistics
-        pass
-    else:
-        #TODO: Increment successed attribute of selection
-        pass
+    updateStatistics(c, source, True)
 
 # checks whether the title of an article is already in the database, avoiding duplicates
 # we only check for title because the likeliness of identical titles is crazy low, and it cuts down on reposts from other sites
@@ -365,12 +373,14 @@ def parseFeed(RSS,c):
                     else:
                         if not relevant(keywords,title,source):
                             print('Article rejected - deemed irrelevant')
+                            updateStatistics(c, source, False)
                         else:
                             addToDatabase(url,source,author,date,text,title,keywords,image,c)
                             successes += 1
                             print('Article successfully analyzed & added to database')                        
                 else:
                     print('Article rejected - too short')
+                    updateStatistics(c, source, False)
 
             except ArticleException: # article couldn't download (throw this message and move on)
                 print('Rejected - couldn\'t download article ')
@@ -414,8 +424,8 @@ def parseURL(URL, c, checkRelevancy=False):
             #exclude small articles (See justification above in ParseFeed)
             text = a.text
             if len(text) < 500:
-                #TODO: Add Statistics
                 print("Rejected - article too short")
+                updateStatistics(c, source, False);
             else:
                 if(len(a.authors) > 0):
                     author = a.authors[0]
@@ -435,8 +445,9 @@ def parseURL(URL, c, checkRelevancy=False):
                     print('Article rejected - source known to have a paywall')
                 else:
                     if checkRelevancy and not relevant(keywords, title, source):
-                        #TODO: Add statistics
                         print('Article rejected - deemed irrelevant')
+                        #Update statistics
+                        updateStatistics(c, source, False);
                     else:
                         addToDatabase(URL,source,author,date,text,title,keywords,image,c)
                         print('Article successfully analyzed & added to database')
