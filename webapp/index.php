@@ -359,7 +359,7 @@
             </div>
 						<!--style of table-->
             <div class="floatRight" style="width:81%; float: right; ">
-                <table id="results-table" style="background-color: #e0eee0" width="92%" class="stripe hover"  align="center">
+                <table id="results-table" style="background-color: #e0eee0;table-layout: fixed" width="100%" class="stripe hover"  align="center">
                     <thead>
                         <tr align="center">
                         <td><strong>Title</strong></td>
