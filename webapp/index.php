@@ -363,7 +363,7 @@
                     <thead>
                         <tr align="center">
                         <td width="75%"
-												style="overflow: hidden"><strong>Title</strong></td>
+												style="max-width: 800px; overflow: hidden"><strong>Title</strong></td>
                         <td width="15%"><strong>Source</strong></td>
                         <td width="10%"><strong>Date</strong></td>
                         </tr>
