@@ -151,14 +151,14 @@
                         $downloadURL .= "&sourcebox[]=" . $source;
                     }
                 }
-								echo "<button class=\"btn btn-default\" id=\"resBut\" onmouseover=\"changeResBut()\" onmouseout=\"revertResBut()\"
+								echo "<a style=\"color:black; text-decoration:none;
+								\" href=\""; echo "index.php"; echo "\"><button class=\"btn btn-default\" id=\"resBut\" onmouseover=\"changeResBut()\" onmouseout=\"revertResBut()\"
 								style=\"height: 30px;
 								font-weight: bold;
 								font-family: monospace;
 								background-color: rgba(255, 255, 255, 0.45);
 								border: solid 3px;
-								border-radius: 10px;\"><a style=\"color:black; text-decoration:none;
-								\" href=\""; echo "index.php"; echo "\">Restart</a></button>";
+								border-radius: 10px;\">Restart</button></a>";
 
                 echo "<button class=\"btn btn-default\" id=\"downBut\" onmouseover=\"changeDownBut()\" onmouseout=\"revertDownBut()\"
 								style=\"height: 30px;
