@@ -39,9 +39,11 @@
 	      <hr>
 	   </div>
 		 <div align="right">
+			 <a style="color:black; text-decoration:none;" href="index.php">
 			 <button class="btn btn-default" id="resBut" onmouseover="changeResBut()" onmouseout="revertResBut()" style="height: 30px; font-weight: bold; font-family: monospace; background-color: rgba(255, 255, 255, 0.45); border: solid 3px; border-radius: 10px;">
-			 <a style="color:black; text-decoration:none;" href="index.php">Restart</a>
+			 Restart
 		   </button>
+		 </a>
 		 </div>
       <?php
          $connect = mysqli_connect("localhost", "root", "cs499") or die(mysqli_connect_error());
