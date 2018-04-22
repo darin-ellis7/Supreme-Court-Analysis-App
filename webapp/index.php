@@ -362,8 +362,7 @@
                 <table id="results-table" style="background-color: #e0eee0;table-layout: fixed" width="100%" class="stripe hover"  align="center">
                     <thead>
                         <tr align="center">
-                        <td width="75%"
-												style="max-width: 800px; overflow: hidden"><strong>Title</strong></td>
+                        <td width="75%"><strong>Title</strong></td>
                         <td width="15%"><strong>Source</strong></td>
                         <td width="10%"><strong>Date</strong></td>
                         </tr>
@@ -374,7 +373,7 @@
                         {
                             echo "<tr class='clickable-row' style='background-color: #e0eee0' href='./display_article.php?idArticle="; //***
 														echo $row['idArticle']; echo"'>";
-                                echo "<td><button class=\"btn btn-default\" style='color:black;
+                                echo "<td style=\"max-width: 800px; overflow: hidden\"><button class=\"btn btn-default\" style='color:black;
 																font-weight: bold; background-color: #e0eee0;' onclick='location.href=\"./display_article.php?idArticle="; //***
 																echo $row['idArticle']; echo "\";'>"; echo $row['title']; echo "</button></td>";
                                 echo "<td>&nbsp"; echo $row['source']; echo"</td>";
