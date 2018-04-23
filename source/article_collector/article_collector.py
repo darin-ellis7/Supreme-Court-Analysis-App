@@ -1,4 +1,4 @@
-# CS499 Fall 2018 Supreme Court Application John Tompkins, Jonathan Dingess, Mauricio Sanchez. Modified from Fall 2017 Supreme Court Coverage/Analytics Application - Evan Cole, Darin Ellis, Connor Martin, Abdullah Alosail
+# CS499 Spring 2018 Supreme Court Application John Tompkins, Jonathan Dingess, Mauricio Sanchez. Modified from Fall 2017 Supreme Court Coverage/Analytics Application - Evan Cole, Darin Ellis, Connor Martin, Abdullah Alosail
 #Article collection script - ideally, this should be scheduled to run on the hosting server periodically in order to collect new articles
 # Data is collected by checking and parsing two custom RSS feeds we have 
 # To-do: perhaps refine the relevancy check a little more
