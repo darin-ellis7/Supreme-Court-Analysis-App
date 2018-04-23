@@ -1,3 +1,4 @@
+#CS499 Spring 2018
 #File that contains functions to scrape articles from supreme court sections of prominent news website
 
 #The below are used to download pages and sign GET requests for HTTPS

@@ -1,3 +1,5 @@
+# CS499 Spring 2018 Supreme Court Application John Tompkins, Jonathan Dingess, Mauricio Sanchez
+#News API library. Queries from the newsAPI
 from newsapi import NewsApiClient
 from math import ceil
 
