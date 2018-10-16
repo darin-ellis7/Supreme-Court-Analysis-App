@@ -3,7 +3,65 @@ import feedparser
 from scrapers import *
 from utilityFunctions import *
 from newsapi import NewsApiClient
+from bs4 import BeautifulSoup
 import datetime
+
+class TopicSites:
+    def __init__(self):
+        self.pages = []
+
+    # topic site driver
+    def collect(self):
+        print("Collecting CNN articles...")
+        self.collectCNN()
+        print("Collecting Politico articles...")
+        print()
+        self.collectPolitico()
+        successes = 0
+        for p in self.pages:
+            printBasicInfo(p.title,p.url)
+            article = p.scrape()
+            if article:
+                article.printInfo()
+                successes += 1
+                print("Accepted")
+            print("=================================")
+        print("***",successes,"/",len(self.pages),"articles collected from topic sites ***")
+        print("=================================")
+
+    # scrapes CNN's supreme court topic page for articles and their metadata - other functions should be pretty similar
+    def collectCNN(self):
+        url = "https://www.cnn.com/specials/politics/supreme-court-nine"
+        soup = downloadPage(url)
+        if soup:
+            # remove journalist sidebar (it gets in the way of properly scraping)
+            journalistSidebar = soup.find("div",{"class":"column zn__column--idx-1"})
+            if journalistSidebar:
+                journalistSidebar.decompose()
+
+            headlines = soup.select("h3.cd__headline a")
+            if headlines:
+                for h in headlines:
+                    url = "https://www.cnn.com" + h['href']
+                    title = h.text
+                    s = Scraper(url,title,None,None,[])
+                    self.pages.append(s) # build list of pages to scrape
+
+    def collectPolitico(self):
+        links = {}
+        url = "https://www.politico.com/news/supreme-court"
+        soup = downloadPage(url)
+        if soup:
+            pages = soup.select("ul.story-frag-list.layout-grid.grid-3 li div.summary")
+            if pages:
+                for p in pages:
+                    headline = p.select_one("h3 a")
+                    url = headline['href']
+                    title = headline.text
+                    author = p.find(itemprop="name").get("content")
+                    date = convertDate(p.find(itemprop="datePublished").get("datetime"),"%Y-%m-%d %H:%M:%S")
+                    s = Scraper(url,title,author,date,[])
+                    self.pages.append(s)
 
 class RSSFeeds:
     def __init__(self,feeds):
@@ -20,30 +78,20 @@ class RSSFeeds:
                 title = cleanTitle(post['title'])
                 date = convertDate(post['date'],"%Y-%m-%dT%H:%M:%SZ")
 
-                print(title)
-                print(url)
+                printBasicInfo(title,url)
                 s = Scraper(url,title,None,date,[])
-                try:
-                    article = s.scrape()
-                    if article:
-                        # add to database
-                        successes += 1
-                        #print(article.title)
-                        print(article.author)
-                        print(article.date)
-                        print(article.keywords)
-                        print(article.images)
-                        print()
-                        print(article.text)
-                    
-                except Exception as e:
-                    print(e)
-                    continue
-                print("======================================")
-        print()
-        print("***",successes,"/",total,"collected from Google Alerts RSS Feeds ***")
 
-#
+                article = s.scrape()
+                if article:
+                    # add to database
+                    successes += 1
+                    article.printInfo()
+                    print("Accepted")
+                
+                print("======================================")
+        print("***",successes,"/",total,"articles collected from Google Alerts RSS Feeds ***")
+        print("======================================")
+
 class NewsAPICollection:
     def __init__(self,queries):
         self.queries = queries
@@ -75,22 +123,16 @@ class NewsAPICollection:
                 else:
                     date = None
 
-                print(entry['title'])
-                print(entry['url'])
-
+                printBasicInfo(entry['title'],entry['url'])
                 s = Scraper(entry['url'],entry['title'],author,date,images)
                 try: 
                     article = s.scrape()
                     if article:
                         successes += 1
-                        #print(article.title)
-                        print(article.author)
-                        print(article.date)
-                        print(article.images)
-                        print()
-                        print(article.text)
+                        article.printInfo()
+                        print("Accepted")
                 except Exception as e:
                     print(e)
                 print("======================================")
-        print()
-        print("***",successes,"/",total,"collected from NewsAPI results ***")
+        print("***",successes,"/",total," articles collected from NewsAPI results ***")
+        print("======================================")

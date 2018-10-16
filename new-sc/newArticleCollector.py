@@ -19,15 +19,24 @@ def main():
     ssl._create_default_https_context = ssl._create_unverified_context # monkey patch for getting past SSL errors (this might be a system-specific issue)
     user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/602.2.14 (KHTML, like Gecko) Version/10.0.1 Safari/602.2.14'
 
+    # RSS feeds
+    print("*** Google Alerts RSS Feeds ***")
+    print()
     feed_urls = ['https://www.google.com/alerts/feeds/16607645132923191819/10371748129965602805', 'https://www.google.com/alerts/feeds/16607645132923191819/14723000309727640285', 'https://www.google.com/alerts/feeds/16607645132923191819/1276985364450614174', 'https://www.google.com/alerts/feeds/16607645132923191819/1276985364450612172']
     feeds = RSSFeeds(feed_urls)
     feeds.parseFeeds()
 
+    print("*** NewsAPI Search ***")
     print()
-
+    # newsAPI results
     queries  = ["USA Supreme Court","US Supreme Court", "United States Supreme Court","SCOTUS"]
     newsapi = NewsAPICollection(queries)
     newsapi.parseResults()
 
-    # then do specific site collections
+    print("*** Topic Sites Scraping (CNN, Politico)")
+    print()
+    # topic sites
+    t = TopicSites()
+    t.collect()
+
 main()

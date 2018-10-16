@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 from Article import *
 from utilityFunctions import *
 import newspaper
-import requests
+#import requests
 import ssl
 import datetime
 
@@ -28,25 +28,11 @@ class Scraper:
         else: # otherwise, use Newspaper to try to get the data
             article = self.genericScraper()
         return article
-    
-
-    # for specific site scrapers - download the page using BeautifulSoup
-    # returns soup object we can parse
-    def downloadPage(self):
-        user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/602.2.14 (KHTML, like Gecko) Version/10.0.1 Safari/602.2.14'
-        try:
-            request = requests.get(self.url,headers={'User-Agent':user_agent})
-            page = request.content
-            soup = BeautifulSoup(page, 'html.parser')
-        except Exception as e: # couldn't download page
-            print("DOWNLOAD ERROR: ",e)
-            soup = None
-        return soup
 
     # driver for specific-site scrapers
     # returns an Article object, or if something goes wrong, None
     def specificScraper(self):
-        soup = self.downloadPage()
+        soup = downloadPage(self.url)
         if soup: # if page is downloaded, scrape!
             try:
                 article = getattr(self,self.source)(soup) # call appropriate scraper based on source name (scraper functions should ALWAYS be named the same as its source for this work, verbatim)
@@ -65,12 +51,12 @@ class Scraper:
         a = newspaper.Article(self.url,config=config)
         try: # make sure page download goes smoothly
             a.download()
+            a.parse()
         except Exception as e:
-            print("DOWNLOAD ERROR: ",e)
+            print("Rejected - DOWNLOAD ERROR: ",e)
             return None
-        a.parse()
 
-        text = a.text
+        text = cleanText(a.text)
         if len(text) < 500: # not much article text - full article is likely not picked up, and worst case scenario a short article is rejected (probably not all that useful in the long run)
             print("Rejected - Article text was less than 500 characters, likely bad scraping job")
             return None
@@ -119,13 +105,10 @@ class Scraper:
                 self.images.append(i)
 
         text = ''
-        textPath = "div.pg-rail-tall__body div.l-container" # article text is contained in these nested divs
-        container = soup.select_one(textPath)
-        if container:
-            paragraphs = container.find_all(["div","p"],{"class":"zn-body__paragraph"}) # paragraphs are contained in <div> and <p> tags with the class 'zn-body__paragraph' - catch 'em all
-            if paragraphs:
-                for p in paragraphs: # loop through paragraphs and add each one to text string, separated by double new-line
-                    text += (p.text + '\n\n')
+        paragraphs = soup.find_all(["div","p"],{"class":"zn-body__paragraph"}) # paragraphs are contained in <div> and <p> tags with the class 'zn-body__paragraph' - catch 'em all
+        if paragraphs:
+            for p in paragraphs: # loop through paragraphs and add each one to text string, separated by double new-line
+                text += (p.text + '\n\n')
         
         if text == '': # scraping probably went wrong because no text, so return None
             print("Text is empty - likely bad scraping job")
@@ -222,6 +205,17 @@ class Scraper:
         else:
             article = Article(self.title,self.author,self.date,self.url,self.source,text.strip(),self.images)
             return article
+
+
+'''def main():
+    ssl._create_default_https_context = ssl._create_unverified_context # monkey patch for getting past SSL errors (this might be a system-specific issue)
+    cnn = Scraper("https://www.cnn.com/2018/10/08/politics/cnn-poll-kavanaugh-confirmation/index.html","CNN Poll: Majority oppose Kavanaugh, but his popularity grows with GOP",None,None,[])
+    a = cnn.scrape()
+    if a:
+        a.printInfo()
+
+
+main()'''
 
 '''# tests for scraper - delete this once we're golden       
 def main():

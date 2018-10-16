@@ -12,6 +12,17 @@ class Article:
         self.text = text
         self.images = images
         self.keywords = self.getKeywords()
+    
+    def printInfo(self):
+        #print("Title:",self.title)
+        #print("URL:",self.url,"(" + self.source.upper() + ")")
+        print("Author:",self.author)
+        print("Date:",self.date)
+        print("Keywords:",self.keywords)
+        print("Images:",self.images)
+        print("Number of characters:",len(self.text))
+        #print()
+        #print(self.text)
 
     # Newspaper library can get grab keywords from articles in conjunction with the nltk (natural language toolkit) library
     # this function prepares the article for language processing and returns an array of keywords from the article
