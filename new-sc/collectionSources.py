@@ -23,8 +23,10 @@ class TopicSites:
             article = p.scrape()
             if article:
                 article.printInfo()
-                successes += 1
-                print("Accepted")
+                if article.isRelevant():
+                    # add to database
+                    successes += 1
+                    print("Accepted")
             print("=================================")
         print("***",successes,"/",len(self.pages),"articles collected from topic sites ***")
         print("=================================")
@@ -83,10 +85,11 @@ class RSSFeeds:
 
                 article = s.scrape()
                 if article:
-                    # add to database
-                    successes += 1
                     article.printInfo()
-                    print("Accepted")
+                    if article.isRelevant():
+                        # add to database
+                        successes += 1
+                        print("Accepted")
                 
                 print("======================================")
         print("***",successes,"/",total,"articles collected from Google Alerts RSS Feeds ***")
@@ -128,9 +131,11 @@ class NewsAPICollection:
                 try: 
                     article = s.scrape()
                     if article:
-                        successes += 1
                         article.printInfo()
-                        print("Accepted")
+                        if article.isRelevant():
+                            # add to database
+                            successes += 1
+                            print("Accepted")
                 except Exception as e:
                     print(e)
                 print("======================================")
