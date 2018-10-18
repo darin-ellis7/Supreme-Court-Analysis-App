@@ -60,4 +60,14 @@ def printBasicInfo(title,url):
     print('Title:',title)
     print('URL:', url)
 
+def isBlockedSource(url):
+    blockedSources = ['law360','law','freerepublic','bloomberglaw'] 
+    if "howappealing.abovethelaw.com" in url or getSource(url) in blockedSources:
+        print("Rejected - URL/source known to have a paywall, or does not contain full articles")
+        return True
+    else:
+        return False
+
+
+
 

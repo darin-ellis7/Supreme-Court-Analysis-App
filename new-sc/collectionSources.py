@@ -12,11 +12,17 @@ class TopicSites:
 
     # topic site driver
     def collect(self):
-        print("Collecting CNN articles...")
-        self.collectCNN()
-        print("Collecting Politico articles...")
+        print("*** Topic Sites Scraping ***")
         print()
-        self.collectPolitico()
+        functionCalls = {"CNN":"CNN", "Politico":"Politico", "Fox News":"FoxNews", "Chicago Tribune": "ChicagoTribune", "Los Angeles Times":"LATimes"}
+        for source in functionCalls:
+            print("Collecting " + source + "...")
+            try:
+                getattr(self,"collect" + functionCalls[source])()
+            except Exception as e:
+                print("Something went wrong when collecting from",source)
+                continue
+        print()
         successes = 0
         for p in self.pages:
             printBasicInfo(p.title,p.url)
@@ -50,7 +56,6 @@ class TopicSites:
                     self.pages.append(s) # build list of pages to scrape
 
     def collectPolitico(self):
-        links = {}
         url = "https://www.politico.com/news/supreme-court"
         soup = downloadPage(url)
         if soup:
@@ -65,11 +70,76 @@ class TopicSites:
                     s = Scraper(url,title,author,date,[])
                     self.pages.append(s)
 
+    def collectFoxNews(self):
+        url = 'https://www.foxnews.com/category/politics/judiciary/supreme-court'
+        soup = downloadPage(url)
+        if soup:
+            container = soup.select_one("div.content.article-list")
+            if container:
+                pages = container.select("h4.title a")
+                if pages:
+                    for p in pages:
+                        if 'video.foxnews.com' not in p['href']:
+                            url = "https://www.foxnews.com" + p['href']
+                            title = p.text
+                            s = Scraper(url,title,None,None,[])
+                            self.pages.append(s)
+                       
+    def collectChicagoTribune(self):
+        url = "http://www.chicagotribune.com/topic/crime-law-justice/justice-system/u.s.-supreme-court-ORGOV0000126-topic.html?page=1&target=stories&#trb_topicGallery_search"
+        soup = downloadPage(url)
+        if soup:
+            containers = soup.find_all("div",{"class":"trb_search_result_wrapper"})
+            for c in containers:
+                headline = c.select_one("h3 a")
+                url = "http://www.chicagotribune.com" + headline['href']
+                title = headline.text
+                author = c.find(itemprop="author").text
+                date = convertDate(c.find(itemprop="datePublished").get("datetime"), "%Y-%m-%dT%H:%M:%SCDT")
+                s = Scraper(url,title,author,date,[])
+                self.pages.append(s)
+    
+    def collectLATimes(self):
+        urls = ["http://www.latimes.com/search/?q=supreme+court&s=date&t=story", "http://www.latimes.com/la-bio-david-savage-staff.html"]
+        scrapingStaffPage = False
+        for u in urls:
+            soup = downloadPage(u)
+            if soup:
+                if not scrapingStaffPage:
+                    pages = soup.select("div.h7 a")
+                else:
+                    staffPane = soup.select_one("div.card-content.flex-container-column.align-items-start")
+                    if staffPane:
+                        staffPane.decompose()
+                    pages = soup.find_all(["h5","a"],{"class":["","recommender"]})
+
+                if pages:
+                    for p in pages:
+                        if scrapingStaffPage:
+                            author = "David G. Savage"
+                            if p.name == "h5":
+                                p = p.find("a")
+                        else:
+                            author = None
+
+                        if "/espanol/" not in p['href']:
+                            url = "http://www.latimes.com" + p['href']
+                            title = p.text
+                            s = Scraper(url,title,author,None,[])
+                            self.pages.append(s)
+                scrapingStaffPage = True
+
+
+#t = TopicSites()
+#t.collectLATimes()
+
 class RSSFeeds:
     def __init__(self,feeds):
         self.feeds = feeds
 
     def parseFeeds(self):
+        print("*** Google Alerts RSS Feeds ***")
+        print()
         total = 0
         successes = 0
         for feed in self.feeds:
@@ -82,15 +152,14 @@ class RSSFeeds:
 
                 printBasicInfo(title,url)
                 s = Scraper(url,title,None,date,[])
-
-                article = s.scrape()
-                if article:
-                    article.printInfo()
-                    if article.isRelevant():
-                        # add to database
-                        successes += 1
-                        print("Accepted")
-                
+                if not isBlockedSource(url):
+                    article = s.scrape()
+                    if article:
+                        article.printInfo()
+                        if article.isRelevant():
+                            # add to database
+                            successes += 1
+                            print("Accepted")
                 print("======================================")
         print("***",successes,"/",total,"articles collected from Google Alerts RSS Feeds ***")
         print("======================================")
@@ -101,9 +170,10 @@ class NewsAPICollection:
         self.newsapi = NewsApiClient(api_key='43fe19e9160d4a178e862c796a06aea8') # this should be set as an environment variable at some point, it's never a good idea to hardcode API keys
     
     def parseResults(self):
+        print("*** NewsAPI Search ***")
+        print()
         total = 0
         successes = 0
-
         # check articles from the the last two days (in case a problem arises and we can 'go back in time')
         today = datetime.datetime.now()
         two_days_ago = (today - datetime.timedelta(days=2)).strftime('%Y-%m-%d')
@@ -127,8 +197,8 @@ class NewsAPICollection:
                     date = None
 
                 printBasicInfo(entry['title'],entry['url'])
-                s = Scraper(entry['url'],entry['title'],author,date,images)
-                try: 
+                if not isBlockedSource(entry['url']):
+                    s = Scraper(entry['url'],entry['title'],author,date,images)
                     article = s.scrape()
                     if article:
                         article.printInfo()
@@ -136,8 +206,6 @@ class NewsAPICollection:
                             # add to database
                             successes += 1
                             print("Accepted")
-                except Exception as e:
-                    print(e)
                 print("======================================")
         print("***",successes,"/",total," articles collected from NewsAPI results ***")
         print("======================================")

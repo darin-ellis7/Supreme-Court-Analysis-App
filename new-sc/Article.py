@@ -52,8 +52,8 @@ class Article:
             return True
 
         # these are sources that seem to pop up often about the SC in India - kill anything from these websites
-        avoidedSources = ['indiatimes','thehindu','liberianobserver']
-        if self.source.lower() in avoidedSources:
+        foreignSources = ['indiatimes','thehindu','liberianobserver']
+        if self.source.lower() in foreignSources:
             print("Rejected - from a known foreign source")
             return False
 

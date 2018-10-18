@@ -37,7 +37,7 @@ class Scraper:
             try:
                 article = getattr(self,self.source)(soup) # call appropriate scraper based on source name (scraper functions should ALWAYS be named the same as its source for this work, verbatim)
             except Exception as e:
-                print("SCRAPING ERROR (likely formatting change): ",e)
+                print("Rejected - SCRAPING ERROR (likely formatting change): ",e)
                 article = None
         else:
             article = None
@@ -111,7 +111,7 @@ class Scraper:
                 text += (p.text + '\n\n')
         
         if text == '': # scraping probably went wrong because no text, so return None
-            print("Text is empty - likely bad scraping job")
+            print("Rejected - likely bad scraping job")
             return None
         else:
             article = Article(self.title,self.author,self.date,self.url,self.source,text.strip(),self.images)
@@ -140,7 +140,7 @@ class Scraper:
                 text += (p.text + '\n\n')
         
         if text == '':
-            print("Text is empty - likely bad scraping job")
+            print("Rejected - likely bad scraping job")
             return None
         else:
             article = Article(self.title,self.author,self.date,self.url,self.source,text.strip(),self.images)
@@ -150,7 +150,10 @@ class Scraper:
         if not self.author:
             a = soup.find("meta", {"name":"author"})
             if a:
-                self.author = a['content']
+                if a['content'].strip() == '':
+                    self.author = "Unknown Author"
+                else:
+                    self.author = a['content']
         
         if not self.date:
             d = soup.find("meta", {"name":"date"})
@@ -171,7 +174,7 @@ class Scraper:
                     text += (p.text + '\n\n')
         
         if text == '':
-            print("Text is empty - likely bad scraping job")
+            print("Rejected - likely bad scraping job")
             return None
         else:
             article = Article(self.title,self.author,self.date,self.url,self.source,text.strip(),self.images)
