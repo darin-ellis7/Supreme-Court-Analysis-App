@@ -52,13 +52,15 @@ def cleanText(text):
     cleanedText = ''
     for line in text.split('\n'):
         line = line.strip()
-        if line not in ["Advertisement","Story Continued Below",'']:
+        if line.lower() not in ["advertisement","story continued below",'']:
             cleanedText += (line + '\n\n')
     return cleanedText.strip()
 
+# print preliminary article information
 def printBasicInfo(title,url):
     print('Title:',title)
     print('URL:', url)
+
 
 def isBlockedSource(url):
     blockedSources = ['law360','law','freerepublic','bloomberglaw'] 
@@ -68,6 +70,12 @@ def isBlockedSource(url):
     else:
         return False
 
-
-
-
+# checks whether the title of an article is already in the database, avoiding duplicates
+# we only check for title because the likeliness of identical titles is crazy low, and it cuts down on reposts from other sites
+def articleIsDuplicate(title,c):
+    c.execute("""SELECT idArticle FROM article WHERE title = %s""",(title,))
+    if c.rowcount == 0:
+        return False
+    else:
+        print("Rejected - article already exists in the database")
+        return True

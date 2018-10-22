@@ -2,7 +2,6 @@ from bs4 import BeautifulSoup
 from Article import *
 from utilityFunctions import *
 import newspaper
-#import requests
 import ssl
 import datetime
 
