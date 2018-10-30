@@ -60,7 +60,13 @@ class Scraper:
             print("Rejected - Article text was less than 500 characters, likely bad scraping job")
             return None
 
-        # get author, date and images as necessary
+        # get title, author, date and images as necessary
+        if not self.title:
+            if a.title:
+                self.title = a.title
+            else:
+                self.title = "Untitled"
+
         if not self.author:
             if a.authors:
                 self.author = a.authors[0]

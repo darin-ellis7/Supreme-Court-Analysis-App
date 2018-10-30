@@ -3,6 +3,7 @@ from google.cloud import language
 from google.cloud.language import enums
 from google.cloud.language import types
 from Image import Image
+import math
 
 # class for article
 # needs to add database/image/analysis functions
@@ -37,7 +38,7 @@ class Article:
 
     # prints analysis data to script output
     def printAnalysisData(self):
-        if self.sentimentScore and self.magnitude:
+        if self.sentimentScore is not None and self.magnitude is not None:
             print("Sentiment Score & Magnitude:",str(round(self.sentimentScore,3)) + ",",round(self.magnitude,3))
             print()
         for index, image in enumerate(self.images):
@@ -91,20 +92,28 @@ class Article:
     # uses Google Natural Language API to analyze article text, returning an overall sentiment score and its magnitude
     # sentiment scores correspond to the "emotional leaning of the text" according to Google - scores above 0 are considered positive sentiment, below are negative
     # magnitude is the "strength" of the sentiment
-    def analyzeSentiment(self):
-        try:
-            client = language.LanguageServiceClient() # initialize API
-            document = language.types.Document(content=self.text,type=enums.Document.Type.PLAIN_TEXT)
-            annotations = client.analyze_sentiment(document=document) # call to analyze sentiment
-            # get necessary values
-            self.sentimentScore = annotations.document_sentiment.score
-            self.magnitude = annotations.document_sentiment.magnitude
-        except Exception as e:
-            print("Sentiment analysis failed:",e)
+    def analyzeSentiment(self,c):
+        c.execute("""SELECT * from analysisCap""")
+        row = c.fetchone()
+        currentSentimentRequests = row['currentSentimentRequests']
+        expectedSentimentRequests = math.ceil(len(self.text) / 1000)
+        if currentSentimentRequests + expectedSentimentRequests > 5000:
+            print("Can't analyze sentiment score - API requests exceed limit of 5000")
+        else:
+            try:
+                client = language.LanguageServiceClient() # initialize API
+                document = language.types.Document(content=self.text,type=enums.Document.Type.PLAIN_TEXT)
+                annotations = client.analyze_sentiment(document=document) # call to analyze sentiment
+                # get necessary values
+                self.sentimentScore = annotations.document_sentiment.score
+                self.magnitude = annotations.document_sentiment.magnitude
+                self.updateRequests(expectedSentimentRequests,c)
+            except Exception as e:
+                print("Sentiment analysis failed:",e)
 
     # adds all of an article's information to the database
     def addToDatabase(self,c):
-        self.analyzeSentiment()
+        self.analyzeSentiment(c)
         # insert new Article row
         t = (self.url, self.source, self.author, self.date, self.text, self.title, self.sentimentScore, self.magnitude)
         c.execute("""INSERT INTO article(url, source, author, date, article_text, title, score, magnitude) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""",t)
@@ -129,7 +138,7 @@ class Article:
                     filename += ".jpg"
                     imageSaved = image.saveImage(filename)
                     if imageSaved:
-                        image.analyzeImage()
+                        image.analyzeImage(c)
                         image.addImageToDatabase(idArticle,c)
     
     def isRelevant(self):
@@ -175,7 +184,7 @@ class Article:
         # check if the string "[state] Supreme Court" is in the title ([state] can be the word "state", a state name, or a state abbreviation) - this is generally a give away that this is a local Supreme Court
         if 'supreme court' in title:
             stateDetected = False
-            if 'state supreme court' in title or any(((state + ' supreme court') or (state + '\'s supreme court')) in title for state in states): # also accounting for "[state's] supreme court" (ex: "kentucky's supreme court")
+            if 'state supreme court' in title or any((state + ' supreme court' in title or state + '\'s supreme court' in title) for state in states): # also accounting for "[state's] supreme court" (ex: "kentucky's supreme court")
                 stateDetected = True
 
             for abv in state_abvs:
@@ -193,3 +202,6 @@ class Article:
             return False
         
         return True
+    
+    def updateRequests(self,n,c):
+        c.execute("""UPDATE analysisCap SET currentSentimentRequests=currentImageRequests+(%s)""",(n,))

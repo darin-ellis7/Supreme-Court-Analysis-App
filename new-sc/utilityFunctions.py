@@ -4,6 +4,7 @@ import tldextract
 import re
 import html
 import requests
+import math
 from bs4 import BeautifulSoup
 from urllib import parse as urlparse
 
@@ -63,7 +64,7 @@ def printBasicInfo(title,url):
 
 
 def isBlockedSource(url):
-    blockedSources = ['law360','law','freerepublic','bloomberglaw'] 
+    blockedSources = ['law360','law','freerepublic','bloomberglaw','nakedcapitalism','independent','mentalfloss'] 
     if "howappealing.abovethelaw.com" in url or getSource(url) in blockedSources:
         print("Rejected - URL/source known to have a paywall, or does not contain full articles")
         return True
@@ -79,3 +80,10 @@ def articleIsDuplicate(title,c):
     else:
         print("Rejected - article already exists in the database")
         return True
+
+# for calculating the number of Google Natural Language API requests needed for an article
+# 1000 characters, non-whitespace = 1 request
+def calculateSentimentRequests(text):
+    nonwhitespace = ''.join(text.split())
+    return math.ceil(len(nonwhitespace) / 1000)
+

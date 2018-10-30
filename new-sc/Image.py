@@ -54,24 +54,32 @@ class Image:
 
     # uses Google Cloud Vision API to detect entities in the image
     # should get entity descriptions and their respective score (higher = more likely to be relevant to the image)
-    def analyzeImage(self):
-        try:
-            client = vision.ImageAnnotatorClient() # start API
-            # read image and detect web entities on the image
-            #path = "/var/www/html/cs499SupremeCourt/webapp/images/" + filename
-            path = self.filename
-            with io.open(self.filename,'rb') as f:
-                content = f.read()
-            image = vision.types.Image(content=content)
-            web_detection = client.web_detection(image=image).web_detection
+    def analyzeImage(self,c):
+        c.execute("""SELECT * from analysisCap""")
+        row = c.fetchone()
+        currentSentimentRequests = row['currentImageRequests']
+        if currentSentimentRequests + 1 > 1000:
+            print("Can't analyze image - API requests exceed limit of 1000")
+        else:
+            try:
+                client = vision.ImageAnnotatorClient() # start API
+                # read image and detect web entities on the image
+                #path = "/var/www/html/cs499SupremeCourt/webapp/images/" + filename
+                path = self.filename
+                with io.open(self.filename,'rb') as f:
+                    content = f.read()
+                image = vision.types.Image(content=content)
+                web_detection = client.web_detection(image=image).web_detection
 
-            # if there are entities, do the appropriate databases inserts one-by-one (this process is very similar to the one done with article keywords)
-            if web_detection.web_entities:
-                for entity in web_detection.web_entities:
-                    if entity.description.strip() != '':
-                        self.entities[entity.description.strip()] = entity.score
-        except Exception as e:
-            print("Image analysis failed for",self.filename,"-",e)
+                # if there are entities, do the appropriate databases inserts one-by-one (this process is very similar to the one done with article keywords)
+                if web_detection.web_entities:
+                    for entity in web_detection.web_entities:
+                        if entity.description.strip() != '':
+                            self.entities[entity.description.strip()] = entity.score
+
+                self.updateRequests(c)
+            except Exception as e:
+                print("Image analysis failed for",self.filename,"-",e)
     
     # checks whether a specific image entity is already in the database
     def entityIsDuplicate(self,entity, c):
@@ -95,3 +103,6 @@ class Image:
                 row = c.fetchone()
                 idEntity = row['idEntity']
             c.execute("""INSERT INTO entity_instances(idEntity,score,idImage) VALUES (%s,%s,%s)""",(idEntity,score,idImage))
+
+    def updateRequests(self,c):
+        c.execute("""UPDATE analysisCap SET currentImageRequests=currentImageRequests+1""")
