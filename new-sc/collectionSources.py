@@ -45,8 +45,8 @@ class TopicSites:
                         article.printInfo()
                         if article.isRelevant():
                             # add to database
-                            article.addToDatabase(c)
-                            article.printAnalysisData()
+                            #article.addToDatabase(c)
+                            #article.printAnalysisData()
                             successes += 1
                             print()
                             print("Added to database")
@@ -226,8 +226,8 @@ class RSSFeeds:
         for feed in self.feeds:
             feed = feedparser.parse(feed)
             for post in feed.entries:
-                '''if successes > 1:
-                    break'''
+                #if successes > 5:
+                    #break
                 total += 1
                 url = getURL(post['link'])
                 title = cleanTitle(post['title'])
@@ -243,8 +243,8 @@ class RSSFeeds:
                                 article.printInfo()
                                 if article.isRelevant():
                                     # add to database
-                                    article.addToDatabase(c)
-                                    article.printAnalysisData()
+                                    #article.addToDatabase(c)
+                                    #article.printAnalysisData()
                                     successes += 1
                                     print()
                                     print("Added to database")
@@ -273,8 +273,8 @@ class NewsAPICollection:
         for q in self.queries:
             results = self.newsapi.get_everything(q=q, language='en', page_size=50, from_param=two_days_ago, to=today, sort_by='relevancy')
             for entry in results['articles']:
-                '''if successes > 1:
-                    break'''
+                #if successes > 3:
+                    #break
                 total += 1
                 images = []
                 # get as much information as possible about the article before shipping it off to the scraper
@@ -301,8 +301,8 @@ class NewsAPICollection:
                                 article.printInfo()
                                 if article.isRelevant():
                                     # add to database
-                                    article.addToDatabase(c)
-                                    article.printAnalysisData()
+                                    #article.addToDatabase(c)
+                                    #article.printAnalysisData()
                                     successes += 1
                                     print()
                                     print("Added to database")

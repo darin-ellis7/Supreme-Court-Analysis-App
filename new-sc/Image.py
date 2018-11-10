@@ -4,6 +4,7 @@ import io
 from google.cloud import vision
 from google.cloud.vision import types
 
+# class for handling image downloading/saving/analysis
 class Image:
     def __init__(self,url):
         self.url = url
@@ -41,6 +42,7 @@ class Image:
     # save an image
     def saveImage(self,filename):
         try:
+            #path = "/var/www/html/scotusapp/images" + filename
             with open(filename, 'wb') as f: # download image into initial file (we don't know if what format the image is in)
                 f.write(self.rawImage)
             i = img.open(filename)
@@ -55,16 +57,18 @@ class Image:
     # uses Google Cloud Vision API to detect entities in the image
     # should get entity descriptions and their respective score (higher = more likely to be relevant to the image)
     def analyzeImage(self,c):
+        # verify that image analysis is not over 1000 call monthly limit
         c.execute("""SELECT * from analysisCap""")
         row = c.fetchone()
-        currentSentimentRequests = row['currentImageRequests']
-        if currentSentimentRequests + 1 > 1000:
+        currentImageRequests = row['currentImageRequests']
+        if currentImageRequests + 1 > 1000:
             print("Can't analyze image - API requests exceed limit of 1000")
         else:
             try:
                 client = vision.ImageAnnotatorClient() # start API
                 # read image and detect web entities on the image
                 #path = "/var/www/html/cs499SupremeCourt/webapp/images/" + filename
+                #path = "/var/www/html/scotusapp/images" + filename
                 path = self.filename
                 with io.open(self.filename,'rb') as f:
                     content = f.read()
@@ -77,7 +81,7 @@ class Image:
                         if entity.description.strip() != '':
                             self.entities[entity.description.strip()] = entity.score
 
-                self.updateRequests(c)
+                self.updateImageRequests(c)
             except Exception as e:
                 print("Image analysis failed for",self.filename,"-",e)
     
@@ -104,5 +108,6 @@ class Image:
                 idEntity = row['idEntity']
             c.execute("""INSERT INTO entity_instances(idEntity,score,idImage) VALUES (%s,%s,%s)""",(idEntity,score,idImage))
 
-    def updateRequests(self,c):
+    # increment # of image requests in API call table
+    def updateImageRequests(self,c):
         c.execute("""UPDATE analysisCap SET currentImageRequests=currentImageRequests+1""")

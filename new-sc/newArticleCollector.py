@@ -11,6 +11,14 @@ def main():
     db.autocommit(True)
     c = db.cursor(MySQLdb.cursors.DictCursor)
 
+    try:
+        if isNewBillingCycle(c):
+            resetRequests(c)
+    except MySQLdb.Error as e:
+        print("Database error - ",e)
+        print("Script aborted.")
+        return
+
     # RSS feeds
     feed_urls = ['https://www.google.com/alerts/feeds/16607645132923191819/10371748129965602805', 'https://www.google.com/alerts/feeds/16607645132923191819/14723000309727640285', 'https://www.google.com/alerts/feeds/16607645132923191819/1276985364450614174', 'https://www.google.com/alerts/feeds/16607645132923191819/1276985364450612172']
     feeds = RSSFeeds(feed_urls)

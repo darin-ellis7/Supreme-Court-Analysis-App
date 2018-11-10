@@ -93,6 +93,7 @@ class Article:
     # sentiment scores correspond to the "emotional leaning of the text" according to Google - scores above 0 are considered positive sentiment, below are negative
     # magnitude is the "strength" of the sentiment
     def analyzeSentiment(self,c):
+        # verify that sentiment analysis does not exceed 5000 (change later to 8000) call monthly limit
         c.execute("""SELECT * from analysisCap""")
         row = c.fetchone()
         currentSentimentRequests = row['currentSentimentRequests']
@@ -107,7 +108,7 @@ class Article:
                 # get necessary values
                 self.sentimentScore = annotations.document_sentiment.score
                 self.magnitude = annotations.document_sentiment.magnitude
-                self.updateRequests(expectedSentimentRequests,c)
+                self.updateSentimentRequests(expectedSentimentRequests,c)
             except Exception as e:
                 print("Sentiment analysis failed:",e)
 
@@ -203,5 +204,5 @@ class Article:
         
         return True
     
-    def updateRequests(self,n,c):
-        c.execute("""UPDATE analysisCap SET currentSentimentRequests=currentImageRequests+(%s)""",(n,))
+    def updateSentimentRequests(self,n,c):
+        c.execute("""UPDATE analysisCap SET currentSentimentRequests=currentSentimentRequests+(%s)""",(n,))
