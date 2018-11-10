@@ -178,6 +178,33 @@ class TopicSites:
                         s = Scraper(url,title,author,None,[])
                         self.pages.append(s)
 
+def collectNYTimes(self):
+        url = 'https://www.nytimes.com/topic/organization/us-supreme-court'
+        soup = downloadPage(url)
+        if soup:
+            #print(soup.prettify())
+            container = soup.select_one("ol.story-menu.theme-stream.initial-set")
+            #print(container)
+            if container:
+                #print("PAGES")
+                pages = container.select("li a")
+                print(pages)
+                if pages:
+                    for p in pages:
+                        url = p["href"] 
+                        #soup.select_one("a.story-link")
+                        print("URL ")
+                        print(url)
+                        title = p.select_one("h2.headline").text.strip()
+                        print("TITLE ")
+                        print(title)
+                        authorText = p.select_one("p.byline").text
+                        author = authorText[3:]
+                        print("AUTHOR ")
+                        print(author)
+                        s = Scraper(url,title,author,None,[])
+                        self.pages.append(s)
+
         '''# scraping two pages here - the first is a search page for "supreme court", the second is LA Times writer David Savage's bio page; he seems to write exclusively on the Supreme Court
         urls = ["http://www.latimes.com/search/?q=supreme+court&s=date&t=story", "http://www.latimes.com/la-bio-david-savage-staff.html"]
         scrapingStaffPage = False # flag set after scraping the search page
