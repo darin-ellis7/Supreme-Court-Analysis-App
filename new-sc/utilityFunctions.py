@@ -81,9 +81,24 @@ def articleIsDuplicate(title,c):
         print("Rejected - article already exists in the database")
         return True
 
-# for calculating the number of Google Natural Language API requests needed for an article
-# 1000 characters, non-whitespace = 1 request
-def calculateSentimentRequests(text):
-    nonwhitespace = ''.join(text.split())
-    return math.ceil(len(nonwhitespace) / 1000)
+def isNewBillingCycle(c):
+    now = datetime.datetime.now().date()
+    newBillingDate = c.execute("""SELECT newBillingDate FROM analysisCap""")
+    row = c.fetchone()
+    newBillingDate = datetime.datetime.strptime(row['newBillingDate'].strftime("%Y-%m-%d"),"%Y-%m-%d").date()
+    if now >= newBillingDate:
+        return True
+    else:
+        return False
+
+def resetRequests(c):
+    c.execute("""SELECT newBillingDate FROM analysisCap""")
+    row = c.fetchone()
+    oldBillingDate = datetime.datetime.strptime(row['newBillingDate'].strftime("%Y-%m-%d"),"%Y-%m-%d")
+    newBillingDate = (oldBillingDate + datetime.timedelta(30)).strftime("%Y-%m-%d")
+    c.execute("UPDATE analysisCap SET newBillingDate=(%s),currentSentimentRequests=0,currentImageRequests=0",(newBillingDate,))
+
+    
+
+
 

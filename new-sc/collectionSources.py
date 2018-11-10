@@ -19,7 +19,7 @@ class TopicSites:
         # this dict allows us to dynamically call topic site scrapers without actually writing them in the code
         # the key is the full source name that we print out in the script, the value is the name used for the source in its scraper function
         # e.g., for Los Angeles Times - script prints out "Collecting Los Angeles Times...", calls collectLATimes() function
-        functionCalls = {"CNN":["CNN"], "Politico":["Politico",[1,1]], "Fox News":["FoxNews"], "Chicago Tribune": ["ChicagoTribune",[1,1]], "Los Angeles Times":["LATimes",[1,1]],"The Hill":["TheHill",[0,0]]}
+        functionCalls = {"CNN":["CNN"], "New York Times":["NYTimes"], "Politico":["Politico",[1,1]], "Fox News":["FoxNews"], "Chicago Tribune": ["ChicagoTribune",[1,1]], "Los Angeles Times":["LATimes",[1,1]],"The Hill":["TheHill",[0,0]]}
         for source in functionCalls:
             print("Collecting " + source + "...")
             try:
@@ -120,7 +120,8 @@ class TopicSites:
                         author = author.text
                     else:
                         author = None
-                    date = convertDate(c.find(itemprop="datePublished").get("datetime"), "%Y-%m-%dT%H:%M:%SCDT")
+                    #date = convertDate(c.find(itemprop="datePublished").get("datetime"), "%Y-%m-%dT%H:%M:%SCDT")
+                    date = convertDate(c.find(itemprop="datePublished").get("data-dt"), "%B %d, %Y")
                     s = Scraper(url,title,author,date,[])
                     self.pages.append(s)
 
@@ -178,66 +179,37 @@ class TopicSites:
                         s = Scraper(url,title,author,None,[])
                         self.pages.append(s)
 
-def collectNYTimes(self):
-        url = 'https://www.nytimes.com/topic/organization/us-supreme-court'
-        soup = downloadPage(url)
-        if soup:
-            #print(soup.prettify())
-            container = soup.select_one("ol.story-menu.theme-stream.initial-set")
-            #print(container)
-            if container:
-                #print("PAGES")
-                pages = container.select("li a")
-                print(pages)
-                if pages:
-                    for p in pages:
-                        url = p["href"] 
-                        #soup.select_one("a.story-link")
-                        print("URL ")
-                        print(url)
-                        title = p.select_one("h2.headline").text.strip()
-                        print("TITLE ")
-                        print(title)
-                        authorText = p.select_one("p.byline").text
-                        author = authorText[3:]
-                        print("AUTHOR ")
-                        print(author)
-                        s = Scraper(url,title,author,None,[])
-                        self.pages.append(s)
-
-        '''# scraping two pages here - the first is a search page for "supreme court", the second is LA Times writer David Savage's bio page; he seems to write exclusively on the Supreme Court
-        urls = ["http://www.latimes.com/search/?q=supreme+court&s=date&t=story", "http://www.latimes.com/la-bio-david-savage-staff.html"]
-        scrapingStaffPage = False # flag set after scraping the search page
-        for u in urls:
-            soup = downloadPage(u)
+    def collectNYTimes(self):
+            url = 'https://www.nytimes.com/topic/organization/us-supreme-court'
+            soup = downloadPage(url)
             if soup:
-                if not scrapingStaffPage: # scraping articles from search page
-                    pages = soup.select("div.h7 a") 
-                else: # scraping from David Savage's page
-                    # author bio pane gets in the way - remove it
-                    staffPane = soup.select_one("div.card-content.flex-container-column.align-items-start")
-                    if staffPane:
-                        staffPane.decompose()
-                    pages = soup.find_all(["h5","a"],{"class":["","recommender"]})
+                #print(soup.prettify())
+                container = soup.select_one("ol.story-menu.theme-stream.initial-set")
+                #print(container)
+                if container:
+                    #print("PAGES")
+                    pages = container.select("li a")
+                    #print(pages)
+                    if pages:
+                        for p in pages:
+                            url = p["href"] 
+                            #soup.select_one("a.story-link")
+                            title = p.select_one("h2.headline").text.strip()
+                            #a = p.select_one("p.byline")
+                            #if a:
 
-                if pages:
-                    for p in pages:
-                        if scrapingStaffPage:
-                            author = "David G. Savage" # this is a given since working with a bio page
-                            if p.name == "h5": # parsing for large article panes - smaller panes are denoted as <a class:recommender></a>
-                                p = p.find("a")
-                        else:
-                            author = None
-
-                        if "/espanol/" not in p['href']: # ignore spanish versions of LATimes articles
-                            url = "http://www.latimes.com" + p['href']
-                            title = p.text
-                            s = Scraper(url,title,author,None,[])
+                            #authorText = p.select_one("p.byline").text[3:]
+                            #author = authorText[3:]
+                            #print("AUTHOR ")
+                            #print(author)
+                            s = Scraper(url,title,None,None,[])
+                            #s = Scraper(url,title,author,None,[])
+                            #print(title,url)
                             self.pages.append(s)
-                scrapingStaffPage = True'''
-
+             
 #t = TopicSites()
-#t.collectChicagoTribune([2,3])
+#t.collectNYTimes()
+
 
 # functions for Google Alerts RSS feeds
 class RSSFeeds:

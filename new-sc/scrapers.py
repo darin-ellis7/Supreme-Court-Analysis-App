@@ -139,7 +139,7 @@ class Scraper:
                 self.images.append(i)
 
         text = ''
-        paragraphs = soup.select("p.css-1xl4flh.e2kc3sl0")
+        paragraphs = soup.select("p.css-1ebnwsw.e2kc3sl0")
         if paragraphs:
             for p in paragraphs:
                 text += (p.text + '\n\n')
@@ -158,7 +158,11 @@ class Scraper:
                 if a['content'].strip() == '':
                     self.author = "Unknown Author"
                 else:
-                    self.author = a['content']
+                    authsplit = a['content'].split()
+                    if authsplit[0].lower() == "by":
+                        self.author = ' '.join(authsplit[1:])
+                    else:
+                        self.author = a['content']
         
         if not self.date:
             d = soup.find("meta", {"name":"date"})
@@ -215,18 +219,8 @@ class Scraper:
             return article
 
 
+# tests for scraper - delete this once we're golden       
 '''def main():
-    ssl._create_default_https_context = ssl._create_unverified_context # monkey patch for getting past SSL errors (this might be a system-specific issue)
-    cnn = Scraper("https://www.cnn.com/2018/10/08/politics/cnn-poll-kavanaugh-confirmation/index.html","CNN Poll: Majority oppose Kavanaugh, but his popularity grows with GOP",None,None,[])
-    a = cnn.scrape()
-    if a:
-        a.printInfo()
-
-
-main()'''
-
-'''# tests for scraper - delete this once we're golden       
-def main():
     ssl._create_default_https_context = ssl._create_unverified_context # monkey patch for getting past SSL errors (this might be a system-specific issue)
 
     lat = Scraper("http://www.latimes.com/local/lanow/la-me-san-diego-pension-supreme-court-20181011-story.html","San Diego will appeal costly pension ruling to U.S. Supreme Court, citing former mayor's free-speech rights",None,None,[])
@@ -241,7 +235,6 @@ def main():
             print(article.title)
             print(article.author)
             print(article.date)
-            print(article.images)
             print()
             print(article.text)
             print("===========================")
