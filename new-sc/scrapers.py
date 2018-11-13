@@ -75,7 +75,7 @@ class Scraper:
 
         if not self.date:
             if a.publish_date:
-                self.date = a.publish_date
+                self.date = a.publish_date.strftime("%Y-%m-%d")
             else:
                 # set to current date
                 self.date = datetime.datetime.now().strftime("%Y-%m-%d")

@@ -17,9 +17,9 @@ class TopicSites:
         print("*** Topic Sites Scraping ***")
         print()
         # this dict allows us to dynamically call topic site scrapers without actually writing them in the code
-        # the key is the full source name that we print out in the script, the value is the name used for the source in its scraper function
-        # e.g., for Los Angeles Times - script prints out "Collecting Los Angeles Times...", calls collectLATimes() function
-        functionCalls = {"CNN":["CNN"], "New York Times":["NYTimes"], "Politico":["Politico",[1,1]], "Fox News":["FoxNews"], "Chicago Tribune": ["ChicagoTribune",[1,1]], "Los Angeles Times":["LATimes",[1,1]],"The Hill":["TheHill",[0,0]]}
+        # the key is the full source name that we print out in the script and potentially has two values -  the first is the name used for the source in its scraper function, the second is a page range if the page being scraped has paginated search results (not every function has this)
+        # e.g., for Politico - script prints out "Collecting Los Angeles Times...", calls collectLATimes() function, and searches from page 1 to 1 (inclusive) [default setting is to only scrape first results pages]
+        functionCalls = {"CNN":["CNN"], "New York Times":["NYTimes"], "Washington Post":["WaPo"], "Politico":["Politico",[1,1]], "Fox News":["FoxNews"], "Chicago Tribune": ["ChicagoTribune",[1,1]], "Los Angeles Times":["LATimes",[1,1]],"The Hill":["TheHill",[0,0]]}
         for source in functionCalls:
             print("Collecting " + source + "...")
             try:
@@ -120,8 +120,9 @@ class TopicSites:
                         author = author.text
                     else:
                         author = None
+                    date = c.find(itemprop="datePublished").get("datetime").split("T")[0]
                     #date = convertDate(c.find(itemprop="datePublished").get("datetime"), "%Y-%m-%dT%H:%M:%SCDT")
-                    date = convertDate(c.find(itemprop="datePublished").get("data-dt"), "%B %d, %Y")
+                    #date = convertDate(c.find(itemprop="datePublished").get("data-dt"), "%B %d, %Y")
                     s = Scraper(url,title,author,date,[])
                     self.pages.append(s)
 
@@ -183,32 +184,36 @@ class TopicSites:
             url = 'https://www.nytimes.com/topic/organization/us-supreme-court'
             soup = downloadPage(url)
             if soup:
-                #print(soup.prettify())
                 container = soup.select_one("ol.story-menu.theme-stream.initial-set")
-                #print(container)
                 if container:
-                    #print("PAGES")
                     pages = container.select("li a")
-                    #print(pages)
                     if pages:
                         for p in pages:
                             url = p["href"] 
-                            #soup.select_one("a.story-link")
                             title = p.select_one("h2.headline").text.strip()
-                            #a = p.select_one("p.byline")
-                            #if a:
-
-                            #authorText = p.select_one("p.byline").text[3:]
-                            #author = authorText[3:]
-                            #print("AUTHOR ")
-                            #print(author)
                             s = Scraper(url,title,None,None,[])
-                            #s = Scraper(url,title,author,None,[])
-                            #print(title,url)
                             self.pages.append(s)
-             
+
+    def collectWaPo(self):
+        url = "https://www.washingtonpost.com/politics/courts-law/?utm_term=.7a05b7096145"
+        soup = downloadPage(url)
+        if soup:
+            pages = soup.select("div.story-list-story")
+            if pages:
+                for p in pages:
+                    headline = p.select_one("h3 a")
+                    title = headline.text.strip()
+                    url = headline['href']
+                    a = p.select_one("span.author")
+                    if a:
+                        author = a.text
+                    else:
+                        author = None
+                    s = Scraper(url,title,author,None,[])
+                    self.pages.append(s)
+         
 #t = TopicSites()
-#t.collectNYTimes()
+#t.collectWaPo()
 
 
 # functions for Google Alerts RSS feeds
@@ -270,7 +275,7 @@ class NewsAPICollection:
         two_days_ago = (today - datetime.timedelta(days=2)).strftime('%Y-%m-%d')
         today = today.strftime('%Y-%m-%d')
         for q in self.queries:
-            results = self.newsapi.get_everything(q=q, language='en', page_size=50, from_param=two_days_ago, to=today, sort_by='relevancy')
+            results = self.newsapi.get_everything(q=q, language='en', page_size=100, from_param=two_days_ago, to=today, sort_by='relevancy')
             for entry in results['articles']:
                 #if successes > 3:
                     #break
