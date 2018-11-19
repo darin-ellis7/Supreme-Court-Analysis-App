@@ -211,6 +211,94 @@ class TopicSites:
                         author = None
                     s = Scraper(url,title,author,None,[])
                     self.pages.append(s)
+                    
+    def collectNYTimes(self):
+        url = "https://www.nytimes.com/topic/organization/us-supreme-court"
+        soup = downloadPage(url)
+        if soup:
+            container = soup.select_one("ol.story-menu.theme-stream.initial-set")
+            if container:
+                pages = container.select("li a")
+                print(pages)
+                if pages:
+                    for p in pages:
+                        url = p["href"] 
+                        title = p.select_one("h2.headline").text.strip()
+                        authorText = p.select_one("p.byline").text
+                        author = authorText[3:]
+                        s = Scraper(url,title,author,None,[])
+                        self.pages.append(s)
+                        
+    def collectReuters(self):
+        url = "https://www.reuters.com/subjects/supreme-court"
+        soup = downloadPage(url)
+        if soup:
+            container = soup.select_one("div.FeedPage_item-list span")
+            if container:
+                pages = container.select("div.FeedItem_item")
+                if pages:
+                    for p in pages:
+                        url = p.select_one("h2.FeedItemHeadline_headline a")["href"]
+                        title = p.select_one("h2.FeedItemHeadline_headline").text
+                        image = p.select_one("span a img")["src"]
+                        s = Scraper(url,title,None,None,image)
+                        self.pages.append(s)
+                        
+    def collectNPR(self):
+        url = "https://www.npr.org/tags/125938785/supreme-court"
+        soup = downloadPage(url)
+        if soup:
+            containers = []
+            containers.append(soup.select_one("main div.featured"))
+            containers.append(soup.select_one("main div.list-overflow"))
+            if (containers[0] and containers[1]):
+                for c in containers:
+                    pages = c.select("article")
+                    if pages:
+                        for p in pages:
+                            url = p.select_one("h2.title a")["href"]
+                            title = p.select_one("h2.title a").text
+                            s = Scraper(url,title,None,None,[])
+                            self.pages.append(s)
+                            
+    def collectNYPost(self):
+        url = "https://nypost.com/tag/supreme-court/"
+        soup = downloadPage(url)
+        if soup:
+            container = soup.select_one("div.article-loop")
+            if container:
+                pages = container.select("article")
+                if pages:
+                    for p in pages:
+                        url = p.select_one("h3.entry-heading a")["href"]
+                        title = p.select_one("h3.entry-heading a").text
+                        dateStr = p.select_one("div.entry-meta p").text
+                        print(dateStr)
+                        date = datetime.strptime(dateStr, "%b %d %Y")
+                        print(date)
+                        s = Scraper(url,title,None,date,[])
+                        self.pages.append(s)
+                        
+    def collectHuffPost(self):
+        url = "https://www.huffingtonpost.com/topic/supreme-court"
+        soup = downloadPage(url)
+        print(soup)
+        if soup:
+            containers = []
+            containers.append(soup.select_one("section.js-zone-twilight_upper"))
+            containers.append(soup.select_one("section.js-zone-twilight_lower"))
+            if (containers[0] and containers[1]):
+                for c in containers:
+                    pages = c.select("div.card__")
+                    if pages:
+                        for p in pages:
+                            url = "https://www.huffingtonpost.com" + p.select_one("a.card__image__wrapper")["href"]
+                            title = p.select_one("div.card__headline__text").text.strip()
+                            print(title)
+                            author = p.select_one("a.author-list__link span").text.strip()
+                            print(author)
+                            s = Scraper(url,title,author,None,[])
+                            self.pages.append(s)
          
 #t = TopicSites()
 #t.collectWaPo()
