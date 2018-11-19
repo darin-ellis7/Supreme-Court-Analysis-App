@@ -240,8 +240,12 @@ class TopicSites:
                     for p in pages:
                         url = p.select_one("h2.FeedItemHeadline_headline a")["href"]
                         title = p.select_one("h2.FeedItemHeadline_headline").text
-                        image = p.select_one("span a img")["src"]
-                        s = Scraper(url,title,None,None,image)
+                        i = p.select_one("span a img")
+                        if i:
+                            images = [i["src"]]
+                        else:
+                            images = []
+                        s = Scraper(url,title,None,None,images)
                         self.pages.append(s)
                         
     def collectNPR(self):
@@ -305,8 +309,7 @@ class TopicSites:
                             self.pages.append(s)
          
 t = TopicSites()
-t.collectHuffPost()
-
+t.collectReuters()
 # functions for Google Alerts RSS feeds
 class RSSFeeds:
     def __init__(self,feeds):
