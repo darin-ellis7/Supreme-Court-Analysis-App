@@ -180,20 +180,6 @@ class TopicSites:
                         s = Scraper(url,title,author,None,[])
                         self.pages.append(s)
 
-    def collectNYTimes(self):
-            url = 'https://www.nytimes.com/topic/organization/us-supreme-court'
-            soup = downloadPage(url)
-            if soup:
-                container = soup.select_one("ol.story-menu.theme-stream.initial-set")
-                if container:
-                    pages = container.select("li a")
-                    if pages:
-                        for p in pages:
-                            url = p["href"] 
-                            title = p.select_one("h2.headline").text.strip()
-                            s = Scraper(url,title,None,None,[])
-                            self.pages.append(s)
-
     def collectWaPo(self):
         url = "https://www.washingtonpost.com/politics/courts-law/?utm_term=.7a05b7096145"
         soup = downloadPage(url)
@@ -224,8 +210,11 @@ class TopicSites:
                     for p in pages:
                         url = p["href"] 
                         title = p.select_one("h2.headline").text.strip()
-                        authorText = p.select_one("p.byline").text
-                        author = authorText[3:]
+                        a = p.select_one("p.byline")
+                        if authorText:
+                            author = a.text[3:]
+                        else:
+                            author = None
                         s = Scraper(url,title,author,None,[])
                         self.pages.append(s)
                         
