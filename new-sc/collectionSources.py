@@ -282,27 +282,30 @@ class TopicSites:
     def collectHuffPost(self):
         url = "https://www.huffingtonpost.com/topic/supreme-court"
         soup = downloadPage(url)
-        print(soup)
+        #print(soup)
         if soup:
             containers = []
             containers.append(soup.select_one("section.js-zone-twilight_upper"))
             containers.append(soup.select_one("section.js-zone-twilight_lower"))
+            #print(len(containers))
             if (containers[0] and containers[1]):
                 for c in containers:
-                    pages = c.select("div.card__")
+                    pages = c.select("div.card")
                     if pages:
                         for p in pages:
                             url = "https://www.huffingtonpost.com" + p.select_one("a.card__image__wrapper")["href"]
                             title = p.select_one("div.card__headline__text").text.strip()
-                            print(title)
-                            author = p.select_one("a.author-list__link span").text.strip()
-                            print(author)
+                            a = p.select_one("div.card__byline")
+                            if a:
+                                author = a.text.strip()
+                            else:
+                                author = None
+                            print(url,title,author)
                             s = Scraper(url,title,author,None,[])
                             self.pages.append(s)
          
-#t = TopicSites()
-#t.collectWaPo()
-
+t = TopicSites()
+t.collectHuffPost()
 
 # functions for Google Alerts RSS feeds
 class RSSFeeds:
