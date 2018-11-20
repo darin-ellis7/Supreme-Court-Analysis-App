@@ -240,8 +240,11 @@ class TopicSites:
                         try:
                             url = p["href"] 
                             title = p.select_one("h2.headline").text.strip()
-                            authorText = p.select_one("p.byline").text
-                            author = authorText[3:]
+                            a = p.select_one("p.byline")
+                            if a:
+                                author = a.text[3:].strip()
+                            else:
+                                author = None
                             s = Scraper(url,title,author,None,[])
                             self.pages.append(s)
                         except Exception as e:
@@ -270,8 +273,7 @@ class TopicSites:
                         except Exception as e:
                             print("SCRAPING ERROR:",e)
                             continue
-                        
-                        
+                                        
     def collectNPR(self):
         url = "https://www.npr.org/tags/125938785/supreme-court"
         soup = downloadPage(url)
@@ -281,8 +283,6 @@ class TopicSites:
             containers.append(soup.select_one("main div.list-overflow"))
             if (containers[0] and containers[1]):
                 for c in containers:
-                    #pages = c.find_all("article",{"class":[""]})
-                    #pages = c.select("article")
                     pages = c.select("div.item-info")
                     if pages:
                         for p in pages:
