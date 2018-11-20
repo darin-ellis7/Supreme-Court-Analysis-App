@@ -19,19 +19,19 @@ class TopicSites:
         # this dict allows us to dynamically call topic site scrapers without actually writing them in the code
         # the key is the full source name that we print out in the script and potentially has two values -  the first is the name used for the source in its scraper function, the second is a page range if the page being scraped has paginated search results (not every function has this)
         # e.g., for Politico - script prints out "Collecting Los Angeles Times...", calls collectLATimes() function, and searches from page 1 to 1 (inclusive) [default setting is to only scrape first results pages]
-        functionCalls = {"CNN":["CNN"], "New York Times":["NYTimes"], "Washington Post":["WaPo"], "Politico":["Politico",[1,1]], "Fox News":["FoxNews"], "Chicago Tribune": ["ChicagoTribune",[1,1]], "Los Angeles Times":["LATimes",[1,1]],"The Hill":["TheHill",[0,0]]}
+        functionCalls = {
+                            "CNN":["CNN"], "New York Times":["NYTimes"], "Washington Post":["WaPo"], "Politico":["Politico",[1,1]], "Fox News":["FoxNews"], 
+                            "Chicago Tribune": ["ChicagoTribune",[1,1]], "Los Angeles Times":["LATimes",[1,1]],"The Hill":["TheHill",[0,0]], "Reuters":["Reuters"],
+                            "New York Post": ["NYPost"], "Huffington Post": ["HuffPost"], "NPR":["NPR"]
+                        }
         for source in functionCalls:
             print("Collecting " + source + "...")
-            try:
-                functionName = functionCalls[source][0]
-                if len(functionCalls[source]) > 1:
-                    pageRange = functionCalls[source][1]
-                    getattr(self,"collect" + functionName)(pageRange)
-                else:
-                    getattr(self,"collect" + functionName)()
-            except Exception as e:
-                print("Something went wrong when collecting from",source,"-",e)
-                continue
+            functionName = functionCalls[source][0]
+            if len(functionCalls[source]) > 1:
+                pageRange = functionCalls[source][1]
+                getattr(self,"collect" + functionName)(pageRange)
+            else:
+                getattr(self,"collect" + functionName)()
         print()
         successes = 0
         for p in self.pages:
@@ -69,10 +69,14 @@ class TopicSites:
             headlines = soup.select("h3.cd__headline a")
             if headlines:
                 for h in headlines:
-                    url = "https://www.cnn.com" + h['href']
-                    title = h.text
-                    s = Scraper(url,title,None,None,[])
-                    self.pages.append(s) # build list of pages to scrape
+                    try:
+                        url = "https://www.cnn.com" + h['href']
+                        title = h.text
+                        s = Scraper(url,title,None,None,[])
+                        self.pages.append(s) # build list of pages to scrape
+                    except Exception as e:
+                            print("SCRAPING ERROR:",e)
+                            continue
 
     def collectPolitico(self,pageRange):
         for i in range(pageRange[0],pageRange[1] + 1):
@@ -82,13 +86,17 @@ class TopicSites:
                 pages = soup.select("ul.story-frag-list.layout-grid.grid-3 li div.summary")
                 if pages:
                     for p in pages:
-                        headline = p.select_one("h3 a")
-                        url = headline['href']
-                        title = headline.text
-                        author = p.find(itemprop="name").get("content")
-                        date = convertDate(p.find(itemprop="datePublished").get("datetime"),"%Y-%m-%d %H:%M:%S")
-                        s = Scraper(url,title,author,date,[])
-                        self.pages.append(s)
+                        try:
+                            headline = p.select_one("h3 a")
+                            url = headline['href']
+                            title = headline.text
+                            author = p.find(itemprop="name").get("content")
+                            date = convertDate(p.find(itemprop="datePublished").get("datetime"),"%Y-%m-%d %H:%M:%S")
+                            s = Scraper(url,title,author,date,[])
+                            self.pages.append(s)
+                        except Exception as e:
+                            print("SCRAPING ERROR:",e)
+                            continue
 
     def collectFoxNews(self):
         url = 'https://www.foxnews.com/category/politics/judiciary/supreme-court'
@@ -99,11 +107,15 @@ class TopicSites:
                 pages = container.select("h4.title a")
                 if pages:
                     for p in pages:
-                        if 'video.foxnews.com' not in p['href']:
-                            url = "https://www.foxnews.com" + p['href']
-                            title = p.text
-                            s = Scraper(url,title,None,None,[])
-                            self.pages.append(s)
+                        try:
+                            if 'video.foxnews.com' not in p['href']:
+                                url = "https://www.foxnews.com" + p['href']
+                                title = p.text
+                                s = Scraper(url,title,None,None,[])
+                                self.pages.append(s)
+                        except Exception as e:
+                            print("SCRAPING ERROR:",e)
+                            continue
                        
     def collectChicagoTribune(self,pageRange):
         for i in range(pageRange[0],pageRange[1]+1):
@@ -112,19 +124,21 @@ class TopicSites:
             if soup:
                 containers = soup.find_all("div",{"class":"trb_search_result_wrapper"})
                 for c in containers:
-                    headline = c.select_one("h3 a")
-                    url = "http://www.chicagotribune.com" + headline['href']
-                    title = headline.text
-                    author = c.find(itemprop="author")
-                    if author:
-                        author = author.text
-                    else:
-                        author = None
-                    date = c.find(itemprop="datePublished").get("datetime").split("T")[0]
-                    #date = convertDate(c.find(itemprop="datePublished").get("datetime"), "%Y-%m-%dT%H:%M:%SCDT")
-                    #date = convertDate(c.find(itemprop="datePublished").get("data-dt"), "%B %d, %Y")
-                    s = Scraper(url,title,author,date,[])
-                    self.pages.append(s)
+                    try:
+                        headline = c.select_one("h3 a")
+                        url = "http://www.chicagotribune.com" + headline['href']
+                        title = headline.text
+                        author = c.find(itemprop="author")
+                        if author:
+                            author = author.text
+                        else:
+                            author = None
+                        date = c.find(itemprop="datePublished").get("datetime").split("T")[0]
+                        s = Scraper(url,title,author,date,[])
+                        self.pages.append(s)
+                    except Exception as e:
+                        print("SCRAPING ERROR:",e)
+                        continue
 
     
     def collectTheHill(self,pageRange): # page count starts at 0
@@ -136,16 +150,20 @@ class TopicSites:
                 if container:
                     pages = container.find_all("div",{"class":"views-row"})
                     for p in pages:
-                        headline = p.select_one("h2.node__title.node-title a")
-                        if '/video/' not in headline['href']:
-                            url = "https://thehill.com" + headline['href']
-                            title = headline.text
-                            submitted = p.find("p",{"class":"submitted"})
-                            author = submitted.find("span",{"rel":"sioc:has_creator"}).text.split(',')[0]
-                            datestr = submitted.find("span",{"class":"date"}).text.split()[0]
-                            date = convertDate(datestr,"%m/%d/%y")
-                            s = Scraper(url,title,author,date,[])
-                            self.pages.append(s)
+                        try:
+                            headline = p.select_one("h2.node__title.node-title a")
+                            if '/video/' not in headline['href']:
+                                url = "https://thehill.com" + headline['href']
+                                title = headline.text
+                                submitted = p.find("p",{"class":"submitted"})
+                                author = submitted.find("span",{"rel":"sioc:has_creator"}).text.split(',')[0]
+                                datestr = submitted.find("span",{"class":"date"}).text.split()[0]
+                                date = convertDate(datestr,"%m/%d/%y")
+                                s = Scraper(url,title,author,date,[])
+                                self.pages.append(s)
+                        except Exception as e:
+                            print("SCRAPING ERROR:",e)
+                            continue
 
     def collectLATimes(self,pageRange):
         for i in range(pageRange[0],pageRange[1] + 1): # loop through search results pages
@@ -155,11 +173,15 @@ class TopicSites:
                 pages = soup.select("div.h7 a")
                 if pages:
                     for p in pages:
-                        if "/espanol/" not in p['href']: # ignore spanish versions of LATimes articles
-                            url = "http://www.latimes.com" + p['href']
-                            title = p.text
-                            s = Scraper(url,title,None,None,[])
-                            self.pages.append(s)
+                        try:
+                            if "/espanol/" not in p['href']: # ignore spanish versions of LATimes articles
+                                url = "http://www.latimes.com" + p['href']
+                                title = p.text
+                                s = Scraper(url,title,None,None,[])
+                                self.pages.append(s)
+                        except Exception as e:
+                            print("SCRAPING ERROR:",e)
+                            continue
 
         staffURL = "http://www.latimes.com/la-bio-david-savage-staff.html"
         soup = downloadPage(staffURL)
@@ -171,28 +193,18 @@ class TopicSites:
             pages = soup.find_all(["h5","a"],{"class":["","recommender"]})
             if pages:
                 for p in pages:
-                    author = "David G. Savage" # this is a given since working with a bio page
-                    if p.name == "h5": # parsing for large article panes - smaller panes are denoted as <a class:recommender></a>
-                        p = p.find("a")
-                    if "/espanol/" not in p['href']:
-                        url = "http://www.latimes.com" + p['href']
-                        title = p.text
-                        s = Scraper(url,title,author,None,[])
-                        self.pages.append(s)
-
-    def collectNYTimes(self):
-            url = 'https://www.nytimes.com/topic/organization/us-supreme-court'
-            soup = downloadPage(url)
-            if soup:
-                container = soup.select_one("ol.story-menu.theme-stream.initial-set")
-                if container:
-                    pages = container.select("li a")
-                    if pages:
-                        for p in pages:
-                            url = p["href"] 
-                            title = p.select_one("h2.headline").text.strip()
-                            s = Scraper(url,title,None,None,[])
+                    try:
+                        author = "David G. Savage" # this is a given since working with a bio page
+                        if p.name == "h5": # parsing for large article panes - smaller panes are denoted as <a class:recommender></a>
+                            p = p.find("a")
+                        if "/espanol/" not in p['href']:
+                            url = "http://www.latimes.com" + p['href']
+                            title = p.text
+                            s = Scraper(url,title,author,None,[])
                             self.pages.append(s)
+                    except Exception as e:
+                        print("SCRAPING ERROR:",e)
+                        continue
 
     def collectWaPo(self):
         url = "https://www.washingtonpost.com/politics/courts-law/?utm_term=.7a05b7096145"
@@ -201,17 +213,21 @@ class TopicSites:
             pages = soup.select("div.story-list-story")
             if pages:
                 for p in pages:
-                    headline = p.select_one("h3 a")
-                    title = headline.text.strip()
-                    url = headline['href']
-                    a = p.select_one("span.author")
-                    if a:
-                        author = a.text
-                    else:
-                        author = None
-                    s = Scraper(url,title,author,None,[])
-                    self.pages.append(s)
-                    
+                    try:
+                        headline = p.select_one("h3 a")
+                        title = headline.text.strip()
+                        url = headline['href']
+                        a = p.select_one("span.author")
+                        if a:
+                            author = a.text
+                        else:
+                            author = None
+                        s = Scraper(url,title,author,None,[])
+                        self.pages.append(s)
+                    except Exception as e:
+                        print("SCRAPING ERROR:",e)
+                        continue
+                        
     def collectNYTimes(self):
         url = "https://www.nytimes.com/topic/organization/us-supreme-court"
         soup = downloadPage(url)
@@ -219,15 +235,18 @@ class TopicSites:
             container = soup.select_one("ol.story-menu.theme-stream.initial-set")
             if container:
                 pages = container.select("li a")
-                print(pages)
                 if pages:
                     for p in pages:
-                        url = p["href"] 
-                        title = p.select_one("h2.headline").text.strip()
-                        authorText = p.select_one("p.byline").text
-                        author = authorText[3:]
-                        s = Scraper(url,title,author,None,[])
-                        self.pages.append(s)
+                        try:
+                            url = p["href"] 
+                            title = p.select_one("h2.headline").text.strip()
+                            authorText = p.select_one("p.byline").text
+                            author = authorText[3:]
+                            s = Scraper(url,title,author,None,[])
+                            self.pages.append(s)
+                        except Exception as e:
+                            print("SCRAPING ERROR:",e)
+                            continue
                         
     def collectReuters(self):
         url = "https://www.reuters.com/subjects/supreme-court"
@@ -238,15 +257,20 @@ class TopicSites:
                 pages = container.select("div.FeedItem_item")
                 if pages:
                     for p in pages:
-                        url = p.select_one("h2.FeedItemHeadline_headline a")["href"]
-                        title = p.select_one("h2.FeedItemHeadline_headline").text
-                        i = p.select_one("span a img")
-                        if i:
-                            images = [i["src"]]
-                        else:
-                            images = []
-                        s = Scraper(url,title,None,None,images)
-                        self.pages.append(s)
+                        try:
+                            url = p.select_one("h2.FeedItemHeadline_headline a")["href"]
+                            title = p.select_one("h2.FeedItemHeadline_headline").text
+                            i = p.select_one("span a img")
+                            if i:
+                                images = [i["src"]]
+                            else:
+                                images = []
+                            s = Scraper(url,title,None,None,images)
+                            self.pages.append(s)
+                        except Exception as e:
+                            print("SCRAPING ERROR:",e)
+                            continue
+                        
                         
     def collectNPR(self):
         url = "https://www.npr.org/tags/125938785/supreme-court"
@@ -257,13 +281,20 @@ class TopicSites:
             containers.append(soup.select_one("main div.list-overflow"))
             if (containers[0] and containers[1]):
                 for c in containers:
-                    pages = c.select("article")
+                    #pages = c.find_all("article",{"class":[""]})
+                    #pages = c.select("article")
+                    pages = c.select("div.item-info")
                     if pages:
                         for p in pages:
-                            url = p.select_one("h2.title a")["href"]
-                            title = p.select_one("h2.title a").text
-                            s = Scraper(url,title,None,None,[])
-                            self.pages.append(s)
+                            try:
+                                url = p.select_one("h2.title a")["href"]
+                                title = p.select_one("h2.title a").text
+                                #print(title,url)
+                                s = Scraper(url,title,None,None,[])
+                                self.pages.append(s)
+                            except Exception as e:
+                                print("SCRAPING ERROR:",e)
+                                continue
                             
     def collectNYPost(self):
         url = "https://nypost.com/tag/supreme-court/"
@@ -274,42 +305,49 @@ class TopicSites:
                 pages = container.select("article")
                 if pages:
                     for p in pages:
-                        url = p.select_one("h3.entry-heading a")["href"]
-                        title = p.select_one("h3.entry-heading a").text
-                        dateStr = p.select_one("div.entry-meta p").text
-                        print(dateStr)
-                        date = datetime.strptime(dateStr, "%b %d %Y")
-                        print(date)
-                        s = Scraper(url,title,None,date,[])
-                        self.pages.append(s)
+                        try:
+                            url = p.select_one("h3.entry-heading a")["href"]
+                            title = p.select_one("h3.entry-heading a").text
+                            d = p.select_one("div.entry-meta p").text
+                            datestr = d.split("|")[0].strip()
+                            date = convertDate(datestr,"%B %d, %Y")
+                            s = Scraper(url,title,None,date,[])
+                            self.pages.append(s)
+                        except Exception as e:
+                            print("SCRAPING ERROR:",e)
+                            continue
                         
     def collectHuffPost(self):
         url = "https://www.huffingtonpost.com/topic/supreme-court"
         soup = downloadPage(url)
-        #print(soup)
         if soup:
             containers = []
             containers.append(soup.select_one("section.js-zone-twilight_upper"))
             containers.append(soup.select_one("section.js-zone-twilight_lower"))
-            #print(len(containers))
             if (containers[0] and containers[1]):
                 for c in containers:
                     pages = c.select("div.card")
                     if pages:
                         for p in pages:
-                            url = "https://www.huffingtonpost.com" + p.select_one("a.card__image__wrapper")["href"]
-                            title = p.select_one("div.card__headline__text").text.strip()
-                            a = p.select_one("div.card__byline")
-                            if a:
-                                author = a.text.strip()
-                            else:
+                            try:
+                                url = "https://www.huffingtonpost.com" + p.select_one("a.card__image__wrapper")["href"]
+                                title = p.select_one("div.card__headline__text").text.strip()
+                                a = p.select_one("div.card__byline")
                                 author = None
-                            print(url,title,author)
-                            s = Scraper(url,title,author,None,[])
-                            self.pages.append(s)
+                                if a:
+                                    atext = a.text.strip()
+                                    if atext != '':
+                                        asplit = atext.split()
+                                        author = ' '.join(asplit[1:])
+                                s = Scraper(url,title,author,None,[])
+                                self.pages.append(s)
+                            except Exception as e:
+                                print("SCRAPING ERROR:",e)
+                                continue
          
-t = TopicSites()
-t.collectReuters()
+#t = TopicSites()
+#t.collectNPR()
+
 # functions for Google Alerts RSS feeds
 class RSSFeeds:
     def __init__(self,feeds):
