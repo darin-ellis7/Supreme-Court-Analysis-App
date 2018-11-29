@@ -46,8 +46,12 @@ class Scraper:
     def genericScraper(self):
         config = newspaper.Config()
         config.browser_user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/602.2.14 (KHTML, like Gecko) Version/10.0.1 Safari/602.2.14'
+        #config.request_timeout = 15
 
-        a = newspaper.Article(self.url,config=config)
+        if self.source not in ["washingtonpost","usnews"]: # washingtonpost and usnews get funky when you set a user agent for some reason (WaPo fails if the timeout isn't long, usnews throws a 403)
+            a = newspaper.Article(self.url,config=config)
+        else:
+            a = newspaper.Article(self.url)
         try: # make sure page download goes smoothly
             a.download()
             a.parse()
@@ -64,21 +68,14 @@ class Scraper:
         if not self.title:
             if a.title:
                 self.title = a.title
-            else:
-                self.title = "Untitled"
 
         if not self.author:
             if a.authors:
                 self.author = a.authors[0]
-            else:
-                self.author = "Unknown Author"
 
         if not self.date:
             if a.publish_date:
                 self.date = a.publish_date.strftime("%Y-%m-%d")
-            else:
-                # set to current date
-                self.date = datetime.datetime.now().strftime("%Y-%m-%d")
         
         if not self.images:
             if a.top_image:
@@ -90,23 +87,30 @@ class Scraper:
     # scraper for CNN
     # all of these scraping functions are pretty similar, so I'm not commenting on the others unless there's a noticable difference (read the BeautifulSoup docs too)
     def cnn(self,soup):
+        opener = soup.find("cite",{"class":"el-editorial-source"})
+        if opener:
+            opener.decompose()
+
         if "cnn.com/videos/" in self.url: # video link - no text to be scraped, DROPPED
             print("Rejected - CNN video link")
             return None
 
         if not self.author:
-            a = soup.find(itemprop="author").get("content")
+            a = soup.find(itemprop="author")
             if a:
-                self.author = a
+                a = a.get("content")
+                self.author = a.split(",")[0].strip()
         
         if not self.date:
-            d = soup.find(itemprop="datePublished").get("content")
+            d = soup.find(itemprop="datePublished")
             if d:
+                d = d.get("content")
                 self.date = convertDate(d,"%Y-%m-%dT%H:%M:%SZ")
 
         if not self.images:
-            i = soup.find(itemprop="image").get("content")
+            i = soup.find(itemprop="image")
             if i:
+                i = i.get("content")
                 self.images.append(i)
 
         text = ''
@@ -134,8 +138,9 @@ class Scraper:
                 self.date = convertDate(d['content'],"%Y%m%d")
 
         if not self.images:
-            i = soup.find(itemprop="image").get("content")
+            i = soup.find(itemprop="image")
             if i:
+                i = i.get("content")
                 self.images.append(i)
 
         text = ''
@@ -217,25 +222,3 @@ class Scraper:
         else:
             article = Article(self.title,self.author,self.date,self.url,self.source,text.strip(),self.images)
             return article
-
-
-# tests for scraper - delete this once we're golden       
-'''def main():
-    ssl._create_default_https_context = ssl._create_unverified_context # monkey patch for getting past SSL errors (this might be a system-specific issue)
-
-    lat = Scraper("http://www.latimes.com/local/lanow/la-me-san-diego-pension-supreme-court-20181011-story.html","San Diego will appeal costly pension ruling to U.S. Supreme Court, citing former mayor's free-speech rights",None,None,[])
-    cnn = Scraper("https://www.cnn.com/2018/10/12/politics/north-dakota-voter-id-native-americans/index.html","A voter ID decision could impact Native Americans -- and the Senate race -- in North Dakota",None,None,[])
-    nyt = Scraper("https://www.nytimes.com/2018/10/11/opinion/should-supreme-court-matter.html?rref=collection%2Ftimestopic%2FU.S.%20Supreme%20Court","Should the Supreme Court Matter So Much?",None,None,[])
-    jd = Scraper("https://www.jdsupra.com/legalnews/the-supreme-court-march-5-2018-61650/","The Supreme Court - March 5, 2018",None,None,[])
-    slate_genericTest = Scraper("https://slate.com/news-and-politics/2018/10/west-virginia-supreme-court-impeachment-constitutional-crisis.html","West Virginia’s Absurd, Dangerous Supreme Court Impeachment Crisis",None,None,[])
-    pages = [lat,cnn,nyt,jd,slate_genericTest]
-    for page in pages:
-        article = page.scrape()
-        if article:
-            print(article.title)
-            print(article.author)
-            print(article.date)
-            print()
-            print(article.text)
-            print("===========================")
-main()'''

@@ -42,8 +42,8 @@ class Image:
     # save an image
     def saveImage(self,filename):
         try:
-            #path = "/var/www/html/scotusapp/images" + filename
-            with open(filename, 'wb') as f: # download image into initial file (we don't know if what format the image is in)
+            path = "/var/www/html/scotusapp/images/" + filename
+            with open(path, 'wb') as f: # download image into initial file (we don't know if what format the image is in)
                 f.write(self.rawImage)
             i = img.open(filename)
             i.convert('RGB').save(filename,"JPEG",quality=85,optimize=True) # convert the image to an JPEG (to standardize all images in the database to one format) - also slightly degrade image quality to save space
@@ -67,10 +67,9 @@ class Image:
             try:
                 client = vision.ImageAnnotatorClient() # start API
                 # read image and detect web entities on the image
-                #path = "/var/www/html/cs499SupremeCourt/webapp/images/" + filename
-                #path = "/var/www/html/scotusapp/images" + filename
-                path = self.filename
-                with io.open(self.filename,'rb') as f:
+            
+                path = "/var/www/html/scotusapp/images/" + self.filename
+                with io.open(path,'rb') as f:
                     content = f.read()
                 image = vision.types.Image(content=content)
                 web_detection = client.web_detection(image=image).web_detection

@@ -71,7 +71,7 @@ class TopicSites:
                 for h in headlines:
                     try:
                         url = "https://www.cnn.com" + h['href']
-                        title = h.text
+                        title = h.text.strip()
                         s = Scraper(url,title,None,None,[])
                         self.pages.append(s) # build list of pages to scrape
                     except Exception as e:
@@ -89,9 +89,19 @@ class TopicSites:
                         try:
                             headline = p.select_one("h3 a")
                             url = headline['href']
-                            title = headline.text
-                            author = p.find(itemprop="name").get("content")
-                            date = convertDate(p.find(itemprop="datePublished").get("datetime"),"%Y-%m-%d %H:%M:%S")
+                            title = headline.text.strip()
+                            a = p.find(itemprop="name")
+                            if a:
+                                author = a.get("content").strip()
+                            else:
+                                author = None
+
+                            d = p.find(itemprop="datePublished")
+                            if d:
+                                date = convertDate(d.get("datetime"),"%Y-%m-%d %H:%M:%S")
+                            else:
+                                date = None
+
                             s = Scraper(url,title,author,date,[])
                             self.pages.append(s)
                         except Exception as e:
@@ -110,7 +120,7 @@ class TopicSites:
                         try:
                             if 'video.foxnews.com' not in p['href']:
                                 url = "https://www.foxnews.com" + p['href']
-                                title = p.text
+                                title = p.text.strip()
                                 s = Scraper(url,title,None,None,[])
                                 self.pages.append(s)
                         except Exception as e:
@@ -127,13 +137,20 @@ class TopicSites:
                     try:
                         headline = c.select_one("h3 a")
                         url = "http://www.chicagotribune.com" + headline['href']
-                        title = headline.text
-                        author = c.find(itemprop="author")
-                        if author:
-                            author = author.text
+                        title = headline.text.strip()
+
+                        a = c.find(itemprop="author")
+                        if a:
+                            author = a.text.strip()
                         else:
                             author = None
-                        date = c.find(itemprop="datePublished").get("datetime").split("T")[0]
+
+                        d = c.find(itemprop="datePublished")
+                        if d:
+                            date = d.get("datetime").split("T")[0]
+                        else:
+                            date = None
+                            
                         s = Scraper(url,title,author,date,[])
                         self.pages.append(s)
                     except Exception as e:
@@ -154,11 +171,22 @@ class TopicSites:
                             headline = p.select_one("h2.node__title.node-title a")
                             if '/video/' not in headline['href']:
                                 url = "https://thehill.com" + headline['href']
-                                title = headline.text
+                                title = headline.text.strip()
                                 submitted = p.find("p",{"class":"submitted"})
-                                author = submitted.find("span",{"rel":"sioc:has_creator"}).text.split(',')[0]
-                                datestr = submitted.find("span",{"class":"date"}).text.split()[0]
-                                date = convertDate(datestr,"%m/%d/%y")
+
+                                a = submitted.find("span",{"rel":"sioc:has_creator"})
+                                if a:
+                                    author = a.text.split(',')[0].strip()
+                                else:
+                                    author = None
+
+                                d = submitted.find("span",{"class":"date"})
+                                if d:
+                                    datestr = d.text.split()[0].strip()
+                                    date = convertDate(datestr,"%m/%d/%y")
+                                else:
+                                    date = None
+
                                 s = Scraper(url,title,author,date,[])
                                 self.pages.append(s)
                         except Exception as e:
@@ -176,7 +204,7 @@ class TopicSites:
                         try:
                             if "/espanol/" not in p['href']: # ignore spanish versions of LATimes articles
                                 url = "http://www.latimes.com" + p['href']
-                                title = p.text
+                                title = p.text.strip()
                                 s = Scraper(url,title,None,None,[])
                                 self.pages.append(s)
                         except Exception as e:
@@ -199,7 +227,7 @@ class TopicSites:
                             p = p.find("a")
                         if "/espanol/" not in p['href']:
                             url = "http://www.latimes.com" + p['href']
-                            title = p.text
+                            title = p.text.strip()
                             s = Scraper(url,title,author,None,[])
                             self.pages.append(s)
                     except Exception as e:
@@ -219,7 +247,7 @@ class TopicSites:
                         url = headline['href']
                         a = p.select_one("span.author")
                         if a:
-                            author = a.text
+                            author = a.text.strip()
                         else:
                             author = None
                         s = Scraper(url,title,author,None,[])
@@ -262,7 +290,7 @@ class TopicSites:
                     for p in pages:
                         try:
                             url = p.select_one("h2.FeedItemHeadline_headline a")["href"]
-                            title = p.select_one("h2.FeedItemHeadline_headline").text
+                            title = p.select_one("h2.FeedItemHeadline_headline").text.strip()
                             i = p.select_one("span a img")
                             if i:
                                 images = [i["src"]]
@@ -288,7 +316,7 @@ class TopicSites:
                         for p in pages:
                             try:
                                 url = p.select_one("h2.title a")["href"]
-                                title = p.select_one("h2.title a").text
+                                title = p.select_one("h2.title a").text.strip()
                                 #print(title,url)
                                 s = Scraper(url,title,None,None,[])
                                 self.pages.append(s)
@@ -307,10 +335,13 @@ class TopicSites:
                     for p in pages:
                         try:
                             url = p.select_one("h3.entry-heading a")["href"]
-                            title = p.select_one("h3.entry-heading a").text
-                            d = p.select_one("div.entry-meta p").text
-                            datestr = d.split("|")[0].strip()
-                            date = convertDate(datestr,"%B %d, %Y")
+                            title = p.select_one("h3.entry-heading a").text.strip()
+                            d = p.select_one("div.entry-meta p")
+                            if d:
+                                datestr = d.text.split("|")[0].strip()
+                                date = convertDate(datestr,"%B %d, %Y")
+                            else:
+                                date = None
                             s = Scraper(url,title,None,date,[])
                             self.pages.append(s)
                         except Exception as e:
@@ -338,7 +369,7 @@ class TopicSites:
                                     atext = a.text.strip()
                                     if atext != '':
                                         asplit = atext.split()
-                                        author = ' '.join(asplit[1:])
+                                        author = ' '.join(asplit[1:]).strip()
                                 s = Scraper(url,title,author,None,[])
                                 self.pages.append(s)
                             except Exception as e:
@@ -366,7 +397,7 @@ class RSSFeeds:
                     #break
                 total += 1
                 url = getURL(post['link'])
-                title = cleanTitle(post['title'])
+                title = cleanTitle(post['title']).strip()
                 date = convertDate(post['date'],"%Y-%m-%dT%H:%M:%SZ")
 
                 printBasicInfo(title,url)
@@ -414,11 +445,17 @@ class NewsAPICollection:
                 total += 1
                 images = []
                 # get as much information as possible about the article before shipping it off to the scraper
+
+                if entry['title']:
+                    title = entry['title'].strip()
+                else:
+                    title = "Untitled"
+
                 if entry['urlToImage']:
                     images.append(entry['urlToImage'])
 
                 if entry['author']:
-                    author = entry['author']
+                    author = entry['author'].strip()
                 else:
                     author = None
 
@@ -427,11 +464,11 @@ class NewsAPICollection:
                 else:
                     date = None
 
-                printBasicInfo(entry['title'],entry['url'])
+                printBasicInfo(title,entry['url'])
                 try:
-                    if not articleIsDuplicate(entry['title'],c):
+                    if not articleIsDuplicate(title,c):
                         if not isBlockedSource(entry['url']):
-                            s = Scraper(entry['url'],entry['title'],author,date,images)
+                            s = Scraper(entry['url'],title,author,date,images)
                             article = s.scrape()
                             if article:
                                 article.printInfo()

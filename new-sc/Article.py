@@ -4,14 +4,28 @@ from google.cloud.language import enums
 from google.cloud.language import types
 from Image import Image
 import math
+import datetime
 
 # class for article
 # needs to add database/image/analysis functions
 class Article:
     def __init__(self,title,author,date,url,source,text,imageURLs):
-        self.title = title
-        self.author = author
-        self.date = date
+        if title:
+            self.title = title
+        else:
+            self.title = "Untitled"
+
+        if author:
+            self.author = author
+        else:
+            self.author = "Unknown Author"
+
+        if date:
+            self.date = date
+        else:
+            # set to current date
+            self.date = datetime.datetime.now().strftime("%Y-%m-%d")
+
         self.url = url
         self.source = source
         self.text = text
@@ -26,15 +40,10 @@ class Article:
     # prints Article info to script output
     # title and URL are located in printBasicInfo() in UtilityFunctions.py, because we need to check those before we ever create an Article object
     def printInfo(self):
-        #print("Title:",self.title)
-        #print("URL:",self.url,"(" + self.source.upper() + ")")
         print("Author:",self.author)
         print("Date:",self.date)
         print("Keywords:",self.keywords)
-        #print("Images:",self.images)
         print("Number of characters:",len(self.text))
-        #print()
-        #print(self.text)
 
     # prints analysis data to script output
     def printAnalysisData(self):
@@ -142,6 +151,7 @@ class Article:
                         image.analyzeImage(c)
                         image.addImageToDatabase(idArticle,c)
     
+    # checks whether an article pertains to the US Supreme Court
     def isRelevant(self):
         # set everything to lowercase to standardize for checking
         title = self.title.lower()
@@ -156,14 +166,39 @@ class Article:
         if any(term in title for term in (instantTerms + justices)): 
             return True
 
-        # these are sources that seem to pop up often about the SC in India - kill anything from these websites
-        foreignSources = ['indiatimes','thehindu','liberianobserver']
+        # these are sources that seem to pop up often with articles about foreign supreme courts - kill anything from these websites
+        foreignSources = ['indiatimes','thehindu','liberianobserver','allafrica']
         if self.source.lower() in foreignSources:
             print("Rejected - from a known foreign source")
             return False
 
+        # list of every country in the world with a supreme court
+        countries = [
+                        'afghanistan', 'albania', 'algeria', 'andorra', 'angola', 'antigua and barbuda', 'argentina', 'armenia', 'australia', 'austria', 'azerbaijan', 'bahamas', 
+                        'bahrain', 'bangladesh', 'barbados', 'belarus', 'belgium', 'belize', 'benin', 'bhutan', 'bolivia', 'bosnia and herzegovina', 'botswana', 'brazil', 'brunei', 
+                        'bulgaria', 'burkina faso', 'burundi', 'cambodia', 'cameroon', 'canada', 'cape verde', 'central african republic', 'chad', 'chile', 'china', 'colombia', 
+                        'comoros', 'congo-brazzaville', 'congo-kinshasa', 'costa rica', 'croatia', 'cuba', 'cyprus', 'czech republic', 'denmark', 'djibouti', 'dominica', 
+                        'dominican republic', 'east timor', 'ecuador', 'egypt', 'el salvador', 'equatorial guinea', 'eritrea', 'estonia', 'ethiopia', 'fiji', 'finland', 'france', 'gabon', 'gambia', 
+                        'georgia', 'germany', 'ghana', 'greece', 'grenada', 'guatemala', 'guinea-bissau', 'guinea-conakry', 'guyana', 'haiti', 'honduras', 'hungary', 'iceland', 'india', 'indonesia', 
+                        'iran', 'iraq', 'ireland', 'israel', 'italy', 'ivory coast', 'jamaica', 'japan', 'jordan', 'kazakhstan', 'kenya', 'kiribati', 'kuwait', 'kyrgyzstan',
+                        'laos', 'latvia', 'lebanon', 'lesotho', 'liberia', 'libya', 'liechtenstein', 'lithuania', 'luxembourg', 'macedonia', 'madagascar', 'malawi', 'malaysia', 'maldives', 'mali', 'malta', 
+                        'marshall islands', 'mauritania', 'mauritius', 'mexico', 'micronesia', 'moldova', 'monaco', 'mongolia', 'montenegro', 'morocco', 'mozambique', 'myanmar', 'namibia', 'nauru', 'nepal', 
+                        'netherlands', 'new zealand', 'nicaragua', 'niger', 'nigeria', 'north korea', 'norway', 'oman', 'pakistan', 'palau', 'palestine', 'panama', 'papua new guinea', 'paraguay', 'peru', 
+                        'philippines', 'poland', 'portugal', 'qatar', 'romania', 'russia', 'rwanda', 'saint kitts and nevis', 'saint lucia', 'saint vincent and the grenadines', 
+                        'samoa', 'san marino', 'são tomé and príncipe', 'saudi arabia', 'senegal', 'serbia', 'seychelles', 'sierra leone', 'singapore', 'slovakia', 'slovenia', 'solomon islands', 'somalia', 
+                        'south africa', 'south korea', 'south sudan', 'spain', 'sri lanka', 'sudan', 'suriname', 'swaziland', 'sweden', 'switzerland', 'syria', 'tajikistan', 'tanzania', 'thailand', 'togo', 
+                        'tonga', 'trinidad and tobago', 'tunisia', 'turkey', 'turkmenistan', 'tuvalu', 'uganda', 'ukraine', 'united arab emirates', 'united kingdom', 'uruguay', 'uzbekistan', 
+                        'vanuatu', 'vatican city', 'venezuela', 'vietnam', 'yemen', 'zambia', 'zimbabwe'
+                    ]
+
+        if any(country + ' supreme court' in title or country + '\'s supreme court' in title for country in countries):
+            return False
+
+        # NOTE: this was the old way for checking for foreign supreme courts - it was really limited, only included a few countries and specific keywords.
+        # Prone to false negatives so using the broader method above instead - perhaps could be tweaked at a later date
+        '''
         # foreign supreme courts that appear most frequently
-        '''foreignCountries = ['india','indian','kenya','kenyan','canada','canadian','spain','spanish','israel','israeli',"british","uk","u.k."]
+        foreignCountries = ['india','indian','kenya','kenyan','canada','canadian','spain','spanish','israel','israeli',"british","uk","u.k."]
 
         # drop any article that relates to an avoided source or foreign country (most likely about foreign supreme courts)
                                                                                                                             
@@ -204,5 +239,6 @@ class Article:
         
         return True
     
+    # increment sentiment requests counter in database
     def updateSentimentRequests(self,n,c):
         c.execute("""UPDATE analysisCap SET currentSentimentRequests=currentSentimentRequests+(%s)""",(n,))

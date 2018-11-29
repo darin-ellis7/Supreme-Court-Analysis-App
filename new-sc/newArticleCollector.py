@@ -2,12 +2,13 @@ import ssl
 from collectionSources import *
 import MySQLdb
 import MySQLdb.cursors
+import os
 
 def main():
     ssl._create_default_https_context = ssl._create_unverified_context # monkey patch for getting past SSL errors (this might be a system-specific issue)
-    user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/602.2.14 (KHTML, like Gecko) Version/10.0.1 Safari/602.2.14'
 
-    db = MySQLdb.connect(host="127.0.0.1",port=3306,user="root",password="",db="SupremeCourtApp",use_unicode=True,charset="utf8")
+    #db = MySQLdb.connect(host="127.0.0.1",port=3306,user="root",password="",db="SupremeCourtApp",use_unicode=True,charset="utf8")
+    db = MySQLdb.connect(host=os.environ['DB_HOST'],port=int(os.environ['DB_PORT']),user=os.environ['DB_USER'],password=os.environ['DB_PASSWORD'],db="SupremeCourtApp",use_unicode=True,charset="utf8")
     db.autocommit(True)
     c = db.cursor(MySQLdb.cursors.DictCursor)
 

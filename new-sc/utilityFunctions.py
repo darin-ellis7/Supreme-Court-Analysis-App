@@ -62,7 +62,7 @@ def printBasicInfo(title,url):
     print('Title:',title)
     print('URL:', url)
 
-
+# checks whether an article is from a known "bad" source - usually aggregate sites, paywalled sites, or obscure sites that don't scrape well and aren't worth writing a scraper for
 def isBlockedSource(url):
     blockedSources = ['law360','law','freerepublic','bloomberglaw','nakedcapitalism','independent','mentalfloss'] 
     if "howappealing.abovethelaw.com" in url or getSource(url) in blockedSources:
@@ -81,24 +81,21 @@ def articleIsDuplicate(title,c):
         print("Rejected - article already exists in the database")
         return True
 
+# determines if a new billing cycle for the Google Cloud API has been reached
 def isNewBillingCycle(c):
     now = datetime.datetime.now().date()
     newBillingDate = c.execute("""SELECT newBillingDate FROM analysisCap""")
     row = c.fetchone()
     newBillingDate = datetime.datetime.strptime(row['newBillingDate'].strftime("%Y-%m-%d"),"%Y-%m-%d").date()
-    if now >= newBillingDate:
+    if now >= newBillingDate: # check if billing date has been passed
         return True
     else:
         return False
 
+# resets analysisCap table in database for new month of API requests
 def resetRequests(c):
     c.execute("""SELECT newBillingDate FROM analysisCap""")
     row = c.fetchone()
     oldBillingDate = datetime.datetime.strptime(row['newBillingDate'].strftime("%Y-%m-%d"),"%Y-%m-%d")
-    newBillingDate = (oldBillingDate + datetime.timedelta(30)).strftime("%Y-%m-%d")
+    newBillingDate = (oldBillingDate + datetime.timedelta(30)).strftime("%Y-%m-%d") # set new billing date 30 days from previous one
     c.execute("UPDATE analysisCap SET newBillingDate=(%s),currentSentimentRequests=0,currentImageRequests=0",(newBillingDate,))
-
-    
-
-
-
