@@ -20,7 +20,7 @@ Here is a rundown of the other directories in this repo:
 As described above, this is where any scraped article images go. Up until recently, images were titled based on the Image ID in the database - now, they are titled based on the Article ID they belong to (older images have not been renamed).
 
 ### Documentation (/docs/)
-A collection of text files and PDF manuals (basically, more detailed READMEs) on how to run and manage the application.
+A collection of text files and PDF manuals on how to run and manage the application. Basically, more detailed READMEs and developer notes.
 
 ### Install (/install/)
 Files relating to the installation and maintenance of the application, such as credentials and backup/cronjob shell scripts. Most of the files in this directory aren't uploaded to Github, as they have sensitive information.
