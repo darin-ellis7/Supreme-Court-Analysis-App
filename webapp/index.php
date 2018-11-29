@@ -1,5 +1,8 @@
 <!-- //*** denotes new lines of code added -->
 <!--This is the homepage of the web application. It presents a search form with a datepicker. Sources are listed on the left, and article titles along with their source and date are presented. There is also a download button for a zip folder of the articles currently on the webpage.-->
+
+<?php include 'buildQuery.php' ?>
+
 <!DOCTYPE html>
 
 <html>
@@ -27,11 +30,16 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"></script>
         <script>
             $(document).ready(function() {
-                            $("#results-table").DataTable({
+                            /*$("#results-table").DataTable({
                             		"searching":false,
                             		"order": [[2,"desc"]],
-                                    "pageLength": 25
-                                });
+                                    "pageLength": 25,
+                                    "processing":true,
+                                    "ajax" {
+                                        url :"response.php", // json datasource
+                                        type: "post",  // type of method  , by default would be get
+                                    }
+                                });*/
                             $('.datebox').datepicker({clearBtn: true });
                           });
         </script>
@@ -99,7 +107,10 @@
 
                             <!-- php code within these input tags are to remember user input after search is done -->
                             <span class="input-group-btn">
-                                <input class='form-control' type="text" name="search_query" style="width: 430px !important;" placeholder='Enter keyword[s] or leave empty' <?php if(isset($_GET['search_query'])) echo " value='{$_GET['search_query']}'"; ?> >
+                                <input class='form-control' type="text" name="search_query" style="width: 430px !important;" placeholder='Enter keyword[s] or leave empty' 
+                                <?php 
+                                    if(isset($_GET['search_query'])) echo " value='{$_GET['search_query']}'"; 
+                                ?> >
                                 <button id="formBut" type='submit' class='btn btn-default' onmouseover='changeSubBut()' onmouseout='revertSubBut()'
 																style = "height: 30px;
 																font-weight: bold;
@@ -175,92 +186,17 @@
 
         <?php
 
+            $search_query = (!empty($_GET['search_query']) ? trim($_GET['search_query']) : '');
+            $dateFrom = (!empty($_GET['dateFrom']) ? $_GET['dateFrom'] : '');
+            $dateTo = (!empty($_GET['dateTo']) ? $_GET['dateTo'] : '');
+            $sourcebox = (!empty($_GET['sourcebox']) ? $_GET['sourcebox'] : '');
+
             // connect to database (or not)
-            $connect = mysqli_connect("localhost", "root", "cs499") or die(mysqli_connect_error());
-            mysqli_set_charset($connect, "utf8");
-            mysqli_select_db($connect, "SupremeCourtApp") or die(mysqli_connect_error());
+            include_once("db_connect.php");
 
-
-            // base sql query
-            // default search includes entire database
-            $sql = "SELECT DISTINCT date, title, source, idArticle FROM article NATURAL JOIN article_keywords NATURAL JOIN keyword_instances ";
-            $source_sql = "SELECT DISTINCT source FROM article NATURAL JOIN article_keywords NATURAL JOIN keyword_instances ";
-            $source_count_sql = "SELECT DISTINCT idArticle,title,source FROM article NATURAL JOIN article_keywords NATURAL JOIN keyword_instances "; // for displaying in filter sidebar how many occurrences of a specific source there are
-
-            // build sql query based on search criteria
-            if(isset($_GET['search_query']))
-            {
-
-                    $search_query = mysqli_real_escape_string($connect, trim($_GET['search_query']));
-                    $query_str = "WHERE (title LIKE '%$search_query%' OR keyword LIKE '%$search_query%') ";
-                    $sql .= $query_str;
-                    $source_sql .= $query_str;
-                    $source_count_sql .= $query_str;
-            }
-
-            // date range search - if no dates provided, ignore
-            if(!empty($_GET['dateFrom']) && !empty($_GET['dateTo']))
-            {
-                // convert date input to Y-m-d format - this is because the bootstrap datepicker sends dates in Y/m/d while SQL only accepts as Y-m-d
-            	$dateFrom = date("Y-m-d",strtotime($_GET['dateFrom']));
-            	$dateTo = date("Y-m-d",strtotime($_GET['dateTo']));
-                if(isset($_GET['search_query']))
-                {
-                    $date_str = "AND date BETWEEN '$dateFrom' AND '$dateTo' ";
-                }
-                else
-                {
-                    $date_str = "WHERE date BETWEEN '$dateFrom' AND '$dateTo' ";
-                }
-
-                $sql .= $date_str;
-                $source_sql .= $date_str;
-                $source_count_sql .= $date_str;
-
-            }
-
-            // if source filter has been applied and search parameters set, limit the sources to what has been checked
-            if(isset($_GET['sourcebox']))
-            {
-                if(!isset($_GET['search_query']) && !isset($_GET['dateFrom']) && !isset($_GET['dateTo']))
-                {
-                    $sourceFilter_str = "WHERE source in (";
-                }
-                else
-                {
-                    $sourceFilter_str = "AND source in (";
-
-                }
-
-                foreach($_GET['sourcebox'] as $source)
-                {
-
-                    $sourceFilter_str .= "'" . $source . "'";
-                    if($source != end($_GET['sourcebox']))
-                    {
-                        $sourceFilter_str .= ",";
-                    }
-                }
-
-                $sourceFilter_str .= ") ";
-
-                $sql .= $sourceFilter_str;
-            }
-
-            $sql .= "ORDER BY date DESC";
-            $source_sql .= "ORDER BY source ASC";
-            if(!isset($_GET['search_query']) && !isset($_GET['dateFrom']) && !isset($_GET['dateTo']))
-            {
-                $source_count_sql .= "WHERE source = ";
-
-            }
-            else
-            {
-                $source_count_sql .= "AND source = ";
-            }
-
-            $query = mysqli_query($connect, $sql) or die(mysqli_connect_error()); // execute search query
-            $source_query = mysqli_query($connect, $source_sql) or die(mysqli_connect_error()); // execute source sidebar query
+            $results_sql = buildQuery(mysqli_real_escape_string($connect, $search_query),$dateFrom,$dateTo,$sourcebox,'results');
+            $sourcebox_sql = buildQuery(mysqli_real_escape_string($connect, $search_query),$dateFrom,$dateTo,$sourcebox,'sourcebox');
+            $sourcebox_query = mysqli_query($connect, $sourcebox_sql) or die(mysqli_connect_error()); // execute source sidebar query
         ?>
 
         <!-- display query results as table -->
@@ -270,7 +206,7 @@
                     <br>
                     <div class="panel panel-default">
                         <div class="panel-heading" style="font-size:20px; background-color: #e0eee0;">  <!--***-->
-                            Sources (<?php echo mysqli_num_rows($source_query) ?>)
+                            Sources (<?php echo mysqli_num_rows($sourcebox_query) ?>)
                         </div>
                         <div class="panel-body" style="font-size: 16px; background-color: #e0eee0">  <!--***-->
                             <?php
@@ -278,7 +214,7 @@
                                 // Known "defect" - because we're using two forms (the search form and filter form), any changes to the search parameters after a filter has been applied will be ignored (like changing the date range after selecting specific sources) - a new search will have to be done
                                 // not enough time to come up with a more elegant solution
 
-                                if(mysqli_num_rows($source_query) == 0)
+                                if(mysqli_num_rows($sourcebox_query) == 0)
                                 {
                                     echo "No sources";
                                 }
@@ -306,9 +242,10 @@
 
                                     // get list of sources from search query
                                     $i = 0;
-                                    while ($row = mysqli_fetch_array($source_query))
+                                    while ($row = mysqli_fetch_array($sourcebox_query))
                                     {
                                         $source = $row['source'];
+                                        $count = $row['count(source)'];
 
                                         // more than 30 results in the search box will result in a collapsible button that when clicked will show the remainder of sources (since large amounts of sources results in an ugly, long box that spans far down the webpage)
 
@@ -324,12 +261,6 @@
                                             echo "<div id='more' class='collapse'>";
                                         }
 
-
-                                        // get and display the number of articles from each specific source that meet the search criteria
-                                        $temp_count_sql = $source_count_sql . "'$source'";
-                                        $count_query = mysqli_query($connect,$temp_count_sql) or die(mysqli_connect_error());
-                                        $count = mysqli_num_rows($count_query);
-
                                         echo "$source ($count) <input type='checkbox' name='sourcebox[]' ";
                                         if(isset($_GET['sourcebox']))
                                         {
@@ -342,7 +273,7 @@
 
                                         // if there is a collapsible button/list, then end the collapse div after hte last source
                                         echo "value=$source><br>";
-                                        $endIndex = mysqli_num_rows($source_query) - 1;
+                                        $endIndex = mysqli_num_rows($sourcebox_query) - 1;
                                         if($i >= 30 && $i == $endIndex)
                                         {
                                             echo "</div>";
@@ -357,31 +288,41 @@
                     </div>
                     <br>
             </div>
-						<!--style of table-->
+
+			<!--style of table-->
             <div class="floatRight" style="width:81%; float: right; ">
                 <table id="results-table" style="background-color: #e0eee0;table-layout: fixed" width="100%" class="stripe hover"  align="center">
                     <thead>
                         <tr align="center">
-                        <td width="75%"><strong>Title</strong></td>
-                        <td width="15%"><strong>Source</strong></td>
-                        <td width="10%"><strong>Date</strong></td>
+                        <th width="75%"><strong>Title</strong></th>
+                        <th width="15%"><strong>Source</strong></th>
+                        <th width="10%"><strong>Date</strong></th>
                         </tr>
                     </thead>
-                    <?php
-                        // build search results table
-                        while ($row = mysqli_fetch_array($query))
-                        {
-                            echo "<tr class='clickable-row' style='background-color: #e0eee0' href='./display_article.php?idArticle="; //***
-														echo $row['idArticle']; echo"'>";
-                                echo "<td style=\"max-width: 800px; overflow: hidden\"><button class=\"btn btn-default\" style='color:black;
-																font-weight: bold; background-color: #e0eee0;' onclick='location.href=\"./display_article.php?idArticle="; //***
-																echo $row['idArticle']; echo "\";'>"; echo $row['title']; echo "</button></td>";
-                                echo "<td>&nbsp"; echo $row['source']; echo"</td>";
-                                echo "<td>"; echo $row['date']; echo "</td>";
-                            echo "</tr>";
-                        }
-                    ?>
                 </table>
+
+                <script>
+                    $(document).ready(function() {
+                        $('#results-table').DataTable({
+                            "searching":false,
+                            "order": [[2,"desc"]],
+                            "pageLength": 25,
+                             "processing": true,
+                             "serverSide": true,
+                             //"stateSave":true,
+                             "ajax":{
+                                url :"response.php", // json datasource
+                                type: "get",  // type of method  , by default would be get
+                                data: function (d) {
+                                    d.search_query = "<?php echo $search_query ?>";
+                                    d.dateFrom = "<?php echo $dateFrom ?>";
+                                    d.dateTo = "<?php echo $dateTo ?>";
+                                    d.sourcebox = <?php echo json_encode($sourcebox) ?>;
+                                }
+                              }
+                            });   
+                    });
+                </script>
             </div>
         </div>
 
