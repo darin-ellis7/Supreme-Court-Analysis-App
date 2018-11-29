@@ -27,3 +27,6 @@ Files relating to the installation and maintenance of the application, such as c
 
 ### Miscellaneous Scripts (/misc/)
 Some scripts written during development to make some tasks easier, like merging two copies of the database together, or rescraping articles from the past that were previously scraped poorly. It's not recommended to run these as they were very one-time-use; they're better off to be rewritten and generalized at some point. If you do use them, be very careful.
+
+### Old Code (/old/)
+Some old code from prior iterations of the application. Don't use it.
