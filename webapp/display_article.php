@@ -46,27 +46,18 @@
 		 </a>
 		 </div>
       <?php
-         $connect = mysqli_connect("localhost", "root", "cs499") or die(mysqli_connect_error());
-         mysqli_set_charset($connect, "utf8");
-         mysqli_select_db($connect, "SupremeCourtApp") or die(mysqli_connect_error());
+         include_once("db_connect.php");
          $search_term = $_GET['idArticle'];
          $sql = "SELECT date, title, source, url, FROM article WHERE idArticle='%{$search_term}%'";
-         //keep it for keyword
-         //$keyword = "SELECT title,source, date FROM article NATURAL JOIN article_keywords NATURAL JOIN keyword_instances";
-
-
 
          if (isset($_POST['search'])) {
 
              $search_term = $_GET['idArticle'];
-
              $sql .= "WHERE idArticle='%{$search_term}%'";
-            //echo $sql;
          }
          else {
             $search_term = $_GET['idArticle'];
             $sql = "SELECT date, source, author, title, article_text, url,score,magnitude FROM article WHERE idArticle='{$search_term}'";
-                //echo $sql;
             $keywordSQL = "SELECT keyword FROM article_keywords WHERE idKey IN (SELECT idKey FROM keyword_instances WHERE idArticle = '{$search_term}')";
 
             $imageSQL = "SELECT path FROM image WHERE idArticle IN ('{$search_term}')";
@@ -139,7 +130,7 @@
                        $row = mysqli_fetch_array($images);
                        if ($row){
 
-                          echo "<img src=\"images/"; echo $row['path']; echo "\" style=\"max-width:84%;\"></br>";
+                          echo "<img src=\"../images/"; echo $row['path']; echo "\" style=\"max-width:84%;\"></br>";
                        }
                        else{
                             echo "<b>None</b>";

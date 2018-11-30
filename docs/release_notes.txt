@@ -1,0 +1,12 @@
+SCOTUSAPP 2.0 Improvements (11/28/2018):
+	- Object-oriented approach to data collection: now, the scraper is much more organized and easier to alter
+	- On the webapp: switch from client to server side pagination (massive speed increase)
+	- Improved scraping for New York Times, CNN, Los Angeles Times, and JDSupra (should collect full articles now)
+	- Improved scraping for articles from Supreme Court topic pages at various news sources
+	- Increased # of articles being collected from NewsAPI
+	- NewsAPI collection now searches for articles from the last two days in case of downtime (this range can be changed)
+	- Cronjob (timer) now set to run multiple times a day, as opposed to once
+	- Further development on handling multiple images from an article (though not fully implemented yet)
+	- Ability to gather old articles from specific news sources by cycling through search results pages
+	- Output of script runs is sent to the administrator email account
+	- SQL database backed up once a month (notification email sent to admin account)

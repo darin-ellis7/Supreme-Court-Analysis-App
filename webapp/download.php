@@ -2,10 +2,7 @@
     // does the same SQL search query as the one in search.php for any given search, but outputs the rows to a .csv + article text in .txt
     // everything is stored inside a .zip file
 
-    // connect to database (or not)
-    $connect = mysqli_connect("localhost", "root", "cs499") or die(mysqli_connect_error());
-    mysqli_set_charset($connect, "utf8");
-    mysqli_select_db($connect, "SupremeCourtApp") or die(mysqli_connect_error());
+    include_once("db_connect.php");
 
     // base sql query
     // default search includes entire database
