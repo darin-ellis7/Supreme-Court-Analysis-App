@@ -144,10 +144,13 @@ class Scraper:
                 self.images.append(i)
 
         text = ''
-        paragraphs = soup.select("p.css-1ebnwsw.e2kc3sl0")
-        if paragraphs:
-            for p in paragraphs:
-                text += (p.text + '\n\n')
+        container = soup.find("section",{"name":"articleBody"})
+        if container:
+            #paragraphs = soup.select("p.css-1ebnwsw.e2kc3sl0")
+            paragraphs = container.find_all("p")
+            if paragraphs:
+                for p in paragraphs:
+                    text += (p.text + '\n\n')
         
         if text == '':
             print("Rejected - likely bad scraping job")
