@@ -8,3 +8,5 @@ SCOTUSAPP 2.0 Improvements (11/28/2018):
 	- Cronjob (timer) now set to run multiple times a day, as opposed to once
 	- Further development on handling multiple images from an article (though not fully implemented yet)
 	- Ability to gather old articles from specific news sources by cycling through search results pages
+	- Output of script runs is sent to the administrator email account
+	- SQL database backed up once a month (notification email sent to admin account)
