@@ -29,7 +29,7 @@ def main():
         return
 
     # RSS feeds
-    feed_urls = ['https://www.google.com/alerts/feeds/16607645132923191819/10371748129965602805', 'https://www.google.com/alerts/feeds/16607645132923191819/14723000309727640285', 'https://www.google.com/alerts/feeds/16607645132923191819/1276985364450614174', 'https://www.google.com/alerts/feeds/16607645132923191819/1276985364450612172']
+    feed_urls = ['https://www.google.com/alerts/feeds/04514219544348410405/10161046346160726598', 'https://www.google.com/alerts/feeds/04514219544348410405/7765273799045579732', 'https://www.google.com/alerts/feeds/04514219544348410405/898187730492460176', 'https://www.google.com/alerts/feeds/04514219544348410405/16898242761418666298']
     feeds = RSSFeeds(feed_urls)
     feeds.parseFeeds(c)
 

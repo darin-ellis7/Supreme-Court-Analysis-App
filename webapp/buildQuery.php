@@ -1,11 +1,15 @@
 <?php
 	function buildQuery($search_query,$dateFrom,$dateTo,$sourcebox,$mode) {
-        
-		$sql = "SELECT DISTINCT date, title, source, idArticle FROM article NATURAL JOIN article_keywords NATURAL JOIN keyword_instances ";
 
-		if($mode == 'sourcebox') {
-			$sql = "SELECT source, count(source) FROM (" . $sql;
-		}
+        if($mode == 'download') {
+            $sql = "SELECT DISTINCT title, date, source, article.idArticle, article.score, magnitude, entity, article_text, MAX(entity_instances.score) FROM (article NATURAL JOIN article_keywords NATURAL JOIN keyword_instances) LEFT JOIN (image NATURAL JOIN image_entities NATURAL JOIN entity_instances) ON article.idArticle = image.idArticle ";
+        }
+        else {
+            $sql = "SELECT DISTINCT date, title, source, idArticle FROM article NATURAL JOIN article_keywords NATURAL JOIN keyword_instances ";
+            if($mode == 'sourcebox') {
+                $sql = "SELECT source, count(source) FROM (" . $sql;
+            }
+        }
 
         // build sql query based on search criteria
         if(!empty($search_query))
@@ -48,7 +52,6 @@
 
             foreach($sourcebox as $source)
             {
-
                 $sourceFilter_str .= "'" . $source . "'";
                 if($source != end($sourcebox))
                 {
@@ -63,8 +66,10 @@
         if($mode == 'sourcebox') {
         	$sql .= ") AS results GROUP BY SOURCE ORDER BY source";
         }
+        else if($mode == 'download') {
+            $sql .= "GROUP BY article.idArticle ORDER BY article.idArticle DESC";
+        }
 
         return $sql;
 	}
-
 ?>

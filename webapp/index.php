@@ -30,16 +30,6 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"></script>
         <script>
             $(document).ready(function() {
-                            /*$("#results-table").DataTable({
-                            		"searching":false,
-                            		"order": [[2,"desc"]],
-                                    "pageLength": 25,
-                                    "processing":true,
-                                    "ajax" {
-                                        url :"response.php", // json datasource
-                                        type: "post",  // type of method  , by default would be get
-                                    }
-                                });*/
                             $('.datebox').datepicker({clearBtn: true });
                           });
         </script>
@@ -229,9 +219,8 @@
 																		border: solid 3px;
 																		border-radius: 10px;'>Apply Filter</button><br><br>";  //***
 
-                                    $names = ['search_query','dateFrom','dateTo'];
-
                                     // pass in search parameters (if any) into filter form
+                                    $names = ['search_query','dateFrom','dateTo'];
                                     foreach($names as $var)
                                     {
                                         if(isset($_GET[$var]))

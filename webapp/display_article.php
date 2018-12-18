@@ -16,10 +16,6 @@
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
       <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-      <script src="js/jspdf.js"></script>
-      <script src="js/pdfFromHTML.js"></script>
-      <script src="js/jquery-latest.js"></script>
-      <script src="js/jquery.tablesorter.js"></script>
 			<script>
 			function changeResBut(){  //***
 				document.getElementById("resBut").style.backgroundColor =  //***
@@ -45,36 +41,29 @@
 		   </button>
 		 </a>
 		 </div>
-      <?php
-         include_once("db_connect.php");
-         $search_term = $_GET['idArticle'];
-         $sql = "SELECT date, title, source, url, FROM article WHERE idArticle='%{$search_term}%'";
+        <?php
+          include_once("db_connect.php");
+          $search_term = $_GET['idArticle'];
+          $sql = "SELECT date, title, source, url, FROM article WHERE idArticle='%{$search_term}%'";
 
-         if (isset($_POST['search'])) {
-
-             $search_term = $_GET['idArticle'];
-             $sql .= "WHERE idArticle='%{$search_term}%'";
-         }
-         else {
+          if (isset($_POST['search'])) {
+            $search_term = $_GET['idArticle'];
+            $sql .= "WHERE idArticle='%{$search_term}%'";
+          }
+          else {
             $search_term = $_GET['idArticle'];
             $sql = "SELECT date, source, author, title, article_text, url,score,magnitude FROM article WHERE idArticle='{$search_term}'";
             $keywordSQL = "SELECT keyword FROM article_keywords WHERE idKey IN (SELECT idKey FROM keyword_instances WHERE idArticle = '{$search_term}')";
 
             $imageSQL = "SELECT path FROM image WHERE idArticle IN ('{$search_term}')";
             $imgEntity = "SELECT idEntity, score FROM entity_instances WHERE idImage IN (SELECT idImage FROM image WHERE idArticle IN ('{$search_term}'))";
+          }
 
-
-
-               }
-         $query = mysqli_query($connect, $sql) or die(mysqli_connect_error());
-         $keywords = mysqli_query($connect, $keywordSQL) or die(mysqli_connect_error());
-         $images = mysqli_query($connect, $imageSQL) or die(mysqli_connect_error());
-         $entities = mysqli_query($connect, $imgEntity) or die(mysqli_connect_error());
-
-
-
-
-         ?>
+          $query = mysqli_query($connect, $sql) or die(mysqli_connect_error());
+          $keywords = mysqli_query($connect, $keywordSQL) or die(mysqli_connect_error());
+          $images = mysqli_query($connect, $imageSQL) or die(mysqli_connect_error());
+          $entities = mysqli_query($connect, $imgEntity) or die(mysqli_connect_error());
+        ?>
       <div class='container'>
       <div class='content-wrapper'>
       <div>
@@ -166,19 +155,7 @@
             </div>
             </div>
          </div>
-
      </div>
-      <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-      <script src="js/jquery.js"></script>
-      <!-- Include all compiled plugins (below), or include individual files as needed -->
-      <script src="js/bootstrap.min.js"></script>
-      <script src="js/jquery.dataTables.min.js"></script>
-      <script src="js/dataTables.bootstrap.min.js"></script>
-      <script>
-         $('#mydata').DataTable();
-
-      </script>
       </br></br></br></br></br></br></br></br></br></br>
    </body>
 </html>
