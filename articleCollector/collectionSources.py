@@ -6,7 +6,6 @@ from newsapi import NewsApiClient
 from bs4 import BeautifulSoup
 import datetime
 import MySQLdb
-import os
 
 # functions for scraping individual Supreme Court news pages from various well-known sources
 class TopicSites:
@@ -46,8 +45,8 @@ class TopicSites:
                         article.printInfo()
                         if article.isRelevant():
                             # add to database
-                            article.addToDatabase(c)
-                            article.printAnalysisData()
+                            #article.addToDatabase(c)
+                            #article.printAnalysisData()
                             successes += 1
                             print()
                             print("Added to database")
@@ -216,25 +215,27 @@ class TopicSites:
         staffURL = "http://www.latimes.com/la-bio-david-savage-staff.html" 
         soup = downloadPage(staffURL)
         if soup:
-            # author bio pane gets in the way - remove it
-            staffPane = soup.select_one("div.card-content.flex-container-column.align-items-start")
-            if staffPane:
-                staffPane.decompose()
-            pages = soup.find_all(["h5","a"],{"class":["","recommender"]})
-            if pages:
-                for p in pages:
-                    try:
-                        author = "David G. Savage" # this is a given since working with a bio page
-                        if p.name == "h5": # parsing for large article panes - smaller panes are denoted as <a class:recommender></a>
-                            p = p.find("a")
-                        if "/espanol/" not in p['href']:
-                            url = "http://www.latimes.com" + p['href']
-                            title = p.text.strip()
-                            s = Scraper(url,title,author,None,[])
-                            self.pages.append(s)
-                    except Exception as e:
-                        print("SCRAPING ERROR:",e)
-                        continue
+            container = soup.select_one("div.container.padded-container")
+            if container:
+                # author bio pane gets in the way - remove it
+                staffPane = container.select_one("div.card-content.flex-container-column.align-items-start")
+                if staffPane:
+                    staffPane.decompose()
+                pages = container.find_all(["h5","a"],{"class":["","recommender"]})
+                if pages:
+                    for p in pages:
+                        try:
+                            author = "David G. Savage" # this is a given since working with a bio page
+                            if p.name == "h5": # parsing for large article panes - smaller panes are denoted as <a class:recommender></a>
+                                p = p.find("a")
+                            if "/espanol/" not in p['href']:
+                                url = "http://www.latimes.com" + p['href']
+                                title = p.text.strip()
+                                s = Scraper(url,title,author,None,[])
+                                self.pages.append(s)
+                        except Exception as e:
+                            print("SCRAPING ERROR:",e)
+                            continue
 
     def collectWaPo(self):
         url = "https://www.washingtonpost.com/politics/courts-law/?utm_term=.7a05b7096145"
@@ -378,8 +379,8 @@ class TopicSites:
                                 print("SCRAPING ERROR:",e)
                                 continue
          
-#t = TopicSites()
-#t.collectNPR()
+t = TopicSites()
+t.collectLATimes([1,1])
 
 # functions for Google Alerts RSS feeds
 class RSSFeeds:
@@ -412,8 +413,8 @@ class RSSFeeds:
                                 article.printInfo()
                                 if article.isRelevant():
                                     # add to database
-                                    article.addToDatabase(c)
-                                    article.printAnalysisData()
+                                    #article.addToDatabase(c)
+                                    #article.printAnalysisData()
                                     successes += 1
                                     print()
                                     print("Added to database")
@@ -425,9 +426,9 @@ class RSSFeeds:
 
 # functions for NewsAPI functionality
 class NewsAPICollection:
-    def __init__(self,queries):
+    def __init__(self,newsapi_key,queries):
         self.queries = queries # list of queries to search NewsAPI for
-        self.newsapi = NewsApiClient(api_key=os.environ['NEWSAPI_KEY'])
+        self.newsapi = NewsApiClient(api_key=newsapi_key)
     
     # driver
     def parseResults(self,c):
@@ -446,8 +447,8 @@ class NewsAPICollection:
                     #break
                 total += 1
                 images = []
+            
                 # get as much information as possible about the article before shipping it off to the scraper
-
                 if entry['title']:
                     title = entry['title'].strip()
                 else:
@@ -476,8 +477,8 @@ class NewsAPICollection:
                                 article.printInfo()
                                 if article.isRelevant():
                                     # add to database
-                                    article.addToDatabase(c)
-                                    article.printAnalysisData()
+                                    #article.addToDatabase(c)
+                                    #article.printAnalysisData()
                                     successes += 1
                                     print()
                                     print("Added to database")

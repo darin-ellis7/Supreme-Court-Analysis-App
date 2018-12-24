@@ -21,7 +21,7 @@ class Scraper:
     # driver function for scraping
     def scrape(self):
         # if the page to be scraped is from a source we've already written an individual scraper, use that scraper
-        specialSources = ["cnn","nytimes","jdsupra","latimes"]
+        specialSources = ["cnn","nytimes","jdsupra","latimes","politico"]
         if self.source in specialSources:
             article = self.specificScraper()
         else: # otherwise, use Newspaper to try to get the data
@@ -120,7 +120,7 @@ class Scraper:
                 text += (p.text + '\n\n')
         
         if text == '': # scraping probably went wrong because no text, so return None
-            print("Rejected - likely bad scraping job")
+            print("Rejected - likely bad scraping job (no article text)")
             return None
         else:
             article = Article(self.title,self.author,self.date,self.url,self.source,text.strip(),self.images)
@@ -153,7 +153,7 @@ class Scraper:
                     text += (p.text + '\n\n')
         
         if text == '':
-            print("Rejected - likely bad scraping job")
+            print("Rejected - likely bad scraping job (no article text)")
             return None
         else:
             article = Article(self.title,self.author,self.date,self.url,self.source,text.strip(),self.images)
@@ -191,7 +191,7 @@ class Scraper:
                     text += (p.text + '\n\n')
         
         if text == '':
-            print("Rejected - likely bad scraping job")
+            print("Rejected - likely bad scraping job (no article text)")
             return None
         else:
             article = Article(self.title,self.author,self.date,self.url,self.source,text.strip(),self.images)
@@ -220,8 +220,46 @@ class Scraper:
                         text += (p.text.strip() + '\n')
         
         if text == '':
-            print("Text is empty - likely bad scraping job")
+            print("Rejected - likely bad scraping job (no article text)")
             return None
         else:
             article = Article(self.title,self.author,self.date,self.url,self.source,text.strip(),self.images)
             return article
+
+    def politico(self,soup):
+        if not self.author:
+            a = soup.select_one("div.story-intro div.summary p.byline")
+            if a:
+                self.author = a.text.strip()[3:]
+
+        if not self.date:
+            d = soup.find(itemprop="datePublished")
+            if d:
+                self.date = d.get("datetime").split()[0]
+
+        if not self.images:
+            i = soup.find("meta",property="og:image")
+            if i:
+                self.images.append(i.get("content"))
+
+        text = ''
+        container = soup.select_one("article.story-main-content")
+        if container:
+            junk = container.find_all(["div","p"],{"class":["footer__copyright","story-continued","story-intro","byline"]}) + container.find_all("aside")
+            for j in junk:
+                j.decompose()
+            paragraphs = container.find_all("p")
+            for p in paragraphs:
+                text += (p.text.strip() + '\n\n')
+        
+        if text == '':
+            print("Text is empty - likely bad scraping job (no article text)")
+            return None
+        else:
+            article = Article(self.title,self.author,self.date,self.url,self.source,text.strip(),self.images)
+            return article
+
+
+
+
+

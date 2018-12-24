@@ -1,5 +1,6 @@
 <!-- //*** denotes new lines of code added -->
 <!--This is the homepage of the web application. It presents a search form with a datepicker. Sources are listed on the left, and article titles along with their source and date are presented. There is also a download button for a zip folder of the articles currently on the webpage.-->
+<!-- originally written by Evan Cole, Darin Ellis, Connor Martin, and Abdullah Alosail, with contributions by John Tompkins, Mauricio Sanchez, and Jonathan Dingess -->
 
 <?php include 'buildQuery.php' ?>
 

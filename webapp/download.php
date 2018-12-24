@@ -22,11 +22,11 @@
     if ($zip->open($zipName, ZipArchive::CREATE) && $query)
     {
         $csvName = "article_data.csv";
-        $csv = fopen($csvName, 'w');
+        $csv = fopen($csvName, 'w') or die ("Unable to generate CSV: " . $csvName);
 
         // CSV column headers
         $arrName = array("Article ID", "Date", "Source", "Title","Sentiment Score","Sentiment Magnitude","Top Image Entity","Entity Score");
-        fputcsv($csv, $arrName);
+        fputcsv($csv, $arrName,"\t");
 
         $txtFiles = array();
 
@@ -35,11 +35,11 @@
         {
            $arr = array($row['idArticle'],$row['date'], $row['source'], $row['title'], $row['score'],$row['magnitude'],$row['entity'],$row['MAX(entity_instances.score)']);
 
-           fputcsv($csv, $arr); // insert row in CSV
+           fputcsv($csv, $arr,"\t"); // insert row in CSV (tab delimiter necessary for Excel compatibility fix)
 
            $txtName = $row['idArticle']; // create a text file for each article's text
            $txtName .= ".txt";
-           $txtFile = fopen($txtName, "w") or die("Unable to open file!");
+           $txtFile = fopen($txtName, "w") or die("Unable to open text file: " . $txtName);
            $txt = $row['article_text'];
            fwrite($txtFile, $txt);
            fclose($txtFile);
@@ -48,6 +48,12 @@
         }
 
         fclose($csv); // CSV finished - all rows inserted
+
+        // the CSV is by default in UTF-8 encoding, which causes some scrambled characters in Excel (like apostrophes), so we convert it to UTF-16LE to fix this
+        $data = file_get_contents($csvName); 
+        $data = chr(255) . chr(254) . mb_convert_encoding($data, 'UTF-16LE','UTF-8');
+        file_put_contents($csvName, $data);
+
         $zip->addFile($csvName,$csvName); // add completed CSV to zip
         $zip->close(); // finish zip
 

@@ -192,6 +192,7 @@ class Article:
                     ]
 
         if any(country + ' supreme court' in title or country + '\'s supreme court' in title for country in countries):
+            print("Rejected - likely a foreign supreme court")
             return False
 
         # NOTE: this was the old way for checking for foreign supreme courts - it was really limited, only included a few countries and specific keywords.
