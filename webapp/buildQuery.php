@@ -1,8 +1,8 @@
 <?php
 	function buildQuery($search_query,$dateFrom,$dateTo,$sourcebox,$mode) {
-
+        
         if($mode == 'download') {
-            $sql = "SELECT DISTINCT title, date, source, article.idArticle, article.score, magnitude, entity, article_text, MAX(entity_instances.score) FROM (article NATURAL JOIN article_keywords NATURAL JOIN keyword_instances) LEFT JOIN (image NATURAL JOIN image_entities NATURAL JOIN entity_instances) ON article.idArticle = image.idArticle ";
+            $sql = "SELECT DISTINCT title, date, source, author, article.url, article.idArticle, article.score, magnitude, entity, article_text, GROUP_CONCAT(DISTINCT keyword) as keywords, MAX(entity_instances.score) as top_entity FROM (article NATURAL JOIN article_keywords NATURAL JOIN keyword_instances) LEFT JOIN (image NATURAL JOIN image_entities NATURAL JOIN entity_instances) ON article.idArticle = image.idArticle ";
         }
         else {
             $sql = "SELECT DISTINCT date, title, source, idArticle FROM article NATURAL JOIN article_keywords NATURAL JOIN keyword_instances ";
@@ -11,12 +11,15 @@
             }
         }
 
+        $conditionsExist = false; // boolean to determine whether WHERE or AND is used in query statement (if true, initial condition has already been set so subsequent conditions are prefixed with AND)
+
         // build sql query based on search criteria
-        if(!empty($search_query))
+        if(!empty($search_query) && $mode != "download") // for downloads, search queries require a a HAVING clause at the end rather than a WHERE in the middle, so this block doesn't apply to those
         {
                 //$search_query = mysqli_real_escape_string($connect, trim($_GET['search_query']));
                 $query_str = "WHERE (title LIKE '%$search_query%' OR keyword LIKE '%$search_query%') ";
                 $sql .= $query_str;
+                $conditionsExist = true;
         }
 
         // date range search - if no dates provided, ignore
@@ -24,25 +27,27 @@
         {
             // convert date input to Y-m-d format - this is because the bootstrap datepicker sends dates in Y/m/d while SQL only accepts as Y-m-d
         	$dateFrom = date("Y-m-d",strtotime($dateFrom));
-        	$dateTo = date("Y-m-d",strtotime($dateTo));
-            if(!empty($search_query))
+            $dateTo = date("Y-m-d",strtotime($dateTo));
+
+            if(!$conditionsExist)
             {
-                $date_str = "AND date BETWEEN '$dateFrom' AND '$dateTo' ";
+                $date_str = "WHERE date BETWEEN '$dateFrom' AND '$dateTo' ";
+                $conditionsExist = true;
             }
             else
             {
-                $date_str = "WHERE date BETWEEN '$dateFrom' AND '$dateTo' ";
+                $date_str = "AND date BETWEEN '$dateFrom' AND '$dateTo' ";
             }
-
             $sql .= $date_str;
         }
 
         // if source filter has been applied and search parameters set, limit the sources to what has been checked
         if(!empty($sourcebox) && $mode != 'sourcebox')
         {
-            if(empty($search_query) && empty($dateFrom) && empty($dateTo))
+            if(!$conditionsExist)
             {
                 $sourceFilter_str = "WHERE source in (";
+                $conditionsExist = true;
             }
             else
             {
@@ -67,7 +72,11 @@
         	$sql .= ") AS results GROUP BY SOURCE ORDER BY source";
         }
         else if($mode == 'download') {
-            $sql .= "GROUP BY article.idArticle ORDER BY article.idArticle DESC";
+            $sql .= "GROUP BY article.idArticle ";
+            if(!empty($search_query)) { // HAVING clause necessary to correctly check search query against list of keywords
+                $sql .= "HAVING title LIKE '%$search_query%' OR keywords LIKE '%$search_query%' ";
+            }
+            $sql .= "ORDER BY article.idArticle DESC";
         }
 
         return $sql;

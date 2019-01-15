@@ -5,6 +5,7 @@
     include_once("db_connect.php");
     include("buildQuery.php");
 
+    ini_set('memory_limit','512M'); // large downloads were hitting some memory usage limit once keywords were added to the CSV - upped it here (will likely need to increase with size of the database)
     ignore_user_abort(true); // still delete temp files if user cancels download
     set_time_limit(120);
 
@@ -25,7 +26,7 @@
         $csv = fopen($csvName, 'w') or die ("Unable to generate CSV: " . $csvName);
 
         // CSV column headers
-        $arrName = array("Article ID", "Date", "Source", "Title","Sentiment Score","Sentiment Magnitude","Top Image Entity","Entity Score");
+        $arrName = array("Article ID", "Date", "Source", "URL","Title","Author","Sentiment Score","Sentiment Magnitude","Top Image Entity","Entity Score","Keywords");
         fputcsv($csv, $arrName,"\t");
 
         $txtFiles = array();
@@ -33,7 +34,7 @@
         // build files to go into zip
         while ($row = mysqli_fetch_array($query))
         {
-           $arr = array($row['idArticle'],$row['date'], $row['source'], $row['title'], $row['score'],$row['magnitude'],$row['entity'],$row['MAX(entity_instances.score)']);
+           $arr = array($row['idArticle'],$row['date'], $row['source'], $row['url'], $row['title'], $row['author'], $row['score'],$row['magnitude'],$row['entity'],$row['top_entity'],$row['keywords']);
 
            fputcsv($csv, $arr,"\t"); // insert row in CSV (tab delimiter necessary for Excel compatibility fix)
 
