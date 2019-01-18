@@ -45,8 +45,8 @@ class TopicSites:
                         article.printInfo()
                         if article.isRelevant():
                             # add to database
-                            #article.addToDatabase(c)
-                            #article.printAnalysisData()
+                            article.addToDatabase(c)
+                            article.printAnalysisData()
                             successes += 1
                             print()
                             print("Added to database")
@@ -321,7 +321,6 @@ class TopicSites:
                             try:
                                 url = p.select_one("h2.title a")["href"]
                                 title = p.select_one("h2.title a").text.strip()
-                                #print(title,url)
                                 s = Scraper(url,title,None,None,[])
                                 self.pages.append(s)
                             except Exception as e:
@@ -380,9 +379,6 @@ class TopicSites:
                                 print("SCRAPING ERROR:",e)
                                 continue
          
-#t = TopicSites()
-#t.collectTheHill([0,0])
-
 # functions for Google Alerts RSS feeds
 class RSSFeeds:
     def __init__(self,feeds):
@@ -414,8 +410,8 @@ class RSSFeeds:
                                 article.printInfo()
                                 if article.isRelevant():
                                     # add to database
-                                    #article.addToDatabase(c)
-                                    #article.printAnalysisData()
+                                    article.addToDatabase(c)
+                                    article.printAnalysisData()
                                     successes += 1
                                     print()
                                     print("Added to database")
@@ -478,8 +474,8 @@ class NewsAPICollection:
                                 article.printInfo()
                                 if article.isRelevant():
                                     # add to database
-                                    #article.addToDatabase(c)
-                                    #article.printAnalysisData()
+                                    article.addToDatabase(c)
+                                    article.printAnalysisData()
                                     successes += 1
                                     print()
                                     print("Added to database")
