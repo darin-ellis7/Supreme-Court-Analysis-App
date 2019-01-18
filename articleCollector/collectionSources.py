@@ -39,7 +39,7 @@ class TopicSites:
                 #break
             printBasicInfo(p.title,p.url)
             try:
-                if not articleIsDuplicate(p.title,c):
+                if not articleIsDuplicate(p.title,p.url,c):
                     article = p.scrape()
                     if article:
                         article.printInfo()
@@ -62,8 +62,9 @@ class TopicSites:
         soup = downloadPage(url)
         if soup:
             # remove journalist sidebar (it gets in the way of properly scraping)
-            journalistSidebar = soup.find("div",{"class":"column zn__column--idx-1"})
-            if journalistSidebar:
+            junk = soup.find_all("div",{"class":"column zn"})
+            if junk and len(junk) > 1:
+                journalistSidebar = junk[1]
                 journalistSidebar.decompose()
 
             headlines = soup.select("h3.cd__headline a")
@@ -379,8 +380,8 @@ class TopicSites:
                                 print("SCRAPING ERROR:",e)
                                 continue
          
-t = TopicSites()
-t.collectLATimes([1,1])
+#t = TopicSites()
+#t.collectTheHill([0,0])
 
 # functions for Google Alerts RSS feeds
 class RSSFeeds:
@@ -405,7 +406,7 @@ class RSSFeeds:
 
                 printBasicInfo(title,url)
                 try:
-                    if not articleIsDuplicate(title,c):
+                    if not articleIsDuplicate(title,url,c):
                         if not isBlockedSource(url):
                             s = Scraper(url,title,None,date,[])
                             article = s.scrape()
@@ -452,7 +453,7 @@ class NewsAPICollection:
                 if entry['title']:
                     title = entry['title'].strip()
                 else:
-                    title = "Untitled"
+                    title = untitleArticle()
 
                 if entry['urlToImage']:
                     images.append(entry['urlToImage'])
@@ -469,7 +470,7 @@ class NewsAPICollection:
 
                 printBasicInfo(title,entry['url'])
                 try:
-                    if not articleIsDuplicate(title,c):
+                    if not articleIsDuplicate(title,entry['url'],c):
                         if not isBlockedSource(entry['url']):
                             s = Scraper(entry['url'],title,author,date,images)
                             article = s.scrape()

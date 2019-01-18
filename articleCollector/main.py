@@ -34,8 +34,9 @@ def main():
     feeds.parseFeeds(c)
 
     # newsAPI results
+    newsapi_key = os.environ['NEWSAPI_KEY']
     queries  = ["USA Supreme Court","US Supreme Court", "United States Supreme Court","SCOTUS"]
-    newsapi = NewsAPICollection(queries)
+    newsapi = NewsAPICollection(newsapi_key,queries)
     newsapi.parseResults(c)
 
     # topic sites

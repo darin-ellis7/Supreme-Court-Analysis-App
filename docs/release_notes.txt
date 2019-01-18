@@ -1,3 +1,12 @@
+SCOTUSAPP 2.1 Improvements (1/18/2019):
+	- author, URL, and keywords now added to the CSV
+	- CSV encoding now correct for viewing in Excel (no more weird characters)
+	- The script now attempts to get the full titles of articles whose titles are truncated in the RSS feed with "..."
+	- large downloads are now stable
+	- scrapers written for Politico and The Hill + minor maintenance for the rest
+	- "fallback" for source-specific scrapers - if they fail, the script then attempts to scrape with the generic, Newspaper-powered scraper
+	- mechanism to keep track of Google Cloud API Requests should be more accurate
+
 SCOTUSAPP 2.0 Improvements (11/28/2018):
 	- Object-oriented approach to data collection: now, the scraper is much more organized and easier to alter
 	- On the webapp: switch from client to server side pagination (massive speed increase)

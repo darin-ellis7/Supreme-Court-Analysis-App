@@ -5,6 +5,7 @@ from google.cloud.language import types
 from Image import Image
 import math
 import datetime
+from utilityFunctions import untitledArticle
 
 # class for article
 # needs to add database/image/analysis functions
@@ -13,7 +14,7 @@ class Article:
         if title:
             self.title = title
         else:
-            self.title = "Untitled"
+            self.title = untitledArticle()
 
         if author:
             self.author = author
@@ -44,6 +45,7 @@ class Article:
         print("Date:",self.date)
         print("Keywords:",self.keywords)
         print("Number of characters:",len(self.text))
+        #print("Text:\n" + self.text)
 
     # prints analysis data to script output
     def printAnalysisData(self):

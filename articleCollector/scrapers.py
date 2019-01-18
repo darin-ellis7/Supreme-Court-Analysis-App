@@ -21,9 +21,12 @@ class Scraper:
     # driver function for scraping
     def scrape(self):
         # if the page to be scraped is from a source we've already written an individual scraper, use that scraper
-        specialSources = ["cnn","nytimes","jdsupra","latimes","politico"]
+        specialSources = ["cnn","nytimes","jdsupra","latimes","politico","thehill"]
         if self.source in specialSources:
             article = self.specificScraper()
+            if not article: # fallback for specific scraper - if it fails, then attempt again using the generic scraper
+                print(self.source,"scraper failed - now attempting with generic scraper")
+                article = self.genericScraper()
         else: # otherwise, use Newspaper to try to get the data
             article = self.genericScraper()
         return article
@@ -65,9 +68,13 @@ class Scraper:
             return None
 
         # get title, author, date and images as necessary
-        if not self.title:
+        if not self.title or self.title.split()[-1] == "...":
             if a.title:
-                self.title = a.title
+                scrapedTitle = a.title.strip()
+                if self.title:
+                    self.title = replaceTitle(self.title,scrapedTitle)
+                else:
+                    self.title = scrapedTitle
 
         if not self.author:
             if a.authors:
@@ -94,6 +101,15 @@ class Scraper:
         if "cnn.com/videos/" in self.url: # video link - no text to be scraped, DROPPED
             print("Rejected - CNN video link")
             return None
+
+        if not self.title or self.title.split()[-1] == "...":
+            t = soup.find("h1",{"class":"pg-headline"})
+            if t:
+                scrapedTitle = t.text.strip()
+                if self.title:
+                    self.title = replaceTitle(self.title,scrapedTitle)
+                else:
+                    self.title = scrapedTitle
 
         if not self.author:
             a = soup.find(itemprop="author")
@@ -127,6 +143,15 @@ class Scraper:
             return article
 
     def nytimes(self,soup):
+        if not self.title or self.title.split()[-1] == "...":
+            t = soup.find("meta",property="og:title")
+            if t:
+                scrapedTitle = t.get("content").strip()
+                if self.title:
+                    self.title = replaceTitle(self.title,scrapedTitle)
+                else:
+                    self.title = scrapedTitle
+
         if not self.author:
             a = soup.find("meta", {"name":"byl"})
             if a:
@@ -160,6 +185,15 @@ class Scraper:
             return article
 
     def latimes(self,soup):
+        if not self.title or self.title.split()[-1] == "...":
+            t = soup.find("meta",property="og:title")
+            if t:
+                scrapedTitle = t.get("content").strip()
+                if self.title:
+                    self.title = replaceTitle(self.title,scrapedTitle)
+                else:
+                    self.title = scrapedTitle
+
         if not self.author:
             a = soup.find("meta", {"name":"author"})
             if a:
@@ -198,6 +232,15 @@ class Scraper:
             return article
             
     def jdsupra(self,soup):
+        if not self.title or self.title.split()[-1] == "...":
+            t = soup.select_one("h1.doc_name.f2-ns.f3.mv0")
+            if t:
+                scrapedTitle = t.text.strip()
+                if self.title:
+                    self.title = replaceTitle(self.title,scrapedTitle)
+                else:
+                    self.title = scrapedTitle
+
         if not self.author:
             a = soup.select_one("div.f6.silver.db.dn-l.mt2.tc-ns a")
             if a:
@@ -227,6 +270,15 @@ class Scraper:
             return article
 
     def politico(self,soup):
+        if not self.title or self.title.split()[-1] == "...":
+            t = soup.find("meta",property="og:title")
+            if t:
+                scrapedTitle = t.get("content").strip()
+                if self.title:
+                    self.title = replaceTitle(self.title,scrapedTitle)
+                else:
+                    self.title = scrapedTitle
+
         if not self.author:
             a = soup.select_one("div.story-intro div.summary p.byline")
             if a:
@@ -259,7 +311,44 @@ class Scraper:
             article = Article(self.title,self.author,self.date,self.url,self.source,text.strip(),self.images)
             return article
 
+    def thehill(self,soup):
+        junk = soup.find_all("span",{"class":"rollover-people-block"}) # site contains links and headlines for related articles when you rollover a known person in the article - remove these
+        for j in junk:
+            j.decompose()
 
+        if not self.title or self.title.split()[-1] == "...":
+            t = soup.find("meta",property="og:title")
+            if t:
+                scrapedTitle = t.get("content").strip()
+                if self.title:
+                    self.title = replaceTitle(self.title,scrapedTitle)
+                else:
+                    self.title = scrapedTitle
 
+        if not self.author:
+            a = soup.find("meta",property="author")
+            if a:
+                self.author = a.get("content")
 
+        if not self.date:
+            d = soup.find("meta",property="article:published_time")
+            if d:
+                self.date = d.get("content").split("T")[0]
 
+        if not self.images:
+            i = soup.find("meta",property="og:image")
+            if i:
+                self.images.append(i.get("content"))
+
+        text = ''
+        paragraphs = soup.select("div.field-items p")
+        if paragraphs:
+            for p in paragraphs:
+                text += (p.text.strip() + '\n\n')
+                
+        if text == '':
+            print("Text is empty - likely bad scraping job (no article text)")
+            return None
+        else:
+            article = Article(self.title,self.author,self.date,self.url,self.source,text.strip(),self.images)
+            return article

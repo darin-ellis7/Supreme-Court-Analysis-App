@@ -72,9 +72,9 @@ def isBlockedSource(url):
         return False
 
 # checks whether the title of an article is already in the database, avoiding duplicates
-# we only check for title because the likeliness of identical titles is crazy low, and it cuts down on reposts from other sites
-def articleIsDuplicate(title,c):
-    c.execute("""SELECT idArticle FROM article WHERE title = %s""",(title,))
+# we only check for title and url because the likeliness of identical titles is crazy low, and it cuts down on reposts from other sites
+def articleIsDuplicate(title,url,c):
+    c.execute("""SELECT idArticle FROM article WHERE title = %s OR url = %s""",(title,url,))
     if c.rowcount == 0:
         return False
     else:
@@ -94,8 +94,22 @@ def isNewBillingCycle(c):
 
 # resets analysisCap table in database for new month of API requests
 def resetRequests(c):
-    c.execute("""SELECT newBillingDate FROM analysisCap""")
-    row = c.fetchone()
-    oldBillingDate = datetime.datetime.strptime(row['newBillingDate'].strftime("%Y-%m-%d"),"%Y-%m-%d")
-    newBillingDate = (oldBillingDate + datetime.timedelta(30)).strftime("%Y-%m-%d") # set new billing date 30 days from previous one
+    now = datetime.date.today()
+    newBillingDate = (now + datetime.timedelta(days=32)).replace(day=1) # reset to the first of next month
     c.execute("UPDATE analysisCap SET newBillingDate=(%s),currentSentimentRequests=0,currentImageRequests=0",(newBillingDate,))
+
+# in the small chance an article doesn't have a title (it does happen, rarely), title it Untitled [date] [time].
+def untitledArticle():
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return "Untitled " + now
+
+# The Google Alerts RSS feeds sometimes truncate long titles with a "..." - this function gets the full title by comparing the feed title against the scraped title
+# worst-case scenario, just use the original title
+def replaceTitle(originalTitle, scrapedTitle):
+    split_title = originalTitle.split()
+    title_no_ellipsis = ' '.join(split_title[:-1])
+    if title_no_ellipsis.lower() in scrapedTitle.lower():
+        print("Truncated title changed to -",scrapedTitle)
+        return scrapedTitle
+    else:
+        return originalTitle
