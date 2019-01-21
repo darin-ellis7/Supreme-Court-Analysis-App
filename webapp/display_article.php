@@ -128,6 +128,8 @@
                </table>
             </div>
             <div style="float:none;">
+		<b><big><big><big>Article ID: </big></big></big></b>
+                	<big><big><?php echo $search_term; ?></big></big></br></br>
                 <b><big><big><big><br>Entities</big></big></big></b></br></br>
                 <?php
                         $entities = mysqli_query($connect, $imgEntity) or die(mysqli_connect_error());
