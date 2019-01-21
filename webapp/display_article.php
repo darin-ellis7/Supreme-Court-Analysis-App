@@ -124,6 +124,8 @@
          </br>
             <div id="rectangle" style="width:number px; height:number px; background-color:white; border-radius: 25px; padding: 20px; border: 2px solid #000000;">
                 <div>
+		<b><big><big><big>Article ID: </big></big></big></b>
+                	<big><big><?php echo $search_term; ?></big></big></br></br>
                 <b><big><big><big>Images</big></big></big></b></br></br>
                     <?php
                         $images = mysqli_query($connect, $imageSQL) or die(mysqli_connect_error());
