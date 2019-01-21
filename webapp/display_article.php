@@ -70,6 +70,8 @@
          <div style="float:left;" class='col-xs-3 col-md-3'>
             <div id="rectangle" style="width:number px; height:number px; background-color:white; border-radius: 25px; padding: 20px; border: 2px solid #000000;">
                <b><big><big><big>Details</big></big></big></b></br></br>
+	       <b><big><big>ID:</big></big></b>
+                	<big><?php echo $search_term; ?></big></br></br>
                <b><big>Author</big></b></br>
                <?php ($row = mysqli_fetch_array($query)); echo $row['author']; ?></br></br>
                <b><big>Source</big></b></br>
@@ -128,8 +130,6 @@
                </table>
             </div>
             <div style="float:none;">
-		<b><big><big><big>Article ID: </big></big></big></b>
-                	<big><big><?php echo $search_term; ?></big></big></br></br>
                 <b><big><big><big><br>Entities</big></big></big></b></br></br>
                 <?php
                         $entities = mysqli_query($connect, $imgEntity) or die(mysqli_connect_error());
