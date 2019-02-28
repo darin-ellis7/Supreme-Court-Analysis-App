@@ -3,9 +3,10 @@
 	include_once("db_connect.php");
 
 	$col = array(
-		0 => 'title',
-		1 => 'source',
-		2 => 'date'
+		0 => 'idArticle',
+		1 => 'title',
+		2 => 'source',
+		3 => 'date'
 	);
 
 	// grab full chunk of data
@@ -20,6 +21,7 @@
 	$data = array();
 	while($row=mysqli_fetch_array($query)) {
 	    $subdata=array();
+	    $subdata[]=$row['idArticle'];
 	    $article_url = "'./display_article.php?idArticle=" . $row['idArticle'] . "'";
 	    $subdata[]="<a style='color:black' href={$article_url}>{$row['title']}</a>";
 	    $subdata[]=$row['source'];

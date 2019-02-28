@@ -77,12 +77,10 @@
 					}
 				</script>
     </head>
-
     <body style=" height:100%; background-color: #fffacd; font-family: monospace; font-weight: bold;">  <!--***  changes appearance of webpage-->
 
         <!-- header -->
         <div style="background-color: #fffacd; padding: 30px; text-align: center;">  <!--***-->
-
             <h1 style="font-size: 50px; font-family: monospace; font-weight: bold;">US Supreme Court Analysis Tool</h1>  <!--***-->
             <hr>
         </div>
@@ -284,6 +282,7 @@
                 <table id="results-table" style="background-color: #e0eee0;table-layout: fixed" width="100%" class="stripe hover"  align="center">
                     <thead>
                         <tr align="center">
+                        <th width="10%"><strong>ID</strong></th>
                         <th width="75%"><strong>Title</strong></th>
                         <th width="15%"><strong>Source</strong></th>
                         <th width="10%"><strong>Date</strong></th>
@@ -295,11 +294,16 @@
                     $(document).ready(function() {
                         $('#results-table').DataTable({
                             "searching":false,
-                            "order": [[2,"desc"]],
+                            "order": [[0,"desc"]],
+                            "columnDefs": [
+                                {
+                                    "targets": [ 0 ], // sort by article ID to avoid "shuffling" articles, but keep the IDs themselves hidden
+                                    "visible": false
+                                }
+                            ],
                             "pageLength": 25,
                              "processing": true,
                              "serverSide": true,
-                             //"stateSave":true,
                              "ajax":{
                                 url :"response.php", // json datasource
                                 type: "get",  // type of method  , by default would be get
@@ -315,8 +319,6 @@
                 </script>
             </div>
         </div>
-
         <div style="height:200px"></div>
-
     </body>
 </html>
