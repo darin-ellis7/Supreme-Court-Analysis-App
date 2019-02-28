@@ -364,7 +364,7 @@ class TopicSites:
                     if pages:
                         for p in pages:
                             try:
-                                url = "https://www.huffingtonpost.com" + p.select_one("a.card__image__wrapper")["href"]
+                                url = p.select_one("a.card__image__wrapper")["href"]
                                 title = p.select_one("div.card__headline__text").text.strip()
                                 a = p.select_one("div.card__byline")
                                 author = None
