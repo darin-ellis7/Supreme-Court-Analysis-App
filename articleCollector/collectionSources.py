@@ -39,11 +39,11 @@ class TopicSites:
                 #break
             printBasicInfo(p.title,p.url)
             try:
-                if not articleIsDuplicate(p.title,p.url,c):
+                if not articleIsDuplicate(p.title,p.url,c) and not rejectedIsDuplicate(p.title,p.url,c):
                     article = p.scrape()
                     if article:
                         article.printInfo()
-                        if article.isRelevant():
+                        if article.isRelevant(c):
                             # add to database
                             article.addToDatabase(c)
                             article.printAnalysisData()
@@ -402,13 +402,13 @@ class RSSFeeds:
 
                 printBasicInfo(title,url)
                 try:
-                    if not articleIsDuplicate(title,url,c):
+                    if not articleIsDuplicate(title,url,c) and not rejectedIsDuplicate(title,url,c):
                         if not isBlockedSource(url):
                             s = Scraper(url,title,None,date,[])
                             article = s.scrape()
                             if article:
                                 article.printInfo()
-                                if article.isRelevant():
+                                if article.isRelevant(c):
                                     # add to database
                                     article.addToDatabase(c)
                                     article.printAnalysisData()
@@ -466,13 +466,13 @@ class NewsAPICollection:
 
                 printBasicInfo(title,entry['url'])
                 try:
-                    if not articleIsDuplicate(title,entry['url'],c):
+                    if not articleIsDuplicate(title,entry['url'],c) and not rejectedIsDuplicate(title,entry['url'],c):
                         if not isBlockedSource(entry['url']):
                             s = Scraper(entry['url'],title,author,date,images)
                             article = s.scrape()
                             if article:
                                 article.printInfo()
-                                if article.isRelevant():
+                                if article.isRelevant(c):
                                     # add to database
                                     article.addToDatabase(c)
                                     article.printAnalysisData()

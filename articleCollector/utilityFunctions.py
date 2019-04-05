@@ -81,6 +81,15 @@ def articleIsDuplicate(title,url,c):
         print("Rejected - article already exists in the database")
         return True
 
+# check whether an irrelevant article is already in the training data
+def rejectedIsDuplicate(title,url,c):
+    c.execute("""SELECT id FROM rejectedTrainingData WHERE title = %s OR url = %s""",(title,url,))
+    if c.rowcount == 0:
+        return False
+    else:
+        print("Rejected article is already in training data")
+        return True
+
 # determines if a new billing cycle for the Google Cloud API has been reached
 def isNewBillingCycle(c):
     now = datetime.datetime.now().date()

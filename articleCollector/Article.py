@@ -154,7 +154,7 @@ class Article:
                         image.addImageToDatabase(idArticle,c)
     
     # checks whether an article pertains to the US Supreme Court
-    def isRelevant(self):
+    def isRelevant(self,c):
         # set everything to lowercase to standardize for checking
         title = self.title.lower()
 
@@ -172,6 +172,7 @@ class Article:
         foreignSources = ['indiatimes','thehindu','liberianobserver','allafrica']
         if self.source.lower() in foreignSources or ('india' in self.source.lower() and 'indiana' not in self.source.lower()): # indian supreme court pops ups a lot, so block any source with "india" in it ("indiana" still passes)
             print("Rejected - from a known foreign source")
+            self.buildRejectedTrainingData("F",c)
             return False
 
         # list of every country in the world with a supreme court
@@ -195,6 +196,7 @@ class Article:
 
         if any(country + ' supreme court' in title or country + '\'s supreme court' in title for country in countries):
             print("Rejected - likely a foreign supreme court")
+            self.buildRejectedTrainingData("F",c)
             return False
 
         # NOTE: this was the old way for checking for foreign supreme courts - it was really limited, only included a few countries and specific keywords.
@@ -233,15 +235,24 @@ class Article:
 
             if stateDetected:
                 print("Rejected - Article likely about a state supreme court")
+                self.buildRejectedTrainingData("S",c)
                 return False
         
         # article needs supreme and court as keywords, or a Supreme Court justice
         if not ('supreme' in self.keywords and 'court' in self.keywords) and not any(justice in self.keywords for justice in justices):
             print("Rejected - no relevant keywords in text")
+            self.buildRejectedTrainingData("U",c)
             return False
         
         return True
-    
+
+    # insert irrelevant article data into the database for training purposes
+    # data is coded by nature of irrelevancy - S = article is about state court, F = article is about foreign court, U = unrelated topic
+    def buildRejectedTrainingData(self,code,c):
+        t = (self.url, self.date, self.text, self.title, code)
+        c.execute("""INSERT INTO rejectedTrainingData(url, date, text, title, code) VALUES (%s,%s,%s,%s,%s)""",t)
+        print("Article added to training data with code",code)
+
     # increment sentiment requests counter in database
     def updateSentimentRequests(self,n,c):
         c.execute("""UPDATE analysisCap SET currentSentimentRequests=currentSentimentRequests+(%s)""",(n,))
