@@ -13,7 +13,7 @@ class TopicSites:
         self.pages = []
 
     # topic site driver
-    def collect(self,c):
+    def collect(self,c,clf,v_text,v_title):
         print("*** Topic Sites Scraping ***")
         print()
         # this dict allows us to dynamically call topic site scrapers without actually writing them in the code
@@ -43,10 +43,10 @@ class TopicSites:
                     article = p.scrape()
                     if article:
                         article.printInfo()
-                        if article.isRelevant(c):
+                        if article.isRelevant_exp(clf,v_text,v_title,c):
                             # add to database
-                            article.addToDatabase(c)
-                            article.printAnalysisData()
+                            #article.addToDatabase(c)
+                            #article.printAnalysisData()
                             successes += 1
                             print()
                             print("Added to database")
@@ -246,7 +246,7 @@ class TopicSites:
             if pages:
                 for p in pages:
                     try:
-                        headline = p.select_one("h3 a")
+                        headline = p.select_one("h2 a")
                         title = headline.text.strip()
                         url = headline['href']
                         a = p.select_one("span.author")
@@ -287,24 +287,24 @@ class TopicSites:
         url = "https://www.reuters.com/subjects/supreme-court"
         soup = downloadPage(url)
         if soup:
-            container = soup.select_one("div.FeedPage_item-list span")
-            if container:
-                pages = container.select("div.FeedItem_item")
-                if pages:
-                    for p in pages:
-                        try:
-                            url = p.select_one("h2.FeedItemHeadline_headline a")["href"]
-                            title = p.select_one("h2.FeedItemHeadline_headline").text.strip()
-                            i = p.select_one("span a img")
-                            if i:
-                                images = [i["src"]]
-                            else:
-                                images = []
-                            s = Scraper(url,title,None,None,images)
-                            self.pages.append(s)
-                        except Exception as e:
-                            print("SCRAPING ERROR:",e)
-                            continue
+            #print(soup.prettify())
+            pages = soup.select("div.FeedItem_item")
+            if pages:
+                for p in pages:
+                    try:
+                        url = p.select_one("h2.FeedItemHeadline_headline a")["href"]
+                        title = p.select_one("h2.FeedItemHeadline_headline").text.strip()
+                        i = p.select_one("span a img")
+                        if i:
+                            images = [i["src"]]
+                        else:
+                            images = []
+                        #print(url,title,images)
+                        s = Scraper(url,title,None,None,images)
+                        self.pages.append(s)
+                    except Exception as e:
+                        print("SCRAPING ERROR:",e)
+                        continue
                                         
     def collectNPR(self):
         url = "https://www.npr.org/tags/125938785/supreme-court"
@@ -331,9 +331,7 @@ class TopicSites:
         url = "https://nypost.com/tag/supreme-court/"
         soup = downloadPage(url)
         if soup:
-            container = soup.select_one("div.article-loop")
-            if container:
-                pages = container.select("article")
+                pages = soup.select("div.entry-header")
                 if pages:
                     for p in pages:
                         try:
@@ -346,6 +344,7 @@ class TopicSites:
                             else:
                                 date = None
                             s = Scraper(url,title,None,date,[])
+                            #print(url,title,date)
                             self.pages.append(s)
                         except Exception as e:
                             print("SCRAPING ERROR:",e)
@@ -378,6 +377,9 @@ class TopicSites:
                             except Exception as e:
                                 print("SCRAPING ERROR:",e)
                                 continue
+
+#t = TopicSites()
+#t.collectReuters()
          
 # functions for Google Alerts RSS feeds
 class RSSFeeds:
@@ -385,7 +387,7 @@ class RSSFeeds:
         self.feeds = feeds # list of feeds to parse
     
     # driver
-    def parseFeeds(self,c):
+    def parseFeeds(self,c,clf,v_text,v_title):
         print("*** Google Alerts RSS Feeds ***")
         print()
         total = 0
@@ -408,10 +410,10 @@ class RSSFeeds:
                             article = s.scrape()
                             if article:
                                 article.printInfo()
-                                if article.isRelevant(c):
+                                if article.isRelevant_exp(clf,v_text,v_title,c):
                                     # add to database
-                                    article.addToDatabase(c)
-                                    article.printAnalysisData()
+                                    #article.addToDatabase(c)
+                                    #article.printAnalysisData()
                                     successes += 1
                                     print()
                                     print("Added to database")
@@ -428,7 +430,7 @@ class NewsAPICollection:
         self.newsapi = NewsApiClient(api_key=newsapi_key)
     
     # driver
-    def parseResults(self,c):
+    def parseResults(self,c,clf,v_text,v_title):
         print("*** NewsAPI Search ***")
         print()
         total = 0
@@ -449,7 +451,7 @@ class NewsAPICollection:
                 if entry['title']:
                     title = entry['title'].strip()
                 else:
-                    title = untitleArticle()
+                    title = untitledArticle()
 
                 if entry['urlToImage']:
                     images.append(entry['urlToImage'])
@@ -472,10 +474,10 @@ class NewsAPICollection:
                             article = s.scrape()
                             if article:
                                 article.printInfo()
-                                if article.isRelevant(c):
+                                if article.isRelevant_exp(clf,v_text,v_title,c):
                                     # add to database
-                                    article.addToDatabase(c)
-                                    article.printAnalysisData()
+                                    #article.addToDatabase(c)
+                                    #article.printAnalysisData()
                                     successes += 1
                                     print()
                                     print("Added to database")

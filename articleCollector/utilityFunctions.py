@@ -7,11 +7,17 @@ import requests
 import math
 from bs4 import BeautifulSoup
 from urllib import parse as urlparse
+from sklearn.svm import LinearSVC
+from sklearn.calibration import CalibratedClassifierCV
+from sklearn.feature_extraction.text import TfidfVectorizer
+from nltk.corpus import stopwords
+from scipy.sparse import hstack
 
 # download a webpage using BeautifulSoup
 # returns soup object we can parse
 def downloadPage(url):
-    user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/602.2.14 (KHTML, like Gecko) Version/10.0.1 Safari/602.2.14'
+    #user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/602.2.14 (KHTML, like Gecko) Version/10.0.1 Safari/602.2.14'
+    user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36'
     try:
         request = requests.get(url,headers={'User-Agent':user_agent})
         page = request.content
@@ -122,3 +128,58 @@ def replaceTitle(originalTitle, scrapedTitle):
         return scrapedTitle
     else:
         return originalTitle
+
+# create training dataset for relevancy check using a LinearSVC model
+# return vectorizer and clf (classifier) because we need them to predict relevancy for individual articles later on
+# our model will consist of two separate tf-idf matrices (one for article text, another for titles) combined into one
+def train_relevancy(c):
+    print("Training relevancy check dataset...")
+    Xraw, Y = get_training_data(c,False)
+    v_text = TfidfVectorizer(stop_words=stopwords.words("english"),min_df=5)
+    v_title = TfidfVectorizer(stop_words=stopwords.words("english"))
+    X = convertTextData(Xraw,v_text,v_title,'train')
+    clf = CalibratedClassifierCV(LinearSVC(),method='sigmoid',cv=3).fit(X,Y) #LinearSVC() doesn't have probability functionality by default so wrapping it into CalibratedClassiferCV()
+    return clf, v_text, v_title
+
+# training data consists of input (x) and output (y)
+# x = 2d array of [article title, article_text]
+# y = classification labels ('R' = relevant, 'U' = unrelated topics, 'F' = foreign courts, 'S' = state/local courts)
+# if True, binary parameter splits labels only into 'R' and 'U' ('F' and 'S' folded into the latter)
+def get_training_data(c,binary):
+    x = []
+    y = []
+    # get relevant training data - label 1 for relevant
+    c.execute("""SELECT article_text,title FROM article WHERE idArticle <= 17671""")
+    rows = c.fetchall()
+    for r in rows:
+        x.append([r["title"],r["article_text"]])
+        y.append("R")
+    # get irrelevant training data - label 0 for irrelevant
+    c.execute("""SELECT code,text,title FROM rejectedTrainingData WHERE id <= 4811""")
+    rows = c.fetchall()
+    for r in rows:
+        x.append([r["title"],r["text"]])
+        code = r["code"]
+        if binary:
+            if r["code"] != "R":
+                code = "U"
+        y.append(code)
+    return x, y
+
+# in order to use the classifier we have to convert text data (our articles and titles) into numerical data (tf-idf matrices)
+# 'mode' parameter determines how to feed the data to the tf-idf vectorizers - if 'train', the data is used to train/fit it. Otherwise, only used to test it/predict.
+# returns a combined tf-idf matrix we can use to train our classifier
+def convertTextData(x,v_text,v_title,mode):
+    Xtitle = []
+    Xtext = []
+    for row in x:
+        Xtitle.append(row[0])
+        Xtext.append(row[1])
+    if mode == 'train':
+        Xtitle = v_title.fit_transform(Xtitle)
+        Xtext = v_text.fit_transform(Xtext)
+    else:
+        Xtitle = v_title.transform(Xtitle)
+        Xtext = v_text.transform(Xtext)
+    x = hstack([Xtext,Xtitle]) # merge text and title matrices
+    return x
