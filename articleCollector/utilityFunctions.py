@@ -149,7 +149,7 @@ def get_training_data(c,binary):
     x = []
     y = []
     # get relevant training data - label 1 for relevant
-    c.execute("""SELECT article_text,title FROM article WHERE idArticle <= 17671""")
+    c.execute("""SELECT article_text,title FROM article WHERE idArticle <= 17671""") # only using training articles I've tested for now (so up to a certain id)
     rows = c.fetchall()
     for r in rows:
         x.append([r["title"],r["article_text"]])

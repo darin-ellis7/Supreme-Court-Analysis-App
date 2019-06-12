@@ -45,8 +45,8 @@ class TopicSites:
                         article.printInfo()
                         if article.isRelevant_exp(clf,v_text,v_title,c):
                             # add to database
-                            #article.addToDatabase(c)
-                            #article.printAnalysisData()
+                            article.addToDatabase(c)
+                            article.printAnalysisData()
                             successes += 1
                             print()
                             print("Added to database")
@@ -412,8 +412,8 @@ class RSSFeeds:
                                 article.printInfo()
                                 if article.isRelevant_exp(clf,v_text,v_title,c):
                                     # add to database
-                                    #article.addToDatabase(c)
-                                    #article.printAnalysisData()
+                                    article.addToDatabase(c)
+                                    article.printAnalysisData()
                                     successes += 1
                                     print()
                                     print("Added to database")
@@ -476,8 +476,8 @@ class NewsAPICollection:
                                 article.printInfo()
                                 if article.isRelevant_exp(clf,v_text,v_title,c):
                                     # add to database
-                                    #article.addToDatabase(c)
-                                    #article.printAnalysisData()
+                                    article.addToDatabase(c)
+                                    article.printAnalysisData()
                                     successes += 1
                                     print()
                                     print("Added to database")

@@ -17,30 +17,32 @@ def main():
     db.autocommit(True)
     c = db.cursor(MySQLdb.cursors.DictCursor)
 
+    print("*** SCOTUSApp Data Collection Script ***\n")
+
     # check for new billing cycle before running
     try:
         if isNewBillingCycle(c):
             resetRequests(c)
-            print("New billing cycle - sentiment requests reset")
-            print()
+            print("New billing cycle - sentiment requests reset\n")
+        clf, v_text, v_title = train_relevancy(c) # build training dataset for relevancy check
     except MySQLdb.Error as e:
         print("Database error - ",e)
-        print("Script aborted.")
+        print("Script aborted.\n")
         return
 
     # RSS feeds
     feed_urls = ['https://www.google.com/alerts/feeds/04514219544348410405/10161046346160726598', 'https://www.google.com/alerts/feeds/04514219544348410405/7765273799045579732', 'https://www.google.com/alerts/feeds/04514219544348410405/898187730492460176', 'https://www.google.com/alerts/feeds/04514219544348410405/16898242761418666298']
     feeds = RSSFeeds(feed_urls)
-    feeds.parseFeeds(c)
+    feeds.parseFeeds(c,clf,v_text,v_title)
 
     # newsAPI results
     newsapi_key = os.environ['NEWSAPI_KEY']
     queries  = ["USA Supreme Court","US Supreme Court", "United States Supreme Court","SCOTUS"]
     newsapi = NewsAPICollection(newsapi_key,queries)
-    newsapi.parseResults(c)
+    newsapi.parseResults(c,clf,v_text,v_title)
 
     # topic sites
     t = TopicSites()
-    t.collect(c)
+    t.collect(c,clf,v_text,v_title)
 
 main()
