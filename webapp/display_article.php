@@ -102,11 +102,17 @@
          </div>
          <div style="float:right;" class='col-xs-9 col-md-9 center-block'>
             <div id="rectangle" style="width:number px; height:number px; background-color:white; border-radius: 25px; padding: 20px; border: 2px solid #000000;">
-
-                <?php $query = mysqli_query($connect, $sql) or die(mysqli_connect_error()); ($row = mysqli_fetch_array($query));?>
+               <?php $query = mysqli_query($connect, $sql) or die(mysqli_connect_error()); ($row = mysqli_fetch_array($query));?>
                <b><big><?php echo $row['title']; ?></b></big></br>
                <?php echo $row['date']; ?></br>
-               <?php echo nl2br($row['article_text']); ?></br>
+               <?php 
+                  // display only a third of the article text (for copyright reasons)
+                  $text = $row['article_text'];
+                  $n = floor(strlen($text) / 3);
+                  $text = substr($text,0,$n) . "...";
+                  echo nl2br($text); 
+               ?>
+               </br>
                </table>
             </div>
          </div>
