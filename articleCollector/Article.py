@@ -124,6 +124,16 @@ class Article:
                 self.updateSentimentRequests(expectedSentimentRequests,c)
             except Exception as e:
                 print("Sentiment analysis failed:",e)
+    
+    # store a .txt file of a newly added article to the /txtfiles/ folder
+    def write_txt(self,idArticle):
+        try:
+            path = "/var/www/html/scotusapp/txtfiles/"
+            filename = str(idArticle) + ".txt"
+            with open(path + filename,"w") as f:
+                f.write(self.text)
+        except IOError as e:
+            print("Failed to write/store text file:",e)
 
     # adds all of an article's information to the database
     def addToDatabase(self,c):
@@ -133,9 +143,10 @@ class Article:
         c.execute("""INSERT INTO article(url, source, author, date, article_text, title, score, magnitude) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""",t)
 
         # then insert the other stuff (keywords and images)
-        idArticle = c.lastrowid # article id needed for keywords and images
+        idArticle = c.lastrowid # article id needed for keywords, images, and storing txt file
         self.addKeywords(idArticle,c)
         self.addImages(idArticle,c)
+        self.write_txt(idArticle)
 
     # driver function for downloading, saving, and analyzing each of an article's images
     def addImages(self,idArticle,c):

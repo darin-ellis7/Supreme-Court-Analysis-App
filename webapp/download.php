@@ -18,34 +18,30 @@
     $query = mysqli_query($connect, $sql) or die(mysqli_connect_error()); // execute query
 
     // Download article data into a .zip file consisting of a single .csv file with all of the search results + individual .txt files for each article's content
-    $zipName = "articles.zip";
+    //$zipName = "articles.zip";
+    $download_id = uniqid(); // download identifier used in zip and csv filenames to differentiate one download instance from another (in case of simultaneous downloads from multiple users)
+    $zipName = "articles_" . $download_id . ".zip";
     $zip = new ZipArchive(); // create a zip file
     if ($zip->open($zipName, ZipArchive::CREATE) && $query)
     {
-        $csvName = "article_data.csv";
+        $csvName = "article_data_" . $download_id . ".csv";
         $csv = fopen($csvName, 'w') or die ("Unable to generate CSV: " . $csvName);
 
         // CSV column headers
         $arrName = array("Article ID", "Date", "Source", "URL","Title","Author","Sentiment Score","Sentiment Magnitude","Top Image Entity","Entity Score","Keywords");
         fputcsv($csv, $arrName,"\t");
 
-        $txtFiles = array();
-
         // build files to go into zip
+        $txt_path = "../txtfiles/"; // where all txt files are stored
         while ($row = mysqli_fetch_array($query))
         {
            $arr = array($row['idArticle'],$row['date'], $row['source'], $row['url'], $row['title'], $row['author'], $row['score'],$row['magnitude'],$row['entity'],$row['top_entity'],$row['keywords']);
-
            fputcsv($csv, $arr,"\t"); // insert row in CSV (tab delimiter necessary for Excel compatibility fix)
 
-           $txtName = $row['idArticle']; // create a text file for each article's text
-           $txtName .= ".txt";
-           $txtFile = fopen($txtName, "w") or die("Unable to open text file: " . $txtName);
-           $txt = $row['article_text'];
-           fwrite($txtFile, $txt);
-           fclose($txtFile);
-           $zip->addFile($txtName, $txtName); // add text file to zip
-           array_push($txtFiles,$txtName); // save text file names so we can delete them after the download
+           $txtName = $row['idArticle'] . ".txt";
+           if (file_exists($txt_path . $txtName)) {
+               $zip->addFile($txt_path . $txtName, $txtName); // add .txt to zip
+           }
         }
 
         fclose($csv); // CSV finished - all rows inserted
@@ -65,10 +61,6 @@
         header("Content-Disposition: attachment; filename=$zipName");
         header("Content-Length: " . filesize($zipName));
 
-        // delete non-zipped files from server
-        foreach($txtFiles as $file) {
-            unlink($file);
-        }
         unlink($csvName);
 
         readfile($zipName); // download zip
