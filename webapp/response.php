@@ -19,7 +19,7 @@
 	$sql .= " ORDER BY ".$col[$_REQUEST['order'][0]['column']]." ".$_REQUEST['order'][0]['dir']."  LIMIT ". $_REQUEST['start']."  ,".$_REQUEST['length'];
 	$query=mysqli_query($connect,$sql);
 	$data = array();
-	while($row=mysqli_fetch_array($query)) {
+	while($row=mysqli_fetch_assoc($query)) {
 	    $subdata=array();
 	    $subdata[]=$row['idArticle'];
 	    $article_url = "'./display_article.php?idArticle=" . $row['idArticle'] . "'";

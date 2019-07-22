@@ -1,4 +1,9 @@
 <!--This page presents the article text and details about them. There is also a box including keywords in the article. At the bottom is a box for presenting images and entities of the articles.-->
+
+<?php
+    include_once("authenticate.php");
+?>
+
 <!DOCTYPE html>
 <html>
    <head>
@@ -28,19 +33,21 @@
 			</script>
    </head>
    <body style=" height:100%; background-color: #fffacd; font-family: monospace; font-weight: bold;">  <!--***-->
+      <div style="float:right; margin-right:1.5%;font-size: 18px; font-family: monospace;">
+         <a style="color:black;" href="user_page.php"><?php echo $_SESSION['name']?></a> | <a style="color:black;" href="logout.php">Logout</a>
+      </div>
 		 <!-- header -->
 	   <div style="background-color: #fffacd; padding: 30px; text-align: center;">  <!--***-->
-
 	      <h1 style="font-size: 50px; font-family: monospace; font-weight: bold;">US Supreme Court Analysis Tool</h1>  <!--***-->
+         <div align="right">
+            <a style="color:black; text-decoration:none;" href="index.php">
+               <button class="btn btn-default" id="resBut" onmouseover="changeResBut()" onmouseout="revertResBut()" style="height: 30px; font-weight: bold; font-family: monospace; background-color: rgba(255, 255, 255, 0.45); border: solid 3px; border-radius: 10px;">
+               Restart
+               </button>
+            </a>
+		   </div>
 	      <hr>
 	   </div>
-		 <div align="right">
-			 <a style="color:black; text-decoration:none;" href="index.php">
-			 <button class="btn btn-default" id="resBut" onmouseover="changeResBut()" onmouseout="revertResBut()" style="height: 30px; font-weight: bold; font-family: monospace; background-color: rgba(255, 255, 255, 0.45); border: solid 3px; border-radius: 10px;">
-			 Restart
-		   </button>
-		 </a>
-		 </div>
         <?php
           include_once("db_connect.php");
           $search_term = $_GET['idArticle'];
@@ -73,7 +80,7 @@
 	       <b><big><big>ID:</big></big></b>
                 	<big><?php echo $search_term; ?></big></br></br>
                <b><big>Author</big></b></br>
-               <?php ($row = mysqli_fetch_array($query)); echo $row['author']; ?></br></br>
+               <?php ($row = mysqli_fetch_assoc($query)); echo $row['author']; ?></br></br>
                <b><big>Source</big></b></br>
                <?php echo $row['source']; ?></br></br>
                <b><big>Publication Date</big></b></br>
@@ -92,7 +99,7 @@
                 <div id="rectangle" style="width:number px; height:number px; background-color:white; border-radius: 25px; padding: 20px; border: 2px solid #000000;">
                     <b><big><big><big>Key Words</big></big></big></b></br></br>
                    <?php $keywords = mysqli_query($connect, $keywordSQL) or die(mysqli_connect_error());
-                       while ($row = mysqli_fetch_array($keywords)){
+                       while ($row = mysqli_fetch_assoc($keywords)){
                           echo $row['keyword']; echo "</br>";
                        }
                     ?>
@@ -102,7 +109,7 @@
          </div>
          <div style="float:right;" class='col-xs-9 col-md-9 center-block'>
             <div id="rectangle" style="width:number px; height:number px; background-color:white; border-radius: 25px; padding: 20px; border: 2px solid #000000;">
-               <?php $query = mysqli_query($connect, $sql) or die(mysqli_connect_error()); ($row = mysqli_fetch_array($query));?>
+               <?php $query = mysqli_query($connect, $sql) or die(mysqli_connect_error()); ($row = mysqli_fetch_assoc($query));?>
                <b><big><?php echo $row['title']; ?></b></big></br>
                <?php echo $row['date']; ?></br>
                <?php 
@@ -124,7 +131,7 @@
                 <b><big><big><big>Images</big></big></big></b></br></br>
                     <?php
                         $images = mysqli_query($connect, $imageSQL) or die(mysqli_connect_error());
-                       $row = mysqli_fetch_array($images);
+                       $row = mysqli_fetch_assoc($images);
                        if ($row){
 
                           echo "<img src=\"../images/"; echo $row['path']; echo "\" style=\"max-width:84%;\"></br>";
@@ -139,19 +146,19 @@
                 <b><big><big><big><br>Entities</big></big></big></b></br></br>
                 <?php
                         $entities = mysqli_query($connect, $imgEntity) or die(mysqli_connect_error());
-                       $row = mysqli_fetch_array($entities);
+                       $row = mysqli_fetch_assoc($entities);
                        if ($row){
                           $ID = $row['idEntity'];
                           $SQL = "SELECT entity from image_entities WHERE idEntity IN ('{$ID}')";
                           $sqlQ = mysqli_query($connect, $SQL) or die(mysqli_connect_error());
-                          $sqlRow = mysqli_fetch_array($sqlQ);
+                          $sqlRow = mysqli_fetch_assoc($sqlQ);
                           echo $sqlRow['entity']; echo "<div style=\"float:right;\"> Score: "; echo $row['score'];
                               echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></br>";
-                          while ($row = mysqli_fetch_array($entities)){
+                          while ($row = mysqli_fetch_assoc($entities)){
                               $ID = $row['idEntity'];
                               $SQL = "SELECT entity from image_entities WHERE idEntity IN ('{$ID}')";
                               $sqlQ = mysqli_query($connect, $SQL) or die(mysqli_connect_error());
-                              $sqlRow = mysqli_fetch_array($sqlQ);
+                              $sqlRow = mysqli_fetch_assoc($sqlQ);
                               echo $sqlRow['entity']; echo "<div style=\"float:right;\"> Score: "; echo $row['score'];
                               echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></br>";
                           }

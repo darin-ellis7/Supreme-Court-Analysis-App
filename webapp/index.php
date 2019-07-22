@@ -2,10 +2,12 @@
 <!--This is the homepage of the web application. It presents a search form with a datepicker. Sources are listed on the left, and article titles along with their source and date are presented. There is also a download button for a zip folder of the articles currently on the webpage.-->
 <!-- originally written by Evan Cole, Darin Ellis, Connor Martin, and Abdullah Alosail, with contributions by John Tompkins, Mauricio Sanchez, and Jonathan Dingess -->
 
-<?php include 'buildQuery.php' ?>
+<?php
+    include_once("authenticate.php");
+    include("buildQuery.php");
+?>
 
 <!DOCTYPE html>
-
 <html>
     <head>
         <title>Search Database</title>
@@ -77,9 +79,12 @@
 					}
 				</script>
     </head>
-    <body style=" height:100%; background-color: #fffacd; font-family: monospace; font-weight: bold;">  <!--***  changes appearance of webpage-->
+    <body style="height:100%; background-color: #fffacd; font-family: monospace; font-weight: bold;">  <!--***  changes appearance of webpage-->
 
         <!-- header -->
+        <div style="float:right; margin-right:1.5%;font-size: 18px; font-family: monospace;">
+            <a style="color:black;" href="user_page.php"><?php echo $_SESSION['name']?></a> | <a style="color:black;" href="logout.php">Logout</a>
+        </div>
         <div style="background-color: #fffacd; padding: 30px; text-align: center;">  <!--***-->
             <h1 style="font-size: 50px; font-family: monospace; font-weight: bold;">US Supreme Court Analysis Tool</h1>  <!--***-->
             <hr>
@@ -230,7 +235,7 @@
 
                                     // get list of sources from search query
                                     $i = 0;
-                                    while ($row = mysqli_fetch_array($sourcebox_query))
+                                    while ($row = mysqli_fetch_assoc($sourcebox_query))
                                     {
                                         $source = $row['source'];
                                         $count = $row['count(source)'];

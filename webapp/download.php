@@ -2,6 +2,7 @@
     // does the same SQL search query as the one in search.php for any given search, but outputs the rows to a .csv + article text in .txt
     // everything is stored inside a .zip file
 
+    include_once("authenticate.php");
     include_once("db_connect.php");
     include("buildQuery.php");
 
@@ -18,7 +19,6 @@
     $query = mysqli_query($connect, $sql) or die(mysqli_connect_error()); // execute query
 
     // Download article data into a .zip file consisting of a single .csv file with all of the search results + individual .txt files for each article's content
-    //$zipName = "articles.zip";
     $download_id = uniqid(); // download identifier used in zip and csv filenames to differentiate one download instance from another (in case of simultaneous downloads from multiple users)
     $zipName = "articles_" . $download_id . ".zip";
     $zip = new ZipArchive(); // create a zip file
@@ -33,7 +33,7 @@
 
         // build files to go into zip
         $txt_path = "../txtfiles/"; // where all txt files are stored
-        while ($row = mysqli_fetch_array($query))
+        while ($row = mysqli_fetch_assoc($query))
         {
            $arr = array($row['idArticle'],$row['date'], $row['source'], $row['url'], $row['title'], $row['author'], $row['score'],$row['magnitude'],$row['entity'],$row['top_entity'],$row['keywords']);
            fputcsv($csv, $arr,"\t"); // insert row in CSV (tab delimiter necessary for Excel compatibility fix)
