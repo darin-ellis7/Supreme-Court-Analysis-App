@@ -62,7 +62,7 @@
         </script>
     </head>
     <body style="height:100%; background-color: #fffacd; font-family: monospace; font-weight: bold; font-size:14px;">
-        <h1 style="text-align: center; font-size: 50px; font-weight: bold;">SCOTUSApp</h1><hr style="background-color:#fffacd;">
+        <h1 style="text-align: center; font-size: 50px; font-weight: bold;"><a href='index.php' style='color:black;'>SCOTUSApp</a></h1><hr style="background-color:#fffacd;">
         <h2 style="font-size: 30px; font-weight: bold; text-align:center;">Login</h2><br>
         <form method="post" action="" style="margin:0 auto;width:30%;">
             <p>SCOTUSApp can only be used by verified accounts - login will only be successful once you have created an account and have been verified by our administrators. If you haven't registered yet, <a href="register.php">click this link</a> to do so.</p>
@@ -86,7 +86,8 @@
                     font-family: monospace;
                     background-color: rgba(255, 255, 255, 0.45);
                     border: solid 3px;
-                    border-radius: 10px;">Submit</button>
+                    border-radius: 10px;">Submit</button><br><br>
+                <a href='forgot_password.php'>Forgot Password?</a>
             </fieldset>
         </form>
     </body>

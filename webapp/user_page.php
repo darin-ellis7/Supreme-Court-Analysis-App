@@ -123,7 +123,7 @@
         </script>
     </head>
     <body style="height:100%; background-color: #fffacd; font-family: monospace; font-weight: bold; font-size:14px;">
-        <h1 style="text-align: center; font-size: 50px; font-weight: bold;">SCOTUSApp</h1><hr style="background-color:#fffacd;">
+        <h1 style="text-align: center; font-size: 50px; font-weight: bold;"><a href='index.php' style='color:black;'>SCOTUSApp</a></h1><hr style="background-color:#fffacd;">
         <h2 style="font-size: 30px; font-weight: bold; text-align:center;">Update Account</h2><br>
         <form method="post" action="" style="margin:0 auto;width:30%;">
             <p>If you need to change any of your account information, do so below. Leave fields as-is if you don't want to change anything.</p>

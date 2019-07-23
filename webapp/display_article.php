@@ -7,7 +7,7 @@
 <!DOCTYPE html>
 <html>
    <head>
-      <title>Search Database</title>
+      <title>SCOTUSApp - Display Article</title>
       <meta charset="utf-8">
       <!-- Bootstrap stuff -->
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -38,7 +38,7 @@
       </div>
 		 <!-- header -->
 	   <div style="background-color: #fffacd; padding: 30px; text-align: center;">  <!--***-->
-	      <h1 style="font-size: 50px; font-family: monospace; font-weight: bold;">US Supreme Court Analysis Tool</h1>  <!--***-->
+	      <h1 style="font-size: 50px; font-family: monospace; font-weight: bold;"><a href='index.php' style='color:black;'>SCOTUSApp</a></h1>  <!--***-->
          <div align="right">
             <a style="color:black; text-decoration:none;" href="index.php">
                <button class="btn btn-default" id="resBut" onmouseover="changeResBut()" onmouseout="revertResBut()" style="height: 30px; font-weight: bold; font-family: monospace; background-color: rgba(255, 255, 255, 0.45); border: solid 3px; border-radius: 10px;">

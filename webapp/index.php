@@ -10,7 +10,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Search Database</title>
+        <title>SCOTUSApp</title>
         <meta charset="utf-8">
 
         <!-- Bootstrap stuff -->
@@ -86,7 +86,7 @@
             <a style="color:black;" href="user_page.php"><?php echo $_SESSION['name']?></a> | <a style="color:black;" href="logout.php">Logout</a>
         </div>
         <div style="background-color: #fffacd; padding: 30px; text-align: center;">  <!--***-->
-            <h1 style="font-size: 50px; font-family: monospace; font-weight: bold;">US Supreme Court Analysis Tool</h1>  <!--***-->
+            <h1 style="font-size: 50px; font-family: monospace; font-weight: bold;"><a href='index.php' style='color:black;'>SCOTUSApp</a></h1>  <!--***-->
             <hr>
         </div>
 
