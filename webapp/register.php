@@ -67,21 +67,9 @@
         return $idUser;
     }
 
-    function getAdmins() {
-        $admins = array();
-        $admins_split = explode(",",getenv("ADMINS"));
-        foreach($admins_split as $admin) {
-            $admin_split = explode(":",$admin);
-            $name = $admin_split[0];
-            $email = $admin_split[1];
-            $admins[$name] = $email;
-        }
-        return $admins;
-    }
-
     function sendVerificationEmail($email,$name,$notes,$idUser) {
         $verify_url = "http://" . $_SERVER['SERVER_NAME'] . dirname($_SERVER['PHP_SELF']) . "/verify_user.php?idUser=" . $idUser;
-        $to = getAdmins();
+        $to = getAdmins(true);
         $subject = "SCOTUSApp - New User Verification";
         $body = "A new user has signed up for SCOTUSApp. Review their information and decide whether to authorize them or not:<br><br>
                     Name: $name<br>
@@ -94,6 +82,7 @@
 
     include_once("db_connect.php");
     include_once("email.php");
+    include("admins.php");
     $valid_reg = false;
     if($_SERVER['REQUEST_METHOD'] == 'POST') {
         $name=isset($_POST['name']) ? $_POST['name'] : "";
@@ -139,6 +128,7 @@
         </script>
     </head>
     <body style="height:100%; background-color: #fffacd; font-family: monospace; font-weight: bold; font-size:14px;">
+        <?php echo contactLink(); ?><br>
         <h1 style="text-align: center; font-size: 50px; font-weight: bold;"><a href='index.php' style='color:black;'>SCOTUSApp</a></h1><hr style="background-color:#fffacd;">
         <h2 style="font-size: 30px; font-weight: bold; text-align:center;">Register Account</h2><br>
         <form method="post" action="register.php" style="margin:0 auto;width:30%;">

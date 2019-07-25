@@ -72,6 +72,7 @@
 
     include_once("authenticate.php");
     include_once("db_connect.php");
+    include("admins.php");
     if(isset($_SESSION['redirectBackTo'])) {
         unset($_SESSION['redirectBackTo']);
     }
@@ -123,6 +124,7 @@
         </script>
     </head>
     <body style="height:100%; background-color: #fffacd; font-family: monospace; font-weight: bold; font-size:14px;">
+        <?php echo contactLink(); ?><br>
         <h1 style="text-align: center; font-size: 50px; font-weight: bold;"><a href='index.php' style='color:black;'>SCOTUSApp</a></h1><hr style="background-color:#fffacd;">
         <h2 style="font-size: 30px; font-weight: bold; text-align:center;">Update Account</h2><br>
         <form method="post" action="" style="margin:0 auto;width:30%;">
