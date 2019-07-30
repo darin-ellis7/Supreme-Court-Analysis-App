@@ -53,6 +53,7 @@
         <?php
          include_once("db_connect.php");
          $idArticle = (!empty($_GET['idArticle']) ? trim($_GET['idArticle']) : '');
+         $idArticle = mysqli_real_escape_string($connect,$idArticle);
 
          $sql = "SELECT date, source, author, title, article_text, url,score,magnitude FROM article WHERE idArticle='{$idArticle}'";
          $keywordSQL = "SELECT keyword FROM article_keywords WHERE idKey IN (SELECT idKey FROM keyword_instances WHERE idArticle = '{$idArticle}')";
