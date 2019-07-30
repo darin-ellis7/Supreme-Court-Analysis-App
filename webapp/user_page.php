@@ -73,9 +73,6 @@
     include_once("authenticate.php");
     include_once("db_connect.php");
     include("admins.php");
-    if(isset($_SESSION['redirectBackTo'])) {
-        unset($_SESSION['redirectBackTo']);
-    }
 
     $sql = "SELECT * from user WHERE idUser={$_SESSION['idUser']}";
     $query = mysqli_query($connect, $sql) or die(mysqli_connect_error());
@@ -85,11 +82,11 @@
     $oldnotes = !empty($userinfo['notes']) ? $userinfo['notes'] : "";
 
     if($_SERVER['REQUEST_METHOD'] == 'POST') {
-        $name=isset($_POST['name']) ? $_POST['name'] : $oldname;
-        $email = isset($_POST['email']) ? $_POST['email'] : $oldemail;
+        $name=isset($_POST['name']) ? trim($_POST['name']) : $oldname;
+        $email = isset($_POST['email']) ? trim($_POST['email']) : $oldemail;
         $password=isset($_POST['password']) ? $_POST['password'] : "";
         $confirm_password=isset($_POST['confirm_password']) ? $_POST['confirm_password'] : "";
-        $notes=isset($_POST['notes']) ? $_POST['notes'] : $oldnotes;
+        $notes=isset($_POST['notes']) ? trim($_POST['notes']) : $oldnotes;
 
         $errs = array();
         $fields_changed = array();

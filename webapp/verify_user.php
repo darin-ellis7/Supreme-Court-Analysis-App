@@ -13,10 +13,6 @@
 
     include_once("authenticate.php");
     include_once("email.php");
-    include("admins.php");
-    if(isset($_SESSION['redirectBackTo'])) {
-        unset($_SESSION['redirectBackTo']);
-    }
 
     if(isset($_GET['idUser'])) {
         include_once("db_connect.php");
