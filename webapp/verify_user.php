@@ -53,10 +53,9 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
     </head>
     <body style="height:100%; background-color: #fffacd; font-family: monospace; font-weight: bold; font-size: 14px;">
-        <?php echo contactLink(); ?><br>
         <div style="float:right; margin-right:1.5%;font-size: 18px; font-family: monospace;">
             <a style="color:black;" href="user_page.php"><?php echo $_SESSION['name']?></a> | <a style="color:black;" href="logout.php">Logout</a>
-        </div>
+        </div><br>
         <h1 style="text-align: center; font-size: 50px; font-weight: bold;"><a href='index.php' style='color:black;'>SCOTUSApp</a></h1><hr style="background-color:#fffacd;">
         <h2 style="font-size: 30px; font-weight: bold; text-align:center;">Verify User</h2><br>
         <p style="text-align:center;"><?php echo $msg; ?></p>
