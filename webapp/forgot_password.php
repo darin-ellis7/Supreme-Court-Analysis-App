@@ -1,4 +1,5 @@
 <?php
+    // verifies that email input is proper
     function verifyEmail($email,$connect,&$errs) {
         $is_valid = true;
         if(empty($email)) {
@@ -21,16 +22,18 @@
         return $is_valid;
     }
 
+    // generates token for password reset
     function generateToken($idUser,$connect) {
         $length = 8;
-        $token = bin2hex(random_bytes($length));
+        $token = bin2hex(random_bytes($length)); // generates random 8 digit token
         $token = mysqli_real_escape_string($connect,$token);
-        $expiration = time() + 3600;
+        $expiration = time() + 3600; // token expires in an hour
         $sql = "INSERT INTO password_tokens(token,expiration,idUser) VALUES ('$token',$expiration,$idUser)";
         mysqli_query($connect, $sql) or die(mysqli_connect_error());
         return $token;
     }
 
+    // since we're not logged in when resetting password, we can't use SESSION variables - we've got to get the info we need from the database
     function getUserInfo($email,$connect) {
         $sql = "SELECT idUser,name FROM user WHERE email='{$email}'";
         $query = mysqli_query($connect, $sql) or die(mysqli_connect_error());
@@ -40,6 +43,7 @@
         return $row;
     }
 
+    // send reset token + link email
     function sendForgotEmail($email,$name,$token) {
         $reset_url = "http://" . $_SERVER['SERVER_NAME'] . dirname($_SERVER['PHP_SELF']) . "/reset_password.php";
         $to = array($name=>$email);
