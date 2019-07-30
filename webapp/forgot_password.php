@@ -58,7 +58,7 @@
     include("admins.php");
     $validEmail = false;
     if($_SERVER['REQUEST_METHOD'] == 'POST') {
-        $email = isset($_POST['email']) ? $_POST['email'] : "";
+        $email = isset($_POST['email']) ? trim($_POST['email']) : "";
         $email = mysqli_real_escape_string($connect,$email);
         $errs = array();
         $validEmail = verifyEmail($email,$connect,$errs);

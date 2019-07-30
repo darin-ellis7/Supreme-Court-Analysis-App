@@ -15,7 +15,7 @@
     $dateTo = (!empty($_GET['dateTo']) ? $_GET['dateTo'] : '');
     $sourcebox = (!empty($_GET['sourcebox']) ? $_GET['sourcebox'] : '');
 
-    $sql = buildQuery($search_query,$dateFrom,$dateTo,$sourcebox,"download");
+    $sql = buildQuery($connect,$search_query,$dateFrom,$dateTo,$sourcebox,"download");
     $query = mysqli_query($connect, $sql) or die(mysqli_connect_error()); // execute query
 
     // Download article data into a .zip file consisting of a single .csv file with all of the search results + individual .txt files for each article's content

@@ -29,11 +29,12 @@
     include("admins.php");
     $valid_reg = false;
     if($_SERVER['REQUEST_METHOD'] == 'POST') {
-        $email = isset($_POST['email']) ? $_POST['email'] : "";
+        $email = isset($_POST['email']) ? trim($_POST['email']) : "";
         $password=isset($_POST['password']) ? $_POST['password'] : "";
         $errs = array();
         if(validLogin($email,$password,$connect,$errs)) {
             $destination = ((isset($_SESSION['redirectBackTo'])) ? $_SESSION['redirectBackTo'] : "index.php");
+            unset($_SESSION['redirectBackTo']);
             header("Location: $destination");
             exit();
         }

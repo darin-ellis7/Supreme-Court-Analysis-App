@@ -1,5 +1,9 @@
 <?php
-	function buildQuery($search_query,$dateFrom,$dateTo,$sourcebox,$mode) {
+	function buildQuery($connect,$search_query,$dateFrom,$dateTo,$sourcebox,$mode) {
+        // preventing SQL injections...(sourcebox strings handled farther down)
+        $search_query = mysqli_real_escape_string($connect,$search_query);
+        $dateFrom = mysqli_real_escape_string($connect,$dateFrom);
+        $dateTo = mysqli_real_escape_string($connect,$dateTo);
         
         if($mode == 'download') {
             $sql = "SELECT DISTINCT title, date, source, author, article.url, article.idArticle, article.score, magnitude, entity, article_text, GROUP_CONCAT(DISTINCT keyword) as keywords, MAX(entity_instances.score) as top_entity FROM (article NATURAL JOIN article_keywords NATURAL JOIN keyword_instances) LEFT JOIN (image NATURAL JOIN image_entities NATURAL JOIN entity_instances) ON article.idArticle = image.idArticle ";
@@ -23,41 +27,34 @@
         }
 
         // date range search - if no dates provided, ignore
-        if(!empty($dateFrom) && !empty($dateTo))
-        {
+        if(!empty($dateFrom) && !empty($dateTo)) {
             // convert date input to Y-m-d format - this is because the bootstrap datepicker sends dates in Y/m/d while SQL only accepts as Y-m-d
         	$dateFrom = date("Y-m-d",strtotime($dateFrom));
             $dateTo = date("Y-m-d",strtotime($dateTo));
 
-            if(!$conditionsExist)
-            {
+            if(!$conditionsExist) {
                 $date_str = "WHERE date BETWEEN '$dateFrom' AND '$dateTo' ";
                 $conditionsExist = true;
             }
-            else
-            {
+            else {
                 $date_str = "AND date BETWEEN '$dateFrom' AND '$dateTo' ";
             }
             $sql .= $date_str;
         }
 
         // if source filter has been applied and search parameters set, limit the sources to what has been checked
-        if(!empty($sourcebox) && $mode != 'sourcebox')
-        {
-            if(!$conditionsExist)
-            {
+        if(!empty($sourcebox) && $mode != 'sourcebox') {
+            if(!$conditionsExist) {
                 $sourceFilter_str = "WHERE source in (";
                 $conditionsExist = true;
             }
-            else
-            {
+            else {
                 $sourceFilter_str = "AND source in (";
 
             }
 
-            foreach($sourcebox as $source)
-            {
-                $sourceFilter_str .= "'" . $source . "'";
+            foreach($sourcebox as $source) {
+                $sourceFilter_str .= "'" . mysqli_real_escape_string($connect,$source) . "'";
                 if($source != end($sourcebox))
                 {
                     $sourceFilter_str .= ",";

@@ -66,7 +66,7 @@
     include("admins.php");
     $validReset = false;
     if($_SERVER['REQUEST_METHOD'] == 'POST') {
-        $token = isset($_POST['token']) ? $_POST['token'] : "";
+        $token = isset($_POST['token']) ? trim($_POST['token']) : "";
         $password=isset($_POST['password']) ? $_POST['password'] : "";
         $confirm_password=isset($_POST['confirm_password']) ? $_POST['confirm_password'] : "";
         $token = mysqli_real_escape_string($connect,$token);

@@ -3,9 +3,41 @@
 <!-- originally written by Evan Cole, Darin Ellis, Connor Martin, and Abdullah Alosail, with contributions by John Tompkins, Mauricio Sanchez, and Jonathan Dingess -->
 
 <?php
+    // generates download button url 
+    function generateDownloadURL($search_query,$dateFrom,$dateTo,$sourcebox) {
+        $url = "download.php?";
+        $vars = array("search_query"=>$search_query,"dateFrom"=>$dateFrom,"dateTo"=>$dateTo,"sourcebox"=>$sourcebox);
+        $add_ampersand = false; // flag for multivariables - every query string beyond the first will be prefixed with &
+        foreach($vars as $key=>$var) {
+            if(!empty($var)) {
+                if($add_ampersand) { $url .= "&"; }
+                if($key != "sourcebox") { 
+                    $url .= "$key=" . $var; }
+                else { // each entry in sourcebox array needs its own query string (separated by ampersand)
+                    $str_arr = array();
+                    foreach($var as $v) { array_push($str_arr,"{$key}[]=$v"); }
+                    $url .= implode("&",$str_arr);  
+                }
+                if(!$add_ampersand) { $add_ampersand = true; }
+            }
+        }
+        return $url;
+    }
+
     include_once("authenticate.php");
     include("buildQuery.php");
     include("admins.php");
+    include_once("db_connect.php"); // connect to database (or not)
+
+    $search_query = (!empty($_GET['search_query']) ? trim($_GET['search_query']) : '');
+    $dateFrom = (!empty($_GET['dateFrom']) ? $_GET['dateFrom'] : '');
+    $dateTo = (!empty($_GET['dateTo']) ? $_GET['dateTo'] : '');
+    $sourcebox = (!empty($_GET['sourcebox']) ? $_GET['sourcebox'] : '');
+
+    $downloadURL = generateDownloadURL($search_query,$dateFrom,$dateTo,$sourcebox);
+    $results_sql = buildQuery($connect,$search_query,$dateFrom,$dateTo,$sourcebox,'results');
+    $sourcebox_sql = buildQuery($connect,$search_query,$dateFrom,$dateTo,$sourcebox,'sourcebox');
+    $sourcebox_query = mysqli_query($connect, $sourcebox_sql) or die(mysqli_connect_error()); // execute source sidebar query
 ?>
 
 <!DOCTYPE html>
@@ -21,7 +53,7 @@
 
         <!-- jQuery library -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-        <script src="js/jquery.js"></script>
+        <!--<script src="js/jquery.js"></script>-->
         <!-- Latest compiled JavaScript -->
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
         <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -105,7 +137,7 @@
                             <span class="input-group-btn">
                                 <input class='form-control' type="text" name="search_query" style="width: 430px !important;" placeholder='Enter keyword[s] or leave empty' 
                                 <?php 
-                                    if(isset($_GET['search_query'])) echo " value='{$_GET['search_query']}'"; 
+                                    if(!empty($search_query)) echo " value='{$search_query}'"; 
                                 ?> >
                                 <button id="formBut" type='submit' class='btn btn-default' onmouseover='changeSubBut()' onmouseout='revertSubBut()'
 																style = "height: 30px;
@@ -120,8 +152,8 @@
 
                             <br>
 
-                            From: <input data-provide="datepicker" class="datebox" type="text" name="dateFrom" <?php if(!empty($_GET['dateFrom']) && !empty($_GET['dateTo'])) { echo " value = '{$_GET['dateFrom']}'"; } ?> >
-                            To: <input data-provide="datepicker" class="datebox" type="text" name="dateTo" <?php if(!empty($_GET['dateFrom']) && !empty($_GET['dateTo'])) { echo " value = '{$_GET['dateTo']}'";} ?> >
+                            From: <input data-provide="datepicker" class="datebox" type="text" name="dateFrom" <?php if(!empty($dateFrom) && !empty($dateTo)) { echo " value = '{$dateFrom}'"; } ?> >
+                            To: <input data-provide="datepicker" class="datebox" type="text" name="dateTo" <?php if(!empty($dateFrom) && !empty($dateTo)) { echo " value = '{$dateTo}'";} ?> >
                         </form>
                     </div>
                 </div>
@@ -130,70 +162,15 @@
 
         <!--download button -->
         <div align="right">
-            <?php
-
-                // build download url based on search parameters
-                $downloadURL = "download.php?";
-                if(isset($_GET['search_query']))
-                {
-                    $downloadURL .= "search_query=" . $_GET['search_query'] . "&";
-                }
-
-                if(isset($_GET['dateFrom']))
-                {
-                    $downloadURL .= "dateFrom=" . $_GET['dateFrom'] . "&";
-
-                }
-
-                if(isset($_GET['dateTo']))
-                {
-                    $downloadURL .= "dateTo=" . $_GET['dateTo'];
-                }
-
-                // if a source filter has been applied, include those in download url
-                if(isset($_GET['sourcebox']))
-                {
-                    foreach($_GET['sourcebox'] as $source)
-                    {
-                        $downloadURL .= "&sourcebox[]=" . $source;
-                    }
-                }
-								echo "<a style=\"color:black; text-decoration:none;
-								\" href=\""; echo "index.php"; echo "\"><button class=\"btn btn-default\" id=\"resBut\" onmouseover=\"changeResBut()\" onmouseout=\"revertResBut()\"
-								style=\"height: 30px;
-								font-weight: bold;
-								font-family: monospace;
-								background-color: rgba(255, 255, 255, 0.45);
-								border: solid 3px;
-								border-radius: 10px;\">Restart</button></a>";
-
-                echo "<button class=\"btn btn-default\" id=\"downBut\" onmouseover=\"changeDownBut()\" onmouseout=\"revertDownBut()\"
-								style=\"height: 30px;
-								font-weight: bold;
-								font-family: monospace;
-								background-color: rgba(255, 255, 255, 0.45);
-								border: solid 3px;
-								border-radius: 10px;\"><a style=\"color:black; text-decoration:none;
-								\" href=\""; echo $downloadURL; echo "\">Download Results</a></button> &nbsp;";  //***
-            ?>
+            <button class="btn btn-default" id="resBut" onmouseover="changeResBut()" onmouseout="revertResBut()" style="height: 30px; font-weight: bold; font-family: monospace; background-color: rgba(255, 255, 255, 0.45); border: solid 3px; border-radius: 10px;">
+                <a style="color:black; text-decoration:none;" href="index.php">Restart</a>
+            </button>
+            <button class="btn btn-default" id="downBut" onmouseover="changeDownBut()" onmouseout="revertDownBut()" style="height: 30px;font-weight: bold; font-family: monospace; background-color: rgba(255, 255, 255, 0.45); border: solid 3px;border-radius: 10px;">
+                <a style="color:black; text-decoration:none;" href="<?php echo $downloadURL ?>">Download Results</a>
+            </button>&nbsp;
         </div>
 
         <hr>
-
-        <?php
-
-            $search_query = (!empty($_GET['search_query']) ? trim($_GET['search_query']) : '');
-            $dateFrom = (!empty($_GET['dateFrom']) ? $_GET['dateFrom'] : '');
-            $dateTo = (!empty($_GET['dateTo']) ? $_GET['dateTo'] : '');
-            $sourcebox = (!empty($_GET['sourcebox']) ? $_GET['sourcebox'] : '');
-
-            // connect to database (or not)
-            include_once("db_connect.php");
-
-            $results_sql = buildQuery(mysqli_real_escape_string($connect, $search_query),$dateFrom,$dateTo,$sourcebox,'results');
-            $sourcebox_sql = buildQuery(mysqli_real_escape_string($connect, $search_query),$dateFrom,$dateTo,$sourcebox,'sourcebox');
-            $sourcebox_query = mysqli_query($connect, $sourcebox_sql) or die(mysqli_connect_error()); // execute source sidebar query
-        ?>
 
         <!-- display query results as table -->
         <div class="mainWrapper" style="overflow:hidden;">
@@ -226,16 +203,29 @@
 																		border-radius: 10px;'>Apply Filter</button><br><br>";  //***
 
                                     // pass in search parameters (if any) into filter form
-                                    $names = ['search_query','dateFrom','dateTo'];
-                                    foreach($names as $var)
-                                    {
-                                        if(isset($_GET[$var]))
-                                        {
-                                            echo "<input type='hidden' name=$var value=" . $_GET[$var] . ">";
+                                    $hiddenvars = array('search_query'=>$search_query,'dateFrom'=>$dateFrom,'dateTo'=>$dateTo);
+                                    foreach($hiddenvars as $key=>$var) {
+                                        if(!empty($var)) {
+                                            echo "<input type='hidden' name='$key' value='$var'>";
                                         }
                                     }
 
-                                    // get list of sources from search query
+                                    echo "<div class='source-results' style='max-height: 810px; overflow:auto'>";
+                                    while($row = mysqli_fetch_assoc($sourcebox_query)) {
+                                        $source = $row['source'];
+                                        $count = $row['count(source)'];
+                                        echo "$source ($count) <input type='checkbox' name='sourcebox[]' value='$source' ";
+                                        if(!empty($sourcebox) && in_array($source,$sourcebox)) { 
+                                            echo "checked = 'checked' "; 
+                                        }
+                                        echo "><br>";
+                                    }
+                                    echo "</div>";
+                                    echo "</form>";
+
+                                
+
+                                    /* // get list of sources from search query
                                     $i = 0;
                                     while ($row = mysqli_fetch_assoc($sourcebox_query))
                                     {
@@ -257,9 +247,9 @@
                                         }
 
                                         echo "$source ($count) <input type='checkbox' name='sourcebox[]' ";
-                                        if(isset($_GET['sourcebox']))
+                                        if(!empty($sourcebox))
                                         {
-                                            if(in_array($source,$_GET['sourcebox']))
+                                            if(in_array($source,$sourcebox))
                                             {
                                                 echo "checked = 'checked' ";
                                             }
@@ -276,7 +266,7 @@
 
                                         $i += 1;
                                     }
-                                    echo "</form>";
+                                    echo "</form>";*/
                                 }
                             ?>
                         </div>

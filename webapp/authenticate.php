@@ -6,9 +6,10 @@
     $currentPage = explode('?',basename($_SERVER['REQUEST_URI']))[0];
     if(!$logged_in && $currentPage != "login.php") {
         $allowAccess = false;
-        if (in_array($currentPage,array("verify_user.php","user_page.php"))) {
+        /*if (in_array($currentPage,array("verify_user.php","user_page.php"))) {
             $_SESSION['redirectBackTo'] = basename($_SERVER['REQUEST_URI']);
-        }
+        }*/
+        $_SESSION['redirectBackTo'] = basename($_SERVER['REQUEST_URI']);
         $destination = "login.php";
     }
     else if($logged_in && in_array($currentPage,array("login.php","forgot_password.php","reset_password.php"))) {

@@ -51,22 +51,14 @@
 	      <hr>
 	   </div>
         <?php
-          include_once("db_connect.php");
-          $search_term = $_GET['idArticle'];
-          $sql = "SELECT date, title, source, url, FROM article WHERE idArticle='%{$search_term}%'";
+         include_once("db_connect.php");
+         $idArticle = (!empty($_GET['idArticle']) ? trim($_GET['idArticle']) : '');
 
-          if (isset($_POST['search'])) {
-            $search_term = $_GET['idArticle'];
-            $sql .= "WHERE idArticle='%{$search_term}%'";
-          }
-          else {
-            $search_term = $_GET['idArticle'];
-            $sql = "SELECT date, source, author, title, article_text, url,score,magnitude FROM article WHERE idArticle='{$search_term}'";
-            $keywordSQL = "SELECT keyword FROM article_keywords WHERE idKey IN (SELECT idKey FROM keyword_instances WHERE idArticle = '{$search_term}')";
+         $sql = "SELECT date, source, author, title, article_text, url,score,magnitude FROM article WHERE idArticle='{$idArticle}'";
+         $keywordSQL = "SELECT keyword FROM article_keywords WHERE idKey IN (SELECT idKey FROM keyword_instances WHERE idArticle = '{$idArticle}')";
 
-            $imageSQL = "SELECT path FROM image WHERE idArticle IN ('{$search_term}')";
-            $imgEntity = "SELECT idEntity, score FROM entity_instances WHERE idImage IN (SELECT idImage FROM image WHERE idArticle IN ('{$search_term}'))";
-          }
+         $imageSQL = "SELECT path FROM image WHERE idArticle IN ('{$idArticle}')";
+         $imgEntity = "SELECT idEntity, score FROM entity_instances WHERE idImage IN (SELECT idImage FROM image WHERE idArticle IN ('{$idArticle}'))";
 
           $query = mysqli_query($connect, $sql) or die(mysqli_connect_error());
           $keywords = mysqli_query($connect, $keywordSQL) or die(mysqli_connect_error());
@@ -80,7 +72,7 @@
             <div id="rectangle" style="width:number px; height:number px; background-color:white; border-radius: 25px; padding: 20px; border: 2px solid #000000;">
                <b><big><big><big>Details</big></big></big></b></br></br>
 	       <b><big><big>ID:</big></big></b>
-                	<big><?php echo $search_term; ?></big></br></br>
+                	<big><?php echo $idArticle; ?></big></br></br>
                <b><big>Author</big></b></br>
                <?php ($row = mysqli_fetch_assoc($query)); echo $row['author']; ?></br></br>
                <b><big>Source</big></b></br>
