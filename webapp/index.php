@@ -29,6 +29,7 @@
     include("admins.php");
     include_once("db_connect.php"); // connect to database (or not)
 
+    // sanitize input
     $search_query = (!empty($_GET['search_query']) ? trim($_GET['search_query']) : '');
     $dateFrom = (!empty($_GET['dateFrom']) ? $_GET['dateFrom'] : '');
     $dateTo = (!empty($_GET['dateTo']) ? $_GET['dateTo'] : '');
@@ -119,8 +120,8 @@
         <div style="float:right; margin-right:1.5%;font-size: 18px; font-family: monospace;">
             <a style="color:black;" href="user_page.php"><?php echo $_SESSION['name']?></a> | <a style="color:black;" href="logout.php">Logout</a>
         </div>
-        <div style="background-color: #fffacd; padding: 30px; text-align: center;">  <!--***-->
-            <h1 style="font-size: 50px; font-family: monospace; font-weight: bold;"><a href='index.php' style='color:black;'>SCOTUSApp</a></h1>  <!--***-->
+        <div style="background-color: #fffacd; padding: 30px; text-align: center;">
+            <h1 style="font-size: 50px; font-family: monospace; font-weight: bold;"><a href='index.php' style='color:black;'>SCOTUSApp</a></h1>
             <hr>
         </div>
 
@@ -130,9 +131,7 @@
                 <div class='row'>
                     <div class='navbar-form' align="center">
                         <form action='' method='GET'>
-
                             <br>
-
                             <!-- php code within these input tags are to remember user input after search is done -->
                             <span class="input-group-btn">
                                 <input class='form-control' type="text" name="search_query" style="width: 430px !important;" placeholder='Enter keyword[s] or leave empty' 
@@ -146,7 +145,7 @@
 																background-color: rgba(255, 255, 255, 0.45);
 																border: solid 3px;
 																border-radius: 10px;">
-                                    Submit  <!--***-->
+                                    Submit
                                 </button>
                             </span>
 
@@ -174,7 +173,6 @@
 
         <!-- display query results as table -->
         <div class="mainWrapper" style="overflow:hidden;">
-
             <div class="floatLeft" style="width: 18%; float:left">
                     <br>
                     <div class="panel panel-default">
@@ -186,8 +184,7 @@
                                 // build search filter panel (list of sources with checkboxes)
                                 // Known "defect" - because we're using two forms (the search form and filter form), any changes to the search parameters after a filter has been applied will be ignored (like changing the date range after selecting specific sources) - a new search will have to be done
                                 // not enough time to come up with a more elegant solution
-
-                                if(mysqli_num_rows($sourcebox_query) == 0)
+                                if(mysqli_num_rows($sourcebox_query) == 0) // no results
                                 {
                                     echo "No sources";
                                 }
@@ -210,63 +207,19 @@
                                         }
                                     }
 
+                                    // generate list of sources in a scrollbox
                                     echo "<div class='source-results' style='max-height: 810px; overflow:auto'>";
                                     while($row = mysqli_fetch_assoc($sourcebox_query)) {
                                         $source = $row['source'];
                                         $count = $row['count(source)'];
                                         echo "$source ($count) <input type='checkbox' name='sourcebox[]' value='$source' ";
                                         if(!empty($sourcebox) && in_array($source,$sourcebox)) { 
-                                            echo "checked = 'checked' "; 
+                                            echo "checked = 'checked' ";  // if source already checked, it will remain checked upon submit
                                         }
                                         echo "><br>";
                                     }
                                     echo "</div>";
                                     echo "</form>";
-
-                                
-
-                                    /* // get list of sources from search query
-                                    $i = 0;
-                                    while ($row = mysqli_fetch_assoc($sourcebox_query))
-                                    {
-                                        $source = $row['source'];
-                                        $count = $row['count(source)'];
-
-                                        // more than 30 results in the search box will result in a collapsible button that when clicked will show the remainder of sources (since large amounts of sources results in an ugly, long box that spans far down the webpage)
-
-                                        if($i == 30) // after 30 sources, create source button and collapsible div
-                                        {
-                                            echo "<br><a href='#more' class='btn btn-default' id='moreBut' onmouseover='changeMoreBut()' onmouseout='revertMoreBut()' data-toggle='collapse'
-																						style='height: 30px;
-																						font-weight: bold;
-																						font-family: monospace;
-																						background-color: rgba(255, 255, 255, 0.45);
-																						border: solid 3px;
-																						border-radius: 10px;'>More Sources</a><br><br>";  //*** button styling
-                                            echo "<div id='more' class='collapse'>";
-                                        }
-
-                                        echo "$source ($count) <input type='checkbox' name='sourcebox[]' ";
-                                        if(!empty($sourcebox))
-                                        {
-                                            if(in_array($source,$sourcebox))
-                                            {
-                                                echo "checked = 'checked' ";
-                                            }
-
-                                        }
-
-                                        // if there is a collapsible button/list, then end the collapse div after hte last source
-                                        echo "value=$source><br>";
-                                        $endIndex = mysqli_num_rows($sourcebox_query) - 1;
-                                        if($i >= 30 && $i == $endIndex)
-                                        {
-                                            echo "</div>";
-                                        }
-
-                                        $i += 1;
-                                    }
-                                    echo "</form>";*/
                                 }
                             ?>
                         </div>

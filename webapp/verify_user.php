@@ -1,4 +1,10 @@
 <?php
+    // when a new user signs up, an authorization email containing the user's information (name, email, notes) is sent to the administrators for vetting. 
+    // Once they click on the link contained in that email, the user is authorized.
+    // In the database, each user has an authorization code. 0 = unauthorized, 1 = authorized for normal use, 2 = authorized for admin use (able to confirm new users)
+    // This script sets a new user's auth code to 1. It can only be executed by an admin (a user with an auth code of 2). 
+
+    // upon successful authorization, send user a confirmation email telling them they're OKed
     function sendConfirmationEmail($email,$name) {
         $login_url = "http://" . $_SERVER['SERVER_NAME'] . dirname($_SERVER['PHP_SELF']) . "/login.php";
         $to = array($name=>$email);
@@ -11,7 +17,7 @@
         return $email;
     }
 
-    include_once("authenticate.php");
+    include_once("authenticate.php"); // auth script verifies user is logged in and has admin privileges
     include_once("email.php");
 
     if(isset($_GET['idUser'])) {
@@ -27,7 +33,7 @@
             $msg = "User has already been authorized.";
         }
         else {
-            $sql = "UPDATE user SET authority=1 WHERE idUser=$idUser";
+            $sql = "UPDATE user SET authority=1 WHERE idUser=$idUser"; // update user's auth code
             mysqli_query($connect,$sql);
             $email = $row['email'];
             $name = $row['name'];

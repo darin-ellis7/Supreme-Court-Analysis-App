@@ -6,6 +6,8 @@
 	require '../../PHPMailer/src/PHPMailer.php';
 	require '../../PHPMailer/src/SMTP.php';
 
+	// function that enables us to send email from the main SCOTUSApp email (uses PHPMailer library)
+	// returns true upon successful send, false otherwise
 	function sendEmail($to,$subject,$body) {
 		// Instantiation and passing `true` enables exceptions
 		$mail = new PHPMailer(true);

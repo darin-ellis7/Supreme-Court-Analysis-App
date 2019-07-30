@@ -4,7 +4,7 @@
             array_push($errs,"\"Name\" field is empty.");
             return false;
         }
-        else if ($name == $oldname) {
+        else if ($name == $oldname) { // no need to update if field is unchanged from the user's current info
             return false;
         }
         return true;
@@ -58,6 +58,7 @@
         return $is_valid;
     }
 
+    // update user information for each field changed
     function updateAccount($data,$field_changed,$idUser,$connect) {
         $data = mysqli_real_escape_string($connect,$data);
         if($field_changed == 'password_hash') {
@@ -74,7 +75,7 @@
     include_once("db_connect.php");
     include("admins.php");
 
-    $sql = "SELECT * from user WHERE idUser={$_SESSION['idUser']}";
+    $sql = "SELECT * from user WHERE idUser={$_SESSION['idUser']}"; // load initial user information for currently logged in user
     $query = mysqli_query($connect, $sql) or die(mysqli_connect_error());
     $userinfo = mysqli_fetch_assoc($query);
     $oldname = $userinfo['name'];
@@ -89,9 +90,10 @@
         $notes=isset($_POST['notes']) ? trim($_POST['notes']) : $oldnotes;
 
         $errs = array();
-        $fields_changed = array();
+        $fields_changed = array(); // keeps track of what fields changed (shown in confirmation message)
 
-        if(verifyName($name,$oldname,$errs)) { updateAccount($name,"name",$_SESSION['idUser'],$connect); array_push($fields_changed,"Name"); $oldname = $name; }
+        // update fields one by one (and updating text fields where necessary)
+        if(verifyName($name,$oldname,$errs)) { updateAccount($name,"name",$_SESSION['idUser'],$connect); array_push($fields_changed,"Name"); $oldname = $name; } 
         if(verifyEmail($email,$oldemail,$connect,$errs)) { updateAccount($email,"email",$_SESSION['idUser'],$connect); array_push($fields_changed,"Email"); $oldemail = $email; }
         if(verifyPassword($password,$confirm_password,$errs)) { updateAccount($password,"password_hash",$_SESSION['idUser'],$connect); array_push($fields_changed,"Password"); }
         if($notes != $oldnotes) { updateAccount($notes,"notes",$_SESSION['idUser'],$connect); array_push($fields_changed,"Notes"); $oldnotes = $notes; }
@@ -152,11 +154,11 @@
                 Email *
                 <input class='form-control' type="text" name="email" <?php if(isset($oldemail)) echo "value='$oldemail'";?>><br>
                 New Password * (at least 8 characters, no "control characters")
-                <input class='form-control' type="password" name="password"><br>
+                <input class='form-control' type="password" name="password"><br> <!-- password fields intentionally left blank -->
                 Confirm New Password *
                 <input class = 'form-control' type="password" name="confirm_password"><br>
-                Notes (why you want to use SCOTUSApp, any necessary information, etc.) 
-                <textarea class = 'form-control' rows="15" cols="60" name="notes"><?php if(isset($oldnotes)) echo $oldnotes;?></textarea><br>
+                Notes (why you want to use SCOTUSApp, any necessary information, etc. - 1000 characters max) 
+                <textarea class = 'form-control' rows="15" cols="60" maxlength="1000" name="notes"><?php if(isset($oldnotes)) echo $oldnotes;?></textarea><br>
                 <button id="formBut" type='submit' class='btn btn-default' onmouseover='changeSubBut()' onmouseout='revertSubBut()'
                     style = "height: 30px;
                     font-weight: bold;

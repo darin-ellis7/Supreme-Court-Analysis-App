@@ -38,7 +38,7 @@
            $arr = array($row['idArticle'],$row['date'], $row['source'], $row['url'], $row['title'], $row['author'], $row['score'],$row['magnitude'],$row['entity'],$row['top_entity'],$row['keywords']);
            fputcsv($csv, $arr,"\t"); // insert row in CSV (tab delimiter necessary for Excel compatibility fix)
 
-           $txtName = $row['idArticle'] . ".txt";
+           $txtName = $row['idArticle'] . ".txt"; // get {idArticle}.txt file from /txtfiles/ folder
            if (file_exists($txt_path . $txtName)) {
                $zip->addFile($txt_path . $txtName, $txtName); // add .txt to zip
            }

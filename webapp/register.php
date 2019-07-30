@@ -1,4 +1,5 @@
 <?php
+    // verify the name field is filled
     function verifyName($name,&$errs) {
         if (empty($name)) {
             array_push($errs,"\"Name\" field is empty.");
@@ -7,6 +8,7 @@
         return true;
     }
 
+    // verify valid password
     function verifyPassword($password,$confirm_password,&$errs) {
         $is_valid = true;
         if(empty($password) || empty($confirm_password)) {
@@ -22,7 +24,7 @@
                 array_push($errs,"Password is shorter than 8 characters.");
                 $is_valid = false;
             }
-            if(preg_match('/[\x00-\x1F\x7F]/',$password)) {
+            if(preg_match('/[\x00-\x1F\x7F]/',$password)) { // Unicode control characters are not allowed in a password - things like backspace and tab
                 array_push($errs,"Invalid characters found in password.");
                 $is_valid = false;
             }
@@ -30,6 +32,7 @@
         return $is_valid;
     }
 
+    // verify proper email input
     function verifyEmail($email,$connect,&$errs) {
         $is_valid = true;
         if(empty($email)) {
@@ -40,7 +43,7 @@
             array_push($errs,"Invalid email address detected.");
             $is_valid = false;
         }
-        else {
+        else { // checking for duplicate emails
             $email = mysqli_real_escape_string($connect,$email);
             $sql = "SELECT idUser FROM user WHERE email='{$email}'";
             $result = mysqli_query($connect, $sql) or die(mysqli_connect_error());
@@ -53,13 +56,14 @@
         return $is_valid;
     }
 
+    // insert user info into the database
     function addUser($email,$name,$password,$notes,$connect) {
         $email = mysqli_real_escape_string($connect,$email);
         $name = mysqli_real_escape_string($connect,$name);
         $notes = mysqli_real_escape_string($connect,$notes);
-        $password_hash = mysqli_real_escape_string($connect,password_hash($password,PASSWORD_DEFAULT));
-        if(empty($notes)) { 
-            $sql = "INSERT INTO user(email,name,password_hash,authority) VALUES ('$email','$name','$password_hash',0)"; }
+        $password_hash = mysqli_real_escape_string($connect,password_hash($password,PASSWORD_DEFAULT)); // we're not storing passwords in the database, but hashes of them
+        if(empty($notes)) {  // no notes given on signup = notes entered into database as NULL
+            $sql = "INSERT INTO user(email,name,password_hash,authority) VALUES ('$email','$name','$password_hash',0)"; } // default authority code all users upons signup is 0 (unauthorized). They cannot log in until they are authorized by an admin.
         else { 
             $sql = "INSERT INTO user(email,name,password_hash,notes,authority) VALUES ('$email','$name','$password_hash','$notes',0)"; }
         mysqli_query($connect, $sql) or die(mysqli_connect_error());
@@ -67,6 +71,7 @@
         return $idUser;
     }
 
+    // send user verification link to admins
     function sendVerificationEmail($email,$name,$notes,$idUser) {
         $verify_url = "http://" . $_SERVER['SERVER_NAME'] . dirname($_SERVER['PHP_SELF']) . "/verify_user.php?idUser=" . $idUser;
         $to = getAdmins(true);
@@ -90,17 +95,17 @@
         $password=isset($_POST['password']) ? ($_POST['password']) : "";
         $confirm_password=isset($_POST['confirm_password']) ? $_POST['confirm_password'] : "";
         $notes=isset($_POST['notes']) ? trim($_POST['notes']) : "";
-        $errs = array();
+        $errs = array(); // this array keeps track of any errors found in the registration process; passed in by reference to the verification functions
 
         $validName = verifyName($name,$errs);
         $validEmail = verifyEmail($email,$connect,$errs);
         $validPassword = verifyPassword($password,$confirm_password,$errs);
-        $valid_reg = $validName && $validEmail && $validPassword;
+        $valid_reg = $validName && $validEmail && $validPassword; // all conditions must be true for successful registration
 
         if($valid_reg) {
             $idUser = addUser($email,$name,$password,$notes,$connect);
             $email_success = sendVerificationEmail($email,$name,$notes,$idUser);
-            unset($name,$email,$password,$confirm_password,$notes);
+            unset($name,$email,$password,$confirm_password,$notes); // clear fields upon successful register
         }
     } 
 ?>
@@ -135,7 +140,7 @@
             <p>SCOTUSApp can only be used by verified accounts - once you register, your information (minus password) will be sent to our administrators for vetting. Upon verification, you will be sent a success email and can begin use of SCOTUSApp.</p>
             <fieldset class="form-group">
                 <?php
-                    if(isset($errs) && sizeof($errs) > 0) {
+                    if(isset($errs) && sizeof($errs) > 0) { // errors occurred
                         echo "<div style='color:red'>Couldn't complete registration. The following errors were found:<ul>";
                         foreach($errs as $err) {
                             echo "<li>" . $err . "</li>";
@@ -143,11 +148,11 @@
                         echo "</ul>Please correct these errors and resubmit.</div><br>";
                     }
                     else if($valid_reg) {
-                        if($email_success) {
+                        if($email_success) { // all good
                             echo "<p style='color:green'>Registration was a success. When you are verified by the administrators, you will receive an email. 
                             If it's been a few days and you haven't received anything, contact the administrators (and make sure to check your junk mail).</p>";
                         }
-                        else {
+                        else { // email failed to send
                             echo "<p style='color:red'>Your account has been registered, but the verification email failed to send to our administrators - contact them for help.</p>";
                         }
                     }
@@ -161,8 +166,8 @@
                 <input class='form-control' type="password" name="password"><br>
                 Confirm Password *
                 <input class = 'form-control' type="password" name="confirm_password"><br>
-                Notes (why you want to use SCOTUSApp, any necessary information, etc.) 
-                <textarea class = 'form-control' rows="15" cols="60" name="notes"><?php if(isset($notes)) echo $notes;?></textarea><br>
+                Notes (why you want to use SCOTUSApp, any necessary information, etc. - 1000 characters max) 
+                <textarea class = 'form-control' rows="15" cols="60" maxlength="1000" name="notes"><?php if(isset($notes)) echo $notes;?></textarea><br>
                 <button id="formBut" type='submit' class='btn btn-default' onmouseover='changeSubBut()' onmouseout='revertSubBut()'
                     style = "height: 30px;
                     font-weight: bold;

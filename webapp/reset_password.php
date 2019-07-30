@@ -9,11 +9,11 @@
             $sql = "SELECT expiration,tokenid FROM password_tokens WHERE token = '$token'";
             $query = mysqli_query($connect, $sql) or die(mysqli_connect_error());
             $row = mysqli_fetch_assoc($query);
-            if (!$row) {
+            if (!$row) { // token does not exist in database
                 array_push($errs,"Token is invalid.");
                 $is_valid = false;
             }
-            else if(time() > $row['expiration']) {
+            else if(time() > $row['expiration']) { // user is trying to use token an hour past generation
                 array_push($errs,"Token has expired - you must request another one.");
                 $is_valid = false;
             }
@@ -44,7 +44,8 @@
         return $is_valid;
     }
 
-    function getUserID($token,$connect) {
+    // get user id associated with a token
+    function getUserID($token,$connect) { 
         $sql = "SELECT idUser FROM password_tokens where token='$token'";
         $query = mysqli_query($connect, $sql) or die(mysqli_connect_error());
         $row = mysqli_fetch_assoc($query);
@@ -53,12 +54,13 @@
 
     function resetPassword($password,$idUser,$connect) {
         $password_hash = mysqli_real_escape_string($connect,password_hash($password,PASSWORD_DEFAULT));
-        $sql = "UPDATE user SET password_hash='$password_hash' WHERE idUser=$idUser";
+        $sql = "UPDATE user SET password_hash='$password_hash' WHERE idUser=$idUser"; // update password hash
         mysqli_query($connect, $sql) or die(mysqli_connect_error());
     }
 
+    // once user's password is reset, delete all tokens associated with the user
     function cleanup($idUser,$connect) {
-        $sql = "DELETE FROM password_tokens WHERE idUser=$idUser";
+        $sql = "DELETE FROM password_tokens WHERE idUser=$idUser"; 
         mysqli_query($connect, $sql) or die(mysqli_connect_error());
     }
     
@@ -79,7 +81,7 @@
             $idUser = getUserID($token,$connect);
             resetPassword($password,$idUser,$connect);
             cleanup($idUser,$connect);
-            unset($token,$password,$confirm_password);
+            unset($token,$password,$confirm_password); // clear fields upon success
         }
     }
 ?>

@@ -7,7 +7,7 @@
         $row = mysqli_fetch_assoc($result);
         $hash = $row ? $row["password_hash"] : null;
         $validPassword = password_verify($password,$hash);
-        if(!$row || !$validPassword) {
+        if(!$row || !$validPassword) { // user doesn't exist or password is wrong
             array_push($errs,"Invalid email/password combination");
             $is_valid = false;
         }
@@ -15,7 +15,7 @@
             array_push($errs,"Login was correct, but you haven't been authorized yet.");
             $is_valid = false;
         }
-        else {
+        else { // set login session variables (the actual "login") - this is done here because we already have the SQL data in this function
             $_SESSION['authority'] = $row['authority'];
             $_SESSION['idUser'] = $row['idUser'];
             $_SESSION['name'] = $row['name'];
@@ -33,7 +33,7 @@
         $password=isset($_POST['password']) ? $_POST['password'] : "";
         $errs = array();
         if(validLogin($email,$password,$connect,$errs)) {
-            $destination = ((isset($_SESSION['redirectBackTo'])) ? $_SESSION['redirectBackTo'] : "index.php");
+            $destination = ((isset($_SESSION['redirectBackTo'])) ? $_SESSION['redirectBackTo'] : "index.php"); // redirect where necessary
             unset($_SESSION['redirectBackTo']);
             header("Location: $destination");
             exit();
