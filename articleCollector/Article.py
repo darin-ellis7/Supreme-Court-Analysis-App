@@ -192,11 +192,12 @@ class Article:
 
     # checking whether an article pertains to a foreign supreme court - True if so, False if not
     # very similar to stateCourtDetected()
-    def foreignCourtDetected(self,c):
+    def foreignCourtDetected(self,c,collectTrainingData):
         foreignSources = ['indiatimes','thehindu','liberianobserver','allafrica','firstpost','ndtv','news18'] # sources that near exclusively (if not entirely) report on foreign supreme court news, so blocking them manually here
         if self.source.lower() in foreignSources or ('india' in self.url.lower() and 'indiana' not in self.url.lower()): # indian supreme court pops ups a lot, so block any source with "india" in it ("indiana" still passes)
             print("Rejected - from a known foreign source")
-            self.buildRejectedTrainingData("F",c)
+            if collectTrainingData:
+                self.buildRejectedTrainingData("F",c)
             return True
 
         # dict in key:[] format where key is country, [] consists of the country's demonyms that could be used to refer to a foreign court (Russia Supreme Court = Russian Supreme Court, etc.)
@@ -247,13 +248,14 @@ class Article:
             comparisons = self.generate_court_terms(terms)
             if any(c in processed_title or c in openingText for c in comparisons):
                 print("Rejected - likely a foreign supreme court")
-                self.buildRejectedTrainingData("F",c)
+                if collectTrainingData:
+                    self.buildRejectedTrainingData("F",c)
                 return True
         return False
     
     # determine whether the focus of an article is about a state Supreme Court - returns True if deemed so, False otherwise
     # done by parsing the title and part of the text for giveaway terms ("[state] Supreme Court", "[state] high court", "[state] top court"...)
-    def stateCourtDetected(self,c):
+    def stateCourtDetected(self,c,collectTrainingData):
         # dict in key:[] format where key is state and [] consists of common state abbreviations
         states = {'alaska': ['ak'], 'alabama': ['al','ala'], 'arkansas': ['ar'], 'arizona': ['az','ariz'], 'california': ['ca','calif'], 'colorado': ['co'], 'connecticut': ['ct'], 'delaware': ['de'], 
         'florida': ['fl','fla'], 'georgia': ['ga'], 'hawaii': ['hi'], 'iowa': ['ia'], 'idaho': ['id'], 'illinois': ['il'], 'indiana': ['in'], 'kansas': ['ks'], 
@@ -280,12 +282,12 @@ class Article:
             # only checking for terms containing a full state string in the full text (first 3 elements of comparisons array) to avoid false positives
             if any(c in processed_title or (c in openingText and i < 3) for i,c in enumerate(comparisons)):  
                 print("Rejected - Article likely about a state supreme court")
-                self.buildRejectedTrainingData("S",c)
+                if collectTrainingData:
+                    self.buildRejectedTrainingData("S",c)
                 return True
         return False
     
-    def isRelevant_exp(self,clf,v_text,v_title,c):
-        #title = processText(title).lower()
+    def isRelevant_exp(self,clf,v_text,v_title,c,collectTrainingData):
         instantTerms = ["usa supreme court", "us supreme court", "u.s. supreme court", "united states supreme court", "scotus"] # dead giveaways for relevancy
         justices = ['john roberts', 'anthony kennedy', 'clarence thomas', 'ruth bader ginsburg', 'stephen breyer', 
         'samuel alito', 'sonia sotomayor', 'elena kagan', 'neil gorsuch', 'brett kavanaugh', 
@@ -296,7 +298,7 @@ class Article:
         if any(term in self.title.lower() for term in (instantTerms + justices)): 
             return True
         else:
-            if self.stateCourtDetected(c) or self.foreignCourtDetected(c):
+            if self.stateCourtDetected(c,collectTrainingData) or self.foreignCourtDetected(c,collectTrainingData):
                 return False
             else:
                 Xraw = [[self.title, self.text]]
@@ -321,7 +323,8 @@ class Article:
                         print("Relevancy threshold test failed - reclassifying...")
                         result = sorted_probs[1][0] # if article fails threshold test, then finally classify it as the second most likely class
                 print("Rejected - not classified as relevant [ " + result + " ]")
-                self.buildRejectedTrainingData(result,c)
+                if collectTrainingData:
+                    self.buildRejectedTrainingData(result,c)
                 return False
 
     # checks whether an article pertains to the US Supreme Court
@@ -406,7 +409,7 @@ class Article:
         return True
 
     # insert irrelevant article data into the database for training purposes
-    # data is coded by nature of irrelevancy - S = article is about state court, F = article is about foreign court, U = unrelated topic
+    # data is coded by nature of irrelevancy; S = article is about state/lower court, F = article is about foreign court, U = unrelated topic
     def buildRejectedTrainingData(self,code,c):
         t = (self.url, self.date, self.text, self.title, code)
         c.execute("""INSERT INTO rejectedTrainingData(url, date, text, title, code) VALUES (%s,%s,%s,%s,%s)""",t)

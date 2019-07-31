@@ -43,7 +43,7 @@ class TopicSites:
                     article = p.scrape()
                     if article:
                         article.printInfo()
-                        if article.isRelevant_exp(clf,v_text,v_title,c):
+                        if article.isRelevant_exp(clf,v_text,v_title,c,False):
                             # add to database
                             article.addToDatabase(c)
                             article.printAnalysisData()
@@ -410,7 +410,7 @@ class RSSFeeds:
                             article = s.scrape()
                             if article:
                                 article.printInfo()
-                                if article.isRelevant_exp(clf,v_text,v_title,c):
+                                if article.isRelevant_exp(clf,v_text,v_title,c,False):
                                     # add to database
                                     article.addToDatabase(c)
                                     article.printAnalysisData()
@@ -474,7 +474,7 @@ class NewsAPICollection:
                             article = s.scrape()
                             if article:
                                 article.printInfo()
-                                if article.isRelevant_exp(clf,v_text,v_title,c):
+                                if article.isRelevant_exp(clf,v_text,v_title,c,False):
                                     # add to database
                                     article.addToDatabase(c)
                                     article.printAnalysisData()
