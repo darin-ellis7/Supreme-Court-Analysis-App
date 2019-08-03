@@ -80,7 +80,7 @@ def isBlockedSource(url):
 # checks whether the title of an article is already in the database, avoiding duplicates
 # we only check for title and url because the likeliness of identical titles is crazy low, and it cuts down on reposts from other sites
 def articleIsDuplicate(title,url,c):
-    c.execute("""SELECT idArticle FROM article WHERE title = %s OR url = %s""",(title,url,))
+    c.execute("""SELECT idArticle FROM article WHERE title = %s OR url = %s""",(title.replace("’","'"),url,)) # funky single quotes can sometimes lead to duplicates
     if c.rowcount == 0:
         return False
     else:
