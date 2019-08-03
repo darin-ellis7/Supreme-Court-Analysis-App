@@ -195,34 +195,26 @@ class Scraper:
                     self.title = scrapedTitle
 
         if not self.author:
-            a = soup.find("meta", {"name":"author"})
-            if a:
-                if a['content'].strip() == '':
-                    self.author = "Unknown Author"
-                else:
-                    authsplit = a['content'].split()
-                    if authsplit[0].lower() == "by":
-                        self.author = ' '.join(authsplit[1:])
-                    else:
-                        self.author = a['content']
+            a = soup.select("div.ArticlePage-authorName span")
+            if a and len(a) > 1:
+                self.author = a[1].text.strip()
+            else:
+                self.author = "Unknown Author"
         
         if not self.date:
-            d = soup.find("meta", {"name":"date"})
+            d = soup.find("meta",property="article:published_time")
             if d:
-                self.date = convertDate(d['content'],"%Y-%m-%dT%H:%M:%SZ")
+                self.date = d.get("content").split("T")[0]
 
         if not self.images:
-            i = soup.select_one("div.full-width.img-container.aspect-ratio-no-aspect > img")
+            i = soup.select_one("div.ArticlePage-lead img")
             if i:
-                self.images.append(i['src'])
+                self.images.append(i["src"])
 
         text = ''
-        container = soup.select_one("div.collection.collection-cards")
-        if container:
-            paragraphs = container.find_all("p")
-            if paragraphs:
-                for p in paragraphs:
-                    text += (p.text + '\n\n')
+        paragraphs = soup.select("div.RichTextArticleBody p")
+        for p in paragraphs:
+            text += (p.text.strip() + '\n\n')
         
         if text == '':
             print("Rejected - likely bad scraping job (no article text)")
