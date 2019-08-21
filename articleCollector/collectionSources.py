@@ -45,8 +45,8 @@ class TopicSites:
                         article.printInfo()
                         if article.isRelevant_exp(clf,v_text,v_title,c,False):
                             # add to database
-                            #article.addToDatabase(c)
-                            #article.printAnalysisData()
+                            article.addToDatabase(c)
+                            article.printAnalysisData()
                             successes += 1
                             print()
                             print("Added to database")
@@ -130,35 +130,30 @@ class TopicSites:
                        
     def collectChicagoTribune(self,pageRange):
         for i in range(pageRange[0],pageRange[1]+1):
-            url = "http://www.chicagotribune.com/topic/crime-law-justice/justice-system/u.s.-supreme-court-ORGOV0000126-topic.html?page=" + str(i) +"&target=stories&#trb_topicGallery_search"
+            url = "https://www.chicagotribune.com/search/supreme%20court/100-y/story/score/" + str(i) + "/"
             soup = downloadPage(url)
             if soup:
-                containers = soup.find_all("div",{"class":"trb_search_result_wrapper"})
-                for c in containers:
+                pages = soup.select("div.card.card-content")
+                for p in pages:
                     try:
-                        headline = c.select_one("h3 a")
-                        url = "http://www.chicagotribune.com" + headline['href']
-                        title = headline.text.strip()
+                        h = p.select_one("div.h7  > a")
+                        title = h.text.strip()
+                        url = "https://www.chicagotribune.com" + h['href']
 
-                        a = c.find(itemprop="author")
-                        if a:
-                            author = a.text.strip()
-                        else:
-                            author = None
+                        author = None
+                        a = p.select_one("span.byline  > span")
+                        if a: author = a.text.strip()
 
-                        d = c.find(itemprop="datePublished")
-                        if d:
-                            date = d.get("datetime").split("T")[0]
-                        else:
-                            date = None
-                            
+                        date = None
+                        d = p.select_one("span.timestamp ")
+                        if d: date = convertDate(d.text.strip(),"%b %d, %Y")
+
                         s = Scraper(url,title,author,date,[])
                         self.pages.append(s)
                     except Exception as e:
                         print("SCRAPING ERROR:",e)
                         continue
 
-    
     def collectTheHill(self,pageRange): # page count starts at 0
         for i in range(pageRange[0],pageRange[1] + 1):
             url = "https://thehill.com/social-tags/supreme-court" + "?page=" + str(i)
@@ -288,7 +283,6 @@ class TopicSites:
                             images = [i["src"]]
                         else:
                             images = []
-                        #print(url,title,images)
                         s = Scraper(url,title,None,None,images)
                         self.pages.append(s)
                     except Exception as e:
@@ -363,9 +357,6 @@ class TopicSites:
                         print("SCRAPING ERROR:",e)
                         continue
 
-#t = TopicSites()
-#t.collectHuffPost()
-         
 # functions for Google Alerts RSS feeds
 class RSSFeeds:
     def __init__(self,feeds):
