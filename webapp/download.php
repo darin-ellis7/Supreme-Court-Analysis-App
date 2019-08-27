@@ -28,22 +28,21 @@
         $csv = fopen($csvName, 'w') or die ("Unable to generate CSV: " . $csvName);
 
         // CSV column headers
-        $arrName = array("Article ID", "Date", "Source", "URL","Title","Author","Sentiment Score","Sentiment Magnitude","Top Image Entity","Entity Score","Keywords");
+        $arrName = array("Article ID", "Date", "Source", "MBFS Bias","MBFS Score", "AllSides Bias","AllSides Confidence","AllSides Agreement","AllSides Disagreement","URL","Title","Author","Sentiment Score","Sentiment Magnitude","Top Image Entity","Entity Score","Keywords");
         fputcsv($csv, $arrName,"\t");
 
         // build files to go into zip
         $txt_path = "../txtfiles/"; // where all txt files are stored
-        while ($row = mysqli_fetch_assoc($query))
-        {
-           $arr = array($row['idArticle'],$row['date'], $row['source'], $row['url'], $row['title'], $row['author'], $row['score'],$row['magnitude'],$row['entity'],$row['top_entity'],$row['keywords']);
+        while ($row = mysqli_fetch_assoc($query)) {
+           $arr = array($row['idArticle'],$row['date'], $row['source'],$row['mbfs_bias'],$row['mbfs_score'],$row['allsides_bias'],$row['allsides_confidence'],$row['allsides_agree'],
+                        $row['allsides_disagree'],  $row['url'], $row['title'], $row['author'], $row['score'],$row['magnitude'],
+                        $row['top_entity'],$row['top_entity_score'],$row['keywords']);
            fputcsv($csv, $arr,"\t"); // insert row in CSV (tab delimiter necessary for Excel compatibility fix)
-
            $txtName = $row['idArticle'] . ".txt"; // get {idArticle}.txt file from /txtfiles/ folder
            if (file_exists($txt_path . $txtName)) {
                $zip->addFile($txt_path . $txtName, $txtName); // add .txt to zip
            }
         }
-
         fclose($csv); // CSV finished - all rows inserted
 
         // the CSV is by default in UTF-8 encoding, which causes some scrambled characters in Excel (like apostrophes), so we convert it to UTF-16LE to fix this
@@ -61,8 +60,7 @@
         header("Content-Disposition: attachment; filename=$zipName");
         header("Content-Length: " . filesize($zipName));
 
-        unlink($csvName);
-
+        unlink($csvName); // delete csv (no longer needed now that it's in the zip archive)
         readfile($zipName); // download zip
         unlink($zipName); // delete zip from server
     }
