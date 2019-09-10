@@ -133,7 +133,7 @@ class TopicSites:
             url = "https://www.chicagotribune.com/search/supreme%20court/100-y/story/score/" + str(i) + "/"
             soup = downloadPage(url)
             if soup:
-                pages = soup.select("div.card.card-content")
+                pages = soup.select("div.flex-grid div.col")
                 for p in pages:
                     try:
                         h = p.select_one("div.h7  > a")
@@ -146,8 +146,11 @@ class TopicSites:
 
                         date = None
                         d = p.select_one("span.timestamp ")
-                        if d: date = convertDate(d.text.strip(),"%b %d, %Y")
-
+                        if d: 
+                            try:
+                                date = convertDate(d.text.strip(),"%b %d, %Y")
+                            except ValueError as e: # articles posted on current day are listed as how many hours ago they were published, so they don't follow the date format
+                                date = None # set it to None (it'll be changed to current day when initialized as an Article object)
                         s = Scraper(url,title,author,date,[])
                         self.pages.append(s)
                     except Exception as e:
@@ -182,7 +185,6 @@ class TopicSites:
                                     date = convertDate(datestr,"%m/%d/%y")
                                 else:
                                     date = None
-
                                 s = Scraper(url,title,author,date,[])
                                 self.pages.append(s)
                         except Exception as e:
@@ -271,7 +273,6 @@ class TopicSites:
         url = "https://www.reuters.com/subjects/supreme-court"
         soup = downloadPage(url)
         if soup:
-            #print(soup.prettify())
             pages = soup.select("div.FeedItem_item")
             if pages:
                 for p in pages:
@@ -327,7 +328,6 @@ class TopicSites:
                             else:
                                 date = None
                             s = Scraper(url,title,None,date,[])
-                            #print(url,title,date)
                             self.pages.append(s)
                         except Exception as e:
                             print("SCRAPING ERROR:",e)

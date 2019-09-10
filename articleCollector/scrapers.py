@@ -21,7 +21,7 @@ class Scraper:
     # driver function for scraping
     def scrape(self):
         # if the page to be scraped is from a source we've already written an individual scraper, use that scraper
-        specialSources = ["cnn","nytimes","jdsupra","latimes","politico","thehill"]
+        specialSources = ["cnn","nytimes","jdsupra","latimes","politico","thehill","chicagotribune"]
         if self.source in specialSources:
             article = self.specificScraper()
             if not article: # fallback for specific scraper - if it fails, then attempt again using the generic scraper
@@ -338,6 +338,31 @@ class Scraper:
             for p in paragraphs:
                 text += (p.text.strip() + '\n\n')
                 
+        if text == '':
+            print("Text is empty - likely bad scraping job (no article text)")
+            return None
+        else:
+            article = Article(self.title,self.author,self.date,self.url,self.source,text.strip(),self.images)
+            return article
+    
+    def chicagotribune(self,soup):
+        if not self.title:
+            t = soup.find("meta",property="og:title")
+            if t: self.title = t.get("content")
+        if not self.author:
+            a = soup.find("meta",{"name":"author"})
+            if a and a.get("content"): self.author = a.get("content")
+        if not self.date:
+            d = soup.find("meta",{"name":"date"})
+            if d and d.get("content"): self.date = d.get("content").split("T")[0]
+        if not self.images:
+            i = soup.find("meta",property="og:image")
+            if i and i.get("content"): 
+                image = i.get("content")
+                if 'logo' not in image: self.images.append(image) # if an article doesn't have an image, the ChiTribune logo is used so ignore it
+        text = ''
+        paragraphs = soup.find_all("div",{"data-type":"text"})
+        for p in paragraphs: text += (p.text.strip() + '\n\n')
         if text == '':
             print("Text is empty - likely bad scraping job (no article text)")
             return None
