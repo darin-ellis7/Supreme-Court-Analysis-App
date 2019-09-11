@@ -213,6 +213,11 @@
                         <p><a xmlns:dct="http://purl.org/dc/terms/" href="https://www.allsides.com/media-bias/media-bias-ratings" rel="dct:source"><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Dataset" property="dct:title" rel="dct:type">AllSides Media Bias Ratings</span></a> by <a xmlns:cc="http://creativecommons.org/ns#" href="https://www.allsides.com/unbiased-balanced-news" property="cc:attributionName" rel="cc:attributionURL">AllSides.com</a> are licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International License</a>. You may use this data for research or noncommercial purposes provided you include this attribution.</p>
                     </div>  
                 </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <p>Source bias data courtesy of <a href="https://mediabiasfactcheck.com">Media Bias Fact Check</a></p>
+                    </div>  
+                </div>
             </footer>
         </div>
     </body>
