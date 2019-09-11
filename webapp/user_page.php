@@ -45,17 +45,37 @@
             array_push($errs,"Invalid email address detected.");
             $is_valid = false;
         }
-        else {
-            $email = mysqli_real_escape_string($connect,$email);
-            $sql = "SELECT idUser FROM user WHERE email='{$email}'";
-            $result = mysqli_query($connect, $sql) or die(mysqli_connect_error());
-            $rowcount = mysqli_num_rows($result);
-            if ($rowcount != 0) {
-                array_push($errs,"There is already an account associated with this email.");
-                $is_valid = false;
-            }
+        else if(!validDomain($email)) {
+            array_push($errs,"Email must be a .edu address.");
+            $is_valid = false;
+        }
+        else if(duplicateEmail($email,$connect)) {
+            array_push($errs,"There is already an account associated with this email.");
+            $is_valid = false;
         }
         return $is_valid;
+    }
+    
+    function validDomain($email) {
+        $domain = substr(strrchr($email, "@"), 1);
+        $validDomains = array("edu");
+        $validDomain = false;
+        foreach($validDomains as $vd) {
+            $pattern = "/\S+\.$vd/";
+            if(preg_match($pattern,$domain)){
+                $validDomain = true;
+                break;
+            }
+        }
+        return $validDomain;
+    }
+
+    function duplicateEmail($email,$connect) {
+        $email = mysqli_real_escape_string($connect,$email);
+        $sql = "SELECT idUser FROM user WHERE email='{$email}'";
+        $result = mysqli_query($connect, $sql) or die(mysqli_connect_error());
+        $rowcount = mysqli_num_rows($result);
+        return $rowcount != 0;
     }
 
     // update user information for each field changed
@@ -151,7 +171,7 @@
                 * = Required<br><br>
                 Name *
                 <input class ='form-control' type="text" name="name" <?php if(isset($oldname)) echo "value='$oldname'";?>><br>
-                Email *
+                Email (must end in .edu) *
                 <input class='form-control' type="text" name="email" <?php if(isset($oldemail)) echo "value='$oldemail'";?>><br>
                 New Password * (at least 8 characters, no "control characters")
                 <input class='form-control' type="password" name="password"><br> <!-- password fields intentionally left blank -->

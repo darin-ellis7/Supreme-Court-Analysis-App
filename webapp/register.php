@@ -43,17 +43,39 @@
             array_push($errs,"Invalid email address detected.");
             $is_valid = false;
         }
-        else { // checking for duplicate emails
-            $email = mysqli_real_escape_string($connect,$email);
-            $sql = "SELECT idUser FROM user WHERE email='{$email}'";
-            $result = mysqli_query($connect, $sql) or die(mysqli_connect_error());
-            $rowcount = mysqli_num_rows($result);
-            if ($rowcount != 0) {
-                array_push($errs,"There is already an account associated with this email.");
-                $is_valid = false;
-            }
+        else if(!validDomain($email)) {
+            array_push($errs,"Email must be a .edu address.");
+            $is_valid = false;
+        }
+        else if(duplicateEmail($email,$connect)) {
+            array_push($errs,"There is already an account associated with this email.");
+            $is_valid = false;
         }
         return $is_valid;
+    }
+
+    // checks whether email domain is in our list of accepted domains (for now, only .edu)
+    function validDomain($email) {
+        $domain = substr(strrchr($email, "@"), 1);
+        $validDomains = array("edu");
+        $validDomain = false;
+        foreach($validDomains as $vd) {
+            $pattern = "/\S+\.$vd/";
+            if(preg_match($pattern,$domain)){
+                $validDomain = true;
+                break;
+            }
+        }
+        return $validDomain;
+    }
+
+    // checks whether email is already associated with another account
+    function duplicateEmail($email,$connect) {
+        $email = mysqli_real_escape_string($connect,$email);
+        $sql = "SELECT idUser FROM user WHERE email='{$email}'";
+        $result = mysqli_query($connect, $sql) or die(mysqli_connect_error());
+        $rowcount = mysqli_num_rows($result);
+        return $rowcount != 0;
     }
 
     // insert user info into the database
@@ -160,7 +182,7 @@
                 * = Required<br><br>
                 Name *
                 <input class ='form-control' type="text" name="name" <?php if(isset($name)) echo "value='$name'";?>><br>
-                Email *
+                Email (must end in .edu) *
                 <input class='form-control' type="text" name="email" <?php if(isset($email)) echo "value='$email'";?>><br>
                 Password * (at least 8 characters, no "control characters")
                 <input class='form-control' type="password" name="password"><br>
