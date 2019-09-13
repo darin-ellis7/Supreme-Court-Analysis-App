@@ -95,6 +95,27 @@
                         <span class="box-header">Details</span><br><br>
                         <?php $row = mysqli_fetch_assoc($details_query) ?>
                         <span class="field-header">ID: <?php echo isset($row['idArticle']) ? $row['idArticle'] : "N/A"; ?></span><br><br>
+                        <span class="field-header">Alt ID:
+                            <?php
+                                // alt ID could have been calculated within a larger details query,  but I think that query would actually be slower - so we're doing a separate query here
+                                if(isset($row['idArticle']) && isset($row['date'])) {
+                                    $altID_sql =   "SELECT a.n 
+                                                    FROM (SELECT idArticle,@n:=CASE WHEN @pubdate = date THEN @n + 1 ELSE 1 END AS n, @pubdate:=date as date 
+                                                          FROM article 
+                                                          WHERE date='{$row['date']}' ORDER BY date,idArticle) a
+                                                    WHERE a.idArticle='{$row['idArticle']}'";
+                                    mysqli_query($connect,"SET @n=0");
+                                    mysqli_query($connect,"SET @pubdate=''");
+                                    $altID_query = mysqli_query($connect, $altID_sql);
+                                    $altID = mysqli_fetch_assoc($altID_query);
+                                    $altID = $row['date'] . '_' . sprintf("%03d",$altID['n']);
+                                    echo $altID;
+                                }
+                                else {
+                                    echo "N/A";
+                                }
+                            ?>
+                        </span><br><br>
                         <span class="field-header">Author</span><br><?php echo !empty($row['author']) ? $row['author'] : "N/A"; ?><br><br>
                         <span class="field-header">Source</span><br><?php echo !empty($row['source']) ? $row['source'] : "N/A"; ?><br><br>
                         <span class="field-header">Publication Date</span><br><?php echo !empty($row['date']) ? $row['date'] : "N/A"; ?><br><br>

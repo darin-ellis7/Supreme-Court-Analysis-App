@@ -16,6 +16,9 @@
     $sourcebox = (!empty($_GET['sourcebox']) ? $_GET['sourcebox'] : '');
 
     $sql = buildQuery($connect,$search_query,$dateFrom,$dateTo,$sourcebox,"download");
+    // settings user variables necessary for calculating an article's Alt ID
+    mysqli_query($connect,"SET @n=0");
+    mysqli_query($connect,"SET @pubdate=''");
     $query = mysqli_query($connect, $sql) or die(mysqli_connect_error()); // execute query
 
     // Download article data into a .zip file consisting of a single .csv file with all of the search results + individual .txt files for each article's content
@@ -28,20 +31,20 @@
         $csv = fopen($csvName, 'w') or die ("Unable to generate CSV: " . $csvName);
 
         // CSV column headers
-        $arrName = array("Article ID", "Date", "Source", "MBFS Bias","MBFS Score", "AllSides Bias","AllSides Confidence","AllSides Agreement","AllSides Disagreement","URL","Title","Author","Sentiment Score","Sentiment Magnitude","Top Image Entity","Entity Score","Keywords");
+        $arrName = array("Article ID", "Alt ID", "Date", "Source", "MBFS Bias","MBFS Score", "AllSides Bias","AllSides Confidence","AllSides Agreement","AllSides Disagreement","URL","Title","Author","Sentiment Score","Sentiment Magnitude","Top Image Entity","Entity Score","Keywords");
         fputcsv($csv, $arrName,"\t");
-
         // build files to go into zip
         $txt_path = "../txtfiles/"; // where all txt files are stored
         while ($row = mysqli_fetch_assoc($query)) {
-           $arr = array($row['idArticle'],$row['date'], $row['source'],$row['mbfs_bias'],$row['mbfs_score'],$row['allsides_bias'],$row['allsides_confidence'],$row['allsides_agree'],
+            $altID = $row['date'] . '_' . sprintf("%03d",$row['n']); // alternate ID as requested in Y-m-d_n format, where n is the Nth article of its publishing date (sorted by idArticle ascending) [n is 3 digits, with leading zeroes as necessary]
+            $arr = array($row['idArticle'],$altID,$row['date'], $row['source'],$row['mbfs_bias'],$row['mbfs_score'],$row['allsides_bias'],$row['allsides_confidence'],$row['allsides_agree'],
                         $row['allsides_disagree'],  $row['url'], $row['title'], $row['author'], $row['score'],$row['magnitude'],
                         $row['top_entity'],$row['top_entity_score'],$row['keywords']);
-           fputcsv($csv, $arr,"\t"); // insert row in CSV (tab delimiter necessary for Excel compatibility fix)
-           $txtName = $row['idArticle'] . ".txt"; // get {idArticle}.txt file from /txtfiles/ folder
-           if (file_exists($txt_path . $txtName)) {
-               $zip->addFile($txt_path . $txtName, $txtName); // add .txt to zip
-           }
+            fputcsv($csv, $arr,"\t"); // insert row in CSV (tab delimiter necessary for Excel compatibility fix)
+            $txtName = $row['idArticle'] . ".txt"; // get {idArticle}.txt file from /txtfiles/ folder
+            if (file_exists($txt_path . $txtName)) {
+                $zip->addFile($txt_path . $txtName, $txtName); // add .txt to zip
+            }
         }
         fclose($csv); // CSV finished - all rows inserted
 
