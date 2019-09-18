@@ -130,8 +130,9 @@
                                 $bias_sql = "SELECT * FROM source_bias WHERE source = '{$row['source']}' ORDER BY allsides_id LIMIT 1";
                                 $bias_query = mysqli_query($connect,$bias_sql);
                                 $bias = mysqli_fetch_assoc($bias_query);
-                                echo "<span class='subheader'>AllSides</span><br><br>";
+                                echo "<span class='subheader'>";
                                 if(!empty($bias['allsides_bias'])) {
+                                    echo "<a href='https://www.allsides.com/node/{$bias['allsides_id']}'>AllSides</a></span><br><br>";
                                     echo "<span class='field-header'>Bias: {$bias['allsides_bias']}</span><br><br>";
                                     echo "<span class='field-header'>Confidence</span><br>{$bias['allsides_confidence']}<br><br>";
                                     $total_votes = $bias['allsides_agree'] + $bias['allsides_disagree'];
@@ -139,15 +140,19 @@
                                     echo "<span class='field-header'>Community Agreement</span><br>$community_agreement [{$bias['allsides_agree']} / {$bias['allsides_disagree']}]";
                                 }
                                 else {
+                                    echo "AllSides</span><br><br>";
                                     echo "N/A";
                                 }
                                 echo "<hr>";
-                                echo "<span class='subheader'>Media Bias Fact Check</span><br><br>";
+                                echo "<span class='subheader'>";
                                 if(!empty($bias['mbfs_bias'])) {
+                                    echo "<a href='https://mediabiasfactcheck.com/{$bias['mbfs_id']}/'>Media Bias Fact Check</a></span><br><br>";
                                     echo "<span class='field-header'>Bias: {$bias['mbfs_bias']}</span><br><br>";
-                                    echo "<span class='field-header'>Score: {$bias['mbfs_score']}</span>";
+                                    echo "<span class='field-header'>Score: {$bias['mbfs_score']}</span><br><br>";
+                                    echo "<span class='field-header'>Factual Reporting</span><br>{$bias['factual_reporting']}";
                                 }
                                 else {
+                                    echo "Media Bias Fact Check</span><br><br>";
                                     echo "N/A";
                                 }
                             }
