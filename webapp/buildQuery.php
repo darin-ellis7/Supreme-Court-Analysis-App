@@ -6,12 +6,12 @@
         $dateTo = mysqli_real_escape_string($connect,$dateTo);
         
         if($mode == 'download') {
-            $sql = "SELECT a.idArticle,a.n,a.date,a.url,a.source,a.author,a.title,a.article_text,a.score,a.magnitude,GROUP_CONCAT(DISTINCT keyword) as keywords, entity as top_entity, MAX(entity_instances.score) as top_entity_score, allsides_bias,allsides_confidence,allsides_agree,allsides_disagree,mbfs_bias,mbfs_score
+            $sql = "SELECT a.idArticle,a.n,a.date,a.url,a.source,a.author,a.title,a.article_text,a.score,a.magnitude,GROUP_CONCAT(DISTINCT keyword) as keywords, entity as top_entity, MAX(entity_instances.score) as top_entity_score, allsides_bias,allsides_confidence,allsides_agree,allsides_disagree,mbfs_bias,mbfs_score,factual_reporting
                     FROM (SELECT idArticle,@n:=CASE WHEN @pubdate = date THEN @n + 1 ELSE 1 END AS n, @pubdate:=date as date,url,source,author,title,article_text,score,magnitude FROM article ORDER BY date, idArticle) a
                     NATURAL JOIN (article_keywords NATURAL JOIN keyword_instances)
                     LEFT JOIN (image NATURAL JOIN image_entities NATURAL JOIN entity_instances) ON a.idArticle = image.idArticle
                     LEFT JOIN (
-                                (SELECT b1.source,allsides_bias,allsides_confidence,allsides_agree,allsides_disagree,mbfs_bias,mbfs_score
+                                (SELECT b1.source,allsides_bias,allsides_confidence,allsides_agree,allsides_disagree,mbfs_bias,mbfs_score,factual_reporting
                                 FROM source_bias b1
                                 INNER JOIN
                                     (SELECT source,MIN(allsides_id) min_id
@@ -19,29 +19,10 @@
                                     GROUP BY source) b2 ON b2.source=b1.source
                                 AND b1.allsides_id = b2.min_id)
                             UNION
-                                (SELECT source,allsides_bias,allsides_confidence,allsides_agree,allsides_disagree,mbfs_bias,mbfs_score
+                                (SELECT source,allsides_bias,allsides_confidence,allsides_agree,allsides_disagree,mbfs_bias,mbfs_score,factual_reporting
                                 FROM source_bias
                                 WHERE allsides_bias IS NULL
                                     AND mbfs_bias IS NOT NULL)) bias ON a.source=bias.source ";
-            // old query: $sql = "SELECT DISTINCT title, date, source, author, article.url, article.idArticle, article.score, magnitude, entity, article_text, GROUP_CONCAT(DISTINCT keyword) as keywords, MAX(entity_instances.score) as top_entity FROM (article NATURAL JOIN article_keywords NATURAL JOIN keyword_instances) LEFT JOIN (image NATURAL JOIN image_entities NATURAL JOIN entity_instances) ON article.idArticle = image.idArticle ";
-            /*$sql = "SELECT article.idArticle,article.url,article.source,author,title,date,article_text,article.score,magnitude,GROUP_CONCAT(DISTINCT keyword) as keywords, entity as top_entity, MAX(entity_instances.score) as top_entity_score, allsides_bias,allsides_confidence,allsides_agree,allsides_disagree,mbfs_bias,mbfs_score
-                    FROM article
-                    NATURAL JOIN (article_keywords NATURAL JOIN keyword_instances)
-                    LEFT JOIN (image NATURAL JOIN image_entities NATURAL JOIN entity_instances) ON article.idArticle = image.idArticle
-                    LEFT JOIN (
-                                (SELECT b1.source,allsides_bias,allsides_confidence,allsides_agree,allsides_disagree,mbfs_bias,mbfs_score
-                                FROM source_bias b1
-                                INNER JOIN
-                                    (SELECT source,MIN(allsides_id) min_id
-                                    FROM source_bias
-                                    GROUP BY source) b2 ON b2.source=b1.source
-                                AND b1.allsides_id = b2.min_id)
-                            UNION
-                                (SELECT source,allsides_bias,allsides_confidence,allsides_agree,allsides_disagree,mbfs_bias,mbfs_score
-                                FROM source_bias
-                                WHERE allsides_bias IS NULL
-                                    AND mbfs_bias IS NOT NULL)) bias ON article.source=bias.source ";*/
-            
         }
         else {
             // also old: $sql = "SELECT DISTINCT date, title, source, idArticle FROM article NATURAL JOIN article_keywords NATURAL JOIN keyword_instances ";

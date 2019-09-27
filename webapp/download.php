@@ -31,13 +31,13 @@
         $csv = fopen($csvName, 'w') or die ("Unable to generate CSV: " . $csvName);
 
         // CSV column headers
-        $arrName = array("Article ID", "Alt ID", "Date", "Source", "MBFS Bias","MBFS Score", "AllSides Bias","AllSides Confidence","AllSides Agreement","AllSides Disagreement","URL","Title","Author","Sentiment Score","Sentiment Magnitude","Top Image Entity","Entity Score","Keywords");
+        $arrName = array("Article ID", "Alt ID", "Date", "Source", "MBFS Bias","MBFS Score","MBFS Factual Reporting", "AllSides Bias","AllSides Confidence","AllSides Agreement","AllSides Disagreement","URL","Title","Author","Sentiment Score","Sentiment Magnitude","Top Image Entity","Entity Score","Keywords");
         fputcsv($csv, $arrName,"\t");
         // build files to go into zip
         $txt_path = "../txtfiles/"; // where all txt files are stored
         while ($row = mysqli_fetch_assoc($query)) {
             $altID = $row['date'] . '_' . sprintf("%03d",$row['n']); // alternate ID as requested in Y-m-d_n format, where n is the Nth article of its publishing date (sorted by idArticle ascending) [n is 3 digits, with leading zeroes as necessary]
-            $arr = array($row['idArticle'],$altID,$row['date'], $row['source'],$row['mbfs_bias'],$row['mbfs_score'],$row['allsides_bias'],$row['allsides_confidence'],$row['allsides_agree'],
+            $arr = array($row['idArticle'],$altID,$row['date'], $row['source'],$row['mbfs_bias'],$row['mbfs_score'],$row['factual_reporting'],$row['allsides_bias'],$row['allsides_confidence'],$row['allsides_agree'],
                         $row['allsides_disagree'],  $row['url'], $row['title'], $row['author'], $row['score'],$row['magnitude'],
                         $row['top_entity'],$row['top_entity_score'],$row['keywords']);
             fputcsv($csv, $arr,"\t"); // insert row in CSV (tab delimiter necessary for Excel compatibility fix)
