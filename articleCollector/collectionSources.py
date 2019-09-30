@@ -24,6 +24,8 @@ class TopicSites:
                             "Chicago Tribune": ["ChicagoTribune",[1,1]], "Los Angeles Times":["LATimes",[1,1]],"The Hill":["TheHill",[0,0]], "Reuters":["Reuters"],
                             "New York Post": ["NYPost"], "Huffington Post": ["HuffPost"], "NPR":["NPR"]
                         }
+        oldsize = len(self.pages)
+        dead_sources = [] # list of potentially outdated topic site scrapers (we'll need to notify the admins)
         for source in functionCalls:
             print("Collecting " + source + "...")
             functionName = functionCalls[source][0]
@@ -32,6 +34,13 @@ class TopicSites:
                 getattr(self,"collect" + functionName)(pageRange)
             else:
                 getattr(self,"collect" + functionName)()
+            if len(self.pages) == oldsize: # if pages array hasn't grown after a topic site visit, there's a good chance the scraper isn't working anymore - add to dead sources
+                dead_sources.append(source)
+            oldsize = len(self.pages) 
+        if dead_sources:
+            self.TopicSiteAlert(dead_sources,c)
+        else: # all topic sites functional - remove any alerts from DB
+            c.execute("""DELETE FROM alerts WHERE type='TS'""")
         print()
         successes = 0
         for p in self.pages:
@@ -40,7 +49,7 @@ class TopicSites:
             printBasicInfo(p.title,p.url)
             try:
                 if not articleIsDuplicate(p.title,p.url,c) and not rejectedIsDuplicate(p.title,p.url,c):
-                    article = p.scrape()
+                    article = p.scrape(c)
                     if article:
                         article.printInfo()
                         if article.isRelevant_exp(clf,v_text,v_title,c,False):
@@ -55,6 +64,17 @@ class TopicSites:
             print("=================================")
         print("***",successes,"/",len(self.pages),"articles collected from topic sites ***")
         print("=================================")
+    
+    # alerts app admins to a topic site scraper that is no longer collecting articles
+    def TopicSiteAlert(self,dead_sources,c):
+        source_str = ', '.join(dead_sources) # store downed sources in db via comma-delimited format
+        print("\nThe following topic site sources failed to scrape any articles:",source_str)
+        c.execute("SELECT * FROM alerts WHERE sources=%s AND type='TS' LIMIT 1",(source_str,)) # check if alert already exists in database (don't want to send alert every time script is run)
+        if c.rowcount == 0:
+            c.execute("""INSERT INTO alerts(sources,type) VALUES (%s,'TS')""",(source_str,))
+            subject = "SCOTUSApp - Topic Site Outage"
+            text = "During the latest run of the SCOTUSApp article collection script, the following topic site sources failed to scrape any articles: " + source_str + "\n\nThis usually means a topic site scraper has become outdated - it may require maintenance."
+            sendAlert(subject,text)
 
     # scrapes CNN's supreme court topic page for articles and their metadata - other functions should be pretty similar, so avoiding commenting those much
     def collectCNN(self):
@@ -71,10 +91,11 @@ class TopicSites:
             if headlines:
                 for h in headlines:
                     try:
-                        url = "https://www.cnn.com" + h['href']
-                        title = h.text.strip()
-                        s = Scraper(url,title,None,None,[])
-                        self.pages.append(s) # build list of pages to scrape
+                        if not h['href'].startswith("/videos/") and "/live-news/" not in h['href']: # keeping video and live blogs out of the feed
+                            url = "https://www.cnn.com" + h['href']
+                            title = h.text.strip()
+                            s = Scraper(url,title,None,None,[])
+                            self.pages.append(s) # build list of pages to scrape
                     except Exception as e:
                             print("SCRAPING ERROR:",e)
                             continue
@@ -136,7 +157,7 @@ class TopicSites:
                 pages = soup.select("div.flex-grid div.col")
                 for p in pages:
                     try:
-                        h = p.select_one("div.h7  > a")
+                        h = p.select_one("p..h7 > a")
                         title = h.text.strip()
                         url = "https://www.chicagotribune.com" + h['href']
 
@@ -383,7 +404,7 @@ class RSSFeeds:
                     if not articleIsDuplicate(title,url,c) and not rejectedIsDuplicate(title,url,c):
                         if not isBlockedSource(url):
                             s = Scraper(url,title,None,date,[])
-                            article = s.scrape()
+                            article = s.scrape(c)
                             if article:
                                 article.printInfo()
                                 if article.isRelevant_exp(clf,v_text,v_title,c,False):
@@ -447,7 +468,7 @@ class NewsAPICollection:
                     if not articleIsDuplicate(title,entry['url'],c) and not rejectedIsDuplicate(title,entry['url'],c):
                         if not isBlockedSource(entry['url']):
                             s = Scraper(entry['url'],title,author,date,images)
-                            article = s.scrape()
+                            article = s.scrape(c)
                             if article:
                                 article.printInfo()
                                 if article.isRelevant_exp(clf,v_text,v_title,c,False):

@@ -5,6 +5,8 @@ import re
 import html
 import requests
 import math
+import os
+import smtplib
 from bs4 import BeautifulSoup
 from urllib import parse as urlparse
 from sklearn.svm import LinearSVC
@@ -149,13 +151,13 @@ def get_training_data(c,binary):
     x = []
     y = []
     # get relevant training data - label 1 for relevant
-    c.execute("""SELECT article_text,title FROM article WHERE idArticle <= 17671""") # only using training articles I've tested for now (so up to a certain id)
+    c.execute("""SELECT article_text,title FROM article WHERE idArticle <= 26234""") # only using training articles I've tested for now (so up to a certain id)
     rows = c.fetchall()
     for r in rows:
         x.append([r["title"],r["article_text"]])
         y.append("R")
     # get irrelevant training data - label 0 for irrelevant
-    c.execute("""SELECT code,text,title FROM rejectedTrainingData WHERE id <= 4811""")
+    c.execute("""SELECT code,text,title FROM rejectedTrainingData WHERE id <= 13276""")
     rows = c.fetchall()
     for r in rows:
         x.append([r["title"],r["text"]])
@@ -183,3 +185,29 @@ def convertTextData(x,v_text,v_title,mode):
         Xtext = v_text.transform(Xtext)
     x = hstack([Xtext,Xtitle]) # merge text and title matrices
     return x
+
+# universal function for sending an alert email (used in ScraperAlert and TopicSiteAlert functions)
+def sendAlert(subject,text):
+    admins = get_admins()
+    try:
+        print("Sending alert email...")
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(os.environ['APP_EMAIL'], os.environ['EMAIL_PASSWORD'])
+        toaddr = admins[0]
+        cc = []
+        if len(admins) > 1:
+            cc = [admin for admin in admins[1:]]
+        fromaddr = os.environ['APP_EMAIL']
+        message = "From: %s\r\n" % fromaddr + "To: %s\r\n" % toaddr + "CC: %s\r\n" % ",".join(cc) + "Subject: %s\r\n" % subject + "\r\n" + text
+        toaddrs = [toaddr] + cc
+        server.sendmail(fromaddr, toaddrs, message)
+        server.quit()
+    except SMTPException as e:
+        print("Alert email failed to send:",e)
+
+# parses ADMINS environmental variable into a list of emails (used in email alerts)
+def get_admins():
+    admin_str = os.environ['ADMINS']
+    admin_emails = [a for a in admin_str.split(',')]
+    return admin_emails
