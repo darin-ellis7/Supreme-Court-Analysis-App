@@ -154,17 +154,15 @@ class TopicSites:
             url = "https://www.chicagotribune.com/search/supreme%20court/100-y/story/score/" + str(i) + "/"
             soup = downloadPage(url)
             if soup:
-                pages = soup.select("div.flex-grid div.col")
+                pages = soup.select("ul.flex-grid li.col")
                 for p in pages:
                     try:
                         h = p.select_one("p..h7 > a")
                         title = h.text.strip()
                         url = "https://www.chicagotribune.com" + h['href']
-
                         author = None
                         a = p.select_one("span.byline  > span")
                         if a: author = a.text.strip()
-
                         date = None
                         d = p.select_one("span.timestamp ")
                         if d: 
