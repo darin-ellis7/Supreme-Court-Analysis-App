@@ -157,7 +157,7 @@ class TopicSites:
                 pages = soup.select("ul.flex-grid li.col")
                 for p in pages:
                     try:
-                        h = p.select_one("p..h7 > a")
+                        h = p.select_one("p.h7 > a")
                         title = h.text.strip()
                         url = "https://www.chicagotribune.com" + h['href']
                         author = None
