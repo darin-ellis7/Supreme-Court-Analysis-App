@@ -269,24 +269,21 @@ class TopicSites:
         url = "https://www.nytimes.com/topic/organization/us-supreme-court"
         soup = downloadPage(url)
         if soup:
-            container = soup.select_one("ol.story-menu.theme-stream.initial-set")
-            if container:
-                pages = container.select("li a")
-                if pages:
-                    for p in pages:
-                        try:
-                            url = p["href"] 
-                            title = p.select_one("h2.headline").text.strip()
-                            a = p.select_one("p.byline")
-                            if a:
-                                author = a.text[3:].strip()
-                            else:
-                                author = None
-                            s = Scraper(url,title,author,None,[])
-                            self.pages.append(s)
-                        except Exception as e:
-                            print("SCRAPING ERROR:",e)
-                            continue
+            pages = soup.select("section[id=stream-panel] li")
+            for p in pages:
+                try:
+                    url = "https://www.nytimes.com" + p.find("a")['href']
+                    title = p.find("h2").text.strip()
+                    a = p.select_one("span.css-1n7hynb")
+                    if a:
+                        author = a.text.strip()
+                    else:
+                        author = None
+                    s = Scraper(url,title,author,None,[])
+                    self.pages.append(s)
+                except Exception as e:
+                    print("SCRAPING ERROR:",e)
+                    continue
                         
     def collectReuters(self):
         url = "https://www.reuters.com/subjects/supreme-court"
