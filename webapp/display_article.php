@@ -1,4 +1,31 @@
 <?php
+    // this function dynamically generates the social media metrics tables (because there's lots of columns and it's repetitive work, I automated it)
+    // headers parameter is an array following the $label=>$colname format, where the label is how the metric type is displayed on the table, 
+    // and colname is the column name of that data in the database
+    function generate_SMM_table($headers,$row) {
+        $html = "<table class='table table-sm table-bordered'><tr>";
+        $html .= "<th></th>";
+        foreach($headers as $label=>$colname) {
+            $html .= "<th>$label</th>";
+        }
+        $html .= "</tr>";
+        // intervals follows $label=>postfix format
+        // label is how the time interval is displayed on the table
+        // postfix is the respective string at the end of each metric column in the database to differentiate between time intervals
+        $intervals=array("Initial Entry"=>"initial","Day 1"=>"d1","Day 7"=>"d7"); 
+        foreach($intervals as $label=>$postfix) {
+            $html .= "<tr><th>$label</th>";
+            foreach($headers as $label=>$colname) {
+                $colname .= "_$postfix";
+                $data = !is_null($row[$colname]) ? $row[$colname] : "N/A";
+                $html .= "<td>$data</td>";
+            }
+            $html .= "</tr>";
+        }
+        $html .= "</table>";
+        return $html;
+    }
+
     // this page displays the full details about any given article
     include_once("authenticate.php");
     include("admins.php");
@@ -65,8 +92,10 @@
             }
             #entities {
                 font-weight: bold;
+                font-size:14px;
             }
-            #entities td {
+            #smm th, #smm td {
+                text-align:center;
                 font-size:14px;
             }
         </style>
@@ -98,17 +127,17 @@
                         <span class="field-header">Alt ID:
                             <?php
                                 // alt ID could have been calculated within a larger details query,  but I think that query would actually be slower - so we're doing a separate query here
-                                if(isset($row['idArticle']) && isset($row['date'])) {
-                                    $altID_sql =   "SELECT a.n 
-                                                    FROM (SELECT idArticle,@n:=CASE WHEN @pubdate = date THEN @n + 1 ELSE 1 END AS n, @pubdate:=date as date 
+                                if(isset($row['idArticle']) && isset($row['datetime'])) {
+                                    $altID_sql =   "SELECT a.n, a.date
+                                                    FROM (SELECT idArticle,@n:=CASE WHEN @pubdate = date(datetime) THEN @n + 1 ELSE 1 END AS n, @pubdate:=date(datetime) as date 
                                                           FROM article 
-                                                          WHERE date='{$row['date']}' ORDER BY date,idArticle) a
+                                                          WHERE date(datetime)=date('{$row['datetime']}') ORDER BY date,idArticle) a
                                                     WHERE a.idArticle='{$row['idArticle']}'";
                                     mysqli_query($connect,"SET @n=0");
                                     mysqli_query($connect,"SET @pubdate=''");
                                     $altID_query = mysqli_query($connect, $altID_sql);
                                     $altID = mysqli_fetch_assoc($altID_query);
-                                    $altID = $row['date'] . '_' . sprintf("%03d",$altID['n']);
+                                    $altID = $altID['date'] . '_' . sprintf("%03d",$altID['n']);
                                     echo $altID;
                                 }
                                 else {
@@ -118,7 +147,7 @@
                         </span><br><br>
                         <span class="field-header">Author</span><br><?php echo !empty($row['author']) ? $row['author'] : "N/A"; ?><br><br>
                         <span class="field-header">Source</span><br><?php echo !empty($row['source']) ? $row['source'] : "N/A"; ?><br><br>
-                        <span class="field-header">Publication Date</span><br><?php echo !empty($row['date']) ? $row['date'] : "N/A"; ?><br><br>
+                        <span class="field-header">Publication Date</span><br><?php echo !empty($row['datetime']) ? $row['datetime'] : "N/A"; ?><br><br>
                         <span class="field-header">URL</span><br><?php echo !empty($row['url']) ? "<a href='{$row['url']}'>{$row['url']}</a>" : "N/A"; ?><br><br>
                         <span class="field-header">Sentiment Score: <?php echo isset($row['score']) ? $row['score'] : "N/A"; ?></span><br>
                         <span class="field-header">Magnitude: <?php echo isset($row['magnitude']) ? $row['magnitude'] : "N/A"; ?></span><br>
@@ -228,6 +257,28 @@
                             }
                         ?>
                     </div>
+                    <div id="smm" class="box" style="margin-top:1.25%;">
+                        <span class="box-header">Social Media Metrics</span><br><br>
+                        <div id='fb'>
+                            <span class='subheader'>Facebook</span><br>
+                            <?php
+                                $headers = array("Reactions"=>"fb_reactions","Comments"=>"fb_comments","Shares"=>"fb_shares","Comment Plugin"=>"fb_comment_plugin");
+                                echo generate_SMM_table($headers,$row) ?>
+                        </div>
+                        <div id='twitter'>
+                            <span class='subheader'>Twitter</span>
+                            <?php
+                                $headers = array("Tweets"=>"tw_tweets","Total Favorites"=>"tw_favorites","Total Retweets"=>"tw_retweets","Top Favorites"=>"tw_top_favorites","Top Retweets"=>"tw_top_retweets");
+                                echo generate_SMM_table($headers,$row) ?>
+                        </div>
+                        <div id='reddit'>
+                            <span class='subheader'>Reddit</span>
+                            <?php
+                                $headers = array("Posts"=>"rdt_posts","Favorites"=>"rdt_total_comments","Total Comments"=>"rdt_total_comments",
+                                                 "Total Scores"=>"rdt_total_scores","Top Score"=>"rdt_top_score","Top Ratio"=>"rdt_top_ratio","Average Ratio"=>"rdt_avg_ratio");
+                                echo generate_SMM_table($headers,$row) ?>
+                        </div>
+                    </div>
                 </div>
             </div>
             <!-- source bias citations -->
@@ -241,7 +292,8 @@
                 </div>
                 <div class="row">
                     <div class="col-md-12">
-                        <p>Source bias data courtesy of <a href="https://mediabiasfactcheck.com">Media Bias Fact Check</a></p>
+                        <p>Media Bias Fact Check ratings courtesy of <a href="https://mediabiasfactcheck.com">MediaBiasFactCheck.com</a>.
+                        You may use this data for research or noncommercial purposes provided you include this attribution.</p>
                     </div>  
                 </div>
             </footer>
