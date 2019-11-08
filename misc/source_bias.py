@@ -12,21 +12,8 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 import re
-
-# custom class to handle checking whether media bias fact check has loaded shares yet
-class element_has_initialized(object):
-    def __init__(self, selector):
-      self.selector = selector
-  
-    def __call__(self, driver):
-        try:
-            element = driver.find_element_by_css_selector(self.selector)
-        except Exception as e:
-            return False
-        if len(element.text.strip()) > 0: # if element's text is non-empty, continue
-            return True
-        else:
-            return False
+import csv
+import os
 
 # download a webpage using BeautifulSoup
 # returns soup object we can parse
@@ -40,27 +27,6 @@ def downloadPage(url):
     except Exception as e: # couldn't download page
         print("Error at",url,":",e)
         soup = None
-    return soup
-
-# intialize Chrome webdriver for selenium use (not being used at the moment)
-def initializeDriver():
-    options = Options()
-    options.headless = True
-    driver = webdriver.Chrome(options=options, executable_path='/Users/ecole96/Desktop/iMac_Backup/Desktop/scotusapp/misc/chromedriver')
-    return driver
-
-# alternate download function for getting media bias fact check data (because the shares metric is generated client side via JS so we need Selenium)
-def alt_downloadPage(url,driver,element_to_wait_on):
-    try:
-        driver.get(url)
-        if element_to_wait_on:
-            wait = WebDriverWait(driver, 30) # timeout in 30 seconds
-            wait.until(element_has_initialized(element_to_wait_on)) # wait until element is not empty to continue
-        page = driver.page_source
-        soup = BeautifulSoup(page, 'lxml') 
-    except Exception as e: # couldn't download page
-        print("Error at",url,":",e)
-        soup = downloadPage(url)
     return soup
 
 # download a webpage using BeautifulSoup
@@ -105,48 +71,65 @@ class AllSides:
 
     def getData(self,json,c):
         bias = {71:"Left",72:"Center-Left",73:"Center",74:"Center-Right",75:"Right",2707:"Mixed"} # map bias number in JSON to categorical classification
-        for j in tqdm(iterable=json,desc="AllSides Ratings"):
-            row = {"source_name":None,"source":None,"bias":None,"confidence":None,"community_agree":None,"community_disagree":None, "allsides_id":None}
-            bias_category = int(j["bias_rating"])
+        for row in tqdm(iterable=json,desc="AllSides Ratings"):
+            data = {"source_name":None,"source":None,"bias":None,"confidence":None,"community_agree":None,"community_disagree":None, "allsides_id":None}
+            bias_category = int(row["bias_rating"])
             if bias_category != 2690: # 2690 indicates a source that has not been rated yet
-                row["source_name"] = j["news_source"]
-                row["source"] = getDomain(j["url"])
-                row["bias"] = bias[bias_category]
+                data["source_name"] = row["news_source"]
+                data["source"] = getDomain(row["url"])
+                data["bias"] = bias[bias_category]
                  # because there's multiple instances of the same source (main site, editorials, certain authors, etc.), we want the id of the allsides page (taken from url)
-                allsides_id = re.findall(r'\d+', j["allsides_url"])
-                if allsides_id: row["allsides_id"] = int(allsides_id[0])
-                self.scrape_allsides(j["allsides_url"],row)
-                t = tuple(list(row.values()))
-                # insert AllSides data into database (mbfs data in row will be null until that data is scraped later)
-                c.execute("""INSERT INTO source_bias(source_name, source, allsides_bias, allsides_confidence, allsides_agree, allsides_disagree, allsides_id) VALUES (%s,%s,%s,%s,%s,%s,%s)""",t)
-
+                data["allsides_id"] = int(re.findall(r'\d+', row["allsides_url"])[0])
+                exceptions = [10506,31606,865,32855]
+                if data["allsides_id"] not in exceptions:
+                    self.scrape_allsides(row["allsides_url"],data)
+                    self.addToDatabase(data,c)
+            
+        
     # unfortunately the JSON doesn't have all the data we want so we still have to scrape a little more (community agreement / confidence data)
-    def scrape_allsides(self,url,row):
+    def scrape_allsides(self,url,data):
         soup = downloadPage(url)
         if soup:
             community_agree = soup.select_one("span.agree")
-            if community_agree: row['community_agree'] = int(community_agree.text.strip())
+            if community_agree: data['community_agree'] = int(community_agree.text.strip())
             community_disagree = soup.select_one("span.disagree")
-            if community_disagree: row['community_disagree'] = int(community_disagree.text.strip())
+            if community_disagree: data['community_disagree'] = int(community_disagree.text.strip())
             confidence = soup.select_one("div.confidence-level div.span8")
-            if confidence: row['confidence'] = confidence.text.strip()
+            if confidence: data['confidence'] = confidence.text.strip()
+    
+    def addToDatabase(self,data,c):
+        t = (data["source"],data["allsides_id"],data['source'],)
+        c.execute("""SELECT idSource FROM source_bias WHERE (source=%s AND allsides_id=%s) OR (source=%s AND allsides_id IS NULL AND mbfs_id IS NOT NULL) ORDER BY allsides_id LIMIT 1""",t)
+        if c.rowcount == 0:
+            t = tuple(list(data.values()))
+            # insert initial source data into database (mbfs data in row will be null until that data is scraped later, if exists)
+            c.execute("""INSERT INTO source_bias(source_name, source, allsides_bias, allsides_confidence, allsides_agree, allsides_disagree, allsides_id) VALUES (%s,%s,%s,%s,%s,%s,%s)""",t)
+        else: # duplicate
+            idSource = c.fetchone()['idSource']
+            t = (data['bias'],data["confidence"],data["community_agree"],data['community_disagree'],idSource,)
+            c.execute("""UPDATE source_bias SET allsides_bias=%s, allsides_confidence=%s, allsides_agree=%s, allsides_disagree=%s WHERE idSource=%s""",t)
 
 # class for Media Bias Fact Check scraping
 class MBFS:
-    baseURL = "https://mediabiasfactcheck.com/"
-
     def mbfs(self,c):
-        #driver = initializeDriver()
-        driver = None
-        labels = {"left":"Left","leftcenter":"Center-Left","center":"Center","right-center":"Center-Right","right":"Right","fake-news":"Questionable Source"}
-        for l in labels:
-            url = self.baseURL + l + "/"
-            source_urls = self.getSources(url)
-            bias = labels[l]
-            for url in tqdm(iterable=source_urls,desc=bias):
-                data = self.getData(url,bias,driver)
-                if data: self.addToDatabase(data,c)
-        #driver.quit()
+        with open('./misc/mbfs.csv','r') as csvfile:
+            reader = csv.DictReader(csvfile)
+            total = len(list(reader))
+            csvfile.seek(0,0)
+            reader = csv.DictReader(csvfile)
+            for row in tqdm(iterable=reader,desc='Media Bias Fact Check',total=total):
+                source_name = row['Source']
+                mbfs_url = row['URL']
+                mbfs_id = re.search('https://mediabiasfactcheck.com/(.*)/', mbfs_url).group(1)
+                bias = row['Bias']
+                factual_reporting = row['Factual Reporting']
+                excluded = ["Conspiracy-Pseudoscience","Pro-Science","Satire"]
+                if bias not in excluded:
+                    bias_map = {"Left-Center":"Center-Left","Least Biased":"Center","Right-Center":"Center-Right","Questionable":"Questionable Source"}
+                    if bias in bias_map:
+                        bias = bias_map[bias]
+                    data = self.getData(mbfs_url,source_name,bias,factual_reporting,mbfs_id,None)
+                    if data: self.addToDatabase(data,c)
 
     # get source page URLs from category list pages
     def getSources(self,url):
@@ -157,38 +140,34 @@ class MBFS:
             urls = [r['href'] for r in rows]
         return urls
 
-    # primary MBFS scraper
-    def getData(self,url,bias,driver):
-        data = {'source_name':None,'source':None,'bias':None,'bias_score':None,'shares':None}
+    def getData(self,mbfs_url,source_name,bias,factual_reporting,mbfs_id,driver):
+        data = {'source_name':source_name,'source':None,'bias':None,'bias_score':None,'factual_reporting':factual_reporting,'shares':None,'mbfs_id':mbfs_id,}
+        soup = downloadPage(mbfs_url)
         #soup = alt_downloadPage(url,driver,"span.a2a_count")
-        soup = downloadPage(url)
         if soup:
             try:
-                data['source_name'] = soup.select_one("h1.page-title").text.strip()
-                if data['source_name'] == "Page not found (404)":
-                    data = {}
-                    return data
                 source = None
                 for p in soup.select("div.entry p"):
                     a = p.select_one("a")
                     text = p.text.lower().strip()
-                    if a and text.startswith("source:"):
-                        url = a['href']
-                        source = getDomain(url)
+                    if a and any(text.startswith(t) for t in ["source:","sources:"]):
+                        source_url = a['href']
+                        source = getDomain(source_url)
                         data['source'] = source
                         break
                 shares = soup.select_one("span.a2a_count") # this has to be collected via client side scraping, but this isn't working yet (if at all)
                 if shares:
                     data['shares'] = int(shares.text.strip().replace(',',''))
                 img = soup.select_one("div.entry img")
-                if img and img['data-image-title'] and any(category in img['data-image-title'] for category in ['extremeleft','leftcenter','left','leastbiased','rightcenter','extremeright','right']):
+                if img and img.has_attr('data-image-title') and any(category in img['data-image-title'] for category in ['extremeleft','leftcenter','left','leastbiased','rightcenter','extremeright','right']):
                     img_title = img['data-image-title']
                     data['bias'] = self.deriveBiasFromImage(bias,img_title)
                     data['bias_score'] = self.bias_score(img_title)
-                if data['bias'] is None:
+                else:
                     data = {}
             except Exception as e:
-                print(e)
+                print("Error for MBFS source",source_name + ":",e)
+                data = {}
         return data
 
     # MBFS rates sources on a spectrum from Extreme Left to Extreme Right - because AllSides only goes from Left to Right (no extremes), we need to standardize this data
@@ -248,19 +227,17 @@ class MBFS:
         c.execute("""SELECT idSource FROM source_bias WHERE source = %s ORDER BY allsides_id LIMIT 1""",(data["source"],)) 
         if c.rowcount == 0: # source not in database, insert new row
             t = tuple(list(data.values()))
-            c.execute("""INSERT INTO source_bias(source_name,source,mbfs_bias,mbfs_score,mbfs_shares) VALUES (%s,%s,%s,%s,%s)""",t)
+            c.execute("""INSERT INTO source_bias(source_name,source,mbfs_bias,mbfs_score,factual_reporting,mbfs_shares,mbfs_id) VALUES (%s,%s,%s,%s,%s,%s,%s)""",t)
         else: # source in database with AllSides data
             idSource = c.fetchone()['idSource']
-            t = (data["bias"],data["bias_score"],data["shares"],idSource)
-            c.execute("""UPDATE source_bias SET mbfs_bias=%s, mbfs_score=%s, mbfs_shares=%s WHERE idSource = %s""",t)
+            t = (data["bias"],data["bias_score"],data['factual_reporting'],data["shares"],data['mbfs_id'],idSource)
+            c.execute("""UPDATE source_bias SET mbfs_bias=%s, mbfs_score=%s, factual_reporting=%s, mbfs_shares=%s, mbfs_id=%s WHERE idSource = %s""",t)
 
 def main():
     ssl._create_default_https_context = ssl._create_unverified_context # monkey patch for getting past SSL errors (this might be a system-specific issue)
-
     db = MySQLdb.connect(host=os.environ['DB_HOST'],port=int(os.environ['DB_PORT']),user=os.environ['DB_USER'],password=os.environ['DB_PASSWORD'],db="SupremeCourtApp",use_unicode=True,charset="utf8")
     db.autocommit(True)
     c = db.cursor(MySQLdb.cursors.DictCursor)
-
     AllSides().allsides(c)
     MBFS().mbfs(c)
 main()
