@@ -5,9 +5,12 @@
 
 import ssl
 from collectionSources import *
+from SeleniumInstance import *
+from SocialMediaMetrics import *
 import MySQLdb
 import MySQLdb.cursors
 import os
+import pytz
 
 def main():
     ssl._create_default_https_context = ssl._create_unverified_context # monkey patch for getting past SSL errors (this might be a system-specific issue)
@@ -25,6 +28,8 @@ def main():
             resetRequests(c)
             print("New billing cycle - sentiment requests reset\n")
         clf, v_text, v_title = train_relevancy(c) # build training dataset for relevancy check
+        smm = SocialMediaMetrics() # initialize/authentication for social media metrics
+        tz = pytz.timezone('US/Eastern') # initialize timezone for converting article publication datetimes to Eastern time (if necessary)
     except MySQLdb.Error as e:
         print("Database error - ",e)
         print("Script aborted.\n")
@@ -33,16 +38,16 @@ def main():
     # RSS feeds
     feed_urls = ['https://www.google.com/alerts/feeds/04514219544348410405/10161046346160726598', 'https://www.google.com/alerts/feeds/04514219544348410405/7765273799045579732', 'https://www.google.com/alerts/feeds/04514219544348410405/898187730492460176', 'https://www.google.com/alerts/feeds/04514219544348410405/16898242761418666298']
     feeds = RSSFeeds(feed_urls)
-    feeds.parseFeeds(c,clf,v_text,v_title)
+    feeds.parseFeeds(c,clf,v_text,v_title,tz,smm)
 
     # newsAPI results
     newsapi_key = os.environ['NEWSAPI_KEY']
     queries  = ["USA Supreme Court","US Supreme Court", "United States Supreme Court","SCOTUS"]
     newsapi = NewsAPICollection(newsapi_key,queries)
-    newsapi.parseResults(c,clf,v_text,v_title)
+    newsapi.parseResults(c,clf,v_text,v_title,tz,smm)
 
     # topic sites
     t = TopicSites()
-    t.collect(c,clf,v_text,v_title)
+    t.collect(c,clf,v_text,v_title,tz,smm)
 
 main()

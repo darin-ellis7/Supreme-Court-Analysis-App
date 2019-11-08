@@ -5,7 +5,9 @@ from utilityFunctions import *
 from newsapi import NewsApiClient
 from bs4 import BeautifulSoup
 import datetime
+import re
 import MySQLdb
+from SeleniumInstance import *
 
 # functions for scraping individual Supreme Court news pages from various well-known sources
 class TopicSites:
@@ -13,7 +15,7 @@ class TopicSites:
         self.pages = []
 
     # topic site driver
-    def collect(self,c,clf,v_text,v_title):
+    def collect(self,c,clf,v_text,v_title,tz,smm):
         print("*** Topic Sites Scraping ***")
         print()
         # this dict allows us to dynamically call topic site scrapers without actually writing them in the code
@@ -22,7 +24,7 @@ class TopicSites:
         functionCalls = {
                             "CNN":["CNN"], "New York Times":["NYTimes"], "Washington Post":["WaPo"], "Politico":["Politico",[1,1]], "Fox News":["FoxNews"], 
                             "Chicago Tribune": ["ChicagoTribune",[1,1]], "Los Angeles Times":["LATimes",[1,1]],"The Hill":["TheHill",[0,0]], "Reuters":["Reuters"],
-                            "New York Post": ["NYPost"], "Huffington Post": ["HuffPost"], "NPR":["NPR"]
+                            "New York Post": ["NYPost"], "Huffington Post": ["HuffPost"], "NPR":["NPR"], "Wall Street Journal":["WSJ",[1,1]]
                         }
         oldsize = len(self.pages)
         dead_sources = [] # list of potentially outdated topic site scrapers (we'll need to notify the admins)
@@ -43,18 +45,20 @@ class TopicSites:
             c.execute("""DELETE FROM alerts WHERE type='TS'""")
         print()
         successes = 0
+        si = SeleniumInstance()
         for p in self.pages:
             #if successes > 1:
                 #break
             printBasicInfo(p.title,p.url)
             try:
                 if not articleIsDuplicate(p.title,p.url,c) and not rejectedIsDuplicate(p.title,p.url,c):
-                    article = p.scrape(c)
+                    driver = decideScraperMethod(p.source,si)
+                    article = p.scrape(c,driver,tz)
                     if article:
                         article.printInfo()
                         if article.isRelevant_exp(clf,v_text,v_title,c,False):
                             # add to database
-                            article.addToDatabase(c)
+                            article.addToDatabase(c,smm)
                             article.printAnalysisData()
                             successes += 1
                             print()
@@ -64,6 +68,11 @@ class TopicSites:
             print("=================================")
         print("***",successes,"/",len(self.pages),"articles collected from topic sites ***")
         print("=================================")
+        if si.driver: 
+            # if a webdriver is open, we close it at the end of every "phase" (Google Alerts -> NewsAPI -> TopicSites)
+            # This is done to prevent memory leaks as it seems the longer a webdriver is open, the more memory it takes up
+            print("Selenium driver was properly quit.")
+            si.driver.quit()
     
     # alerts app admins to a topic site scraper that is no longer collecting articles
     def TopicSiteAlert(self,dead_sources,c):
@@ -117,13 +126,11 @@ class TopicSites:
                                 author = a.get("content").strip()
                             else:
                                 author = None
-
                             d = p.find(itemprop="datePublished")
                             if d:
-                                date = convertDate(d.get("datetime"),"%Y-%m-%d %H:%M:%S")
+                                date = d.get("datetime").strip()
                             else:
                                 date = None
-
                             s = Scraper(url,title,author,date,[])
                             self.pages.append(s)
                         except Exception as e:
@@ -151,7 +158,7 @@ class TopicSites:
                        
     def collectChicagoTribune(self,pageRange):
         for i in range(pageRange[0],pageRange[1]+1):
-            url = "https://www.chicagotribune.com/search/supreme%20court/100-y/story/score/" + str(i) + "/"
+            url = "https://www.chicagotribune.com/search/supreme%20court/1-w/story/score/" + str(i) + "/"
             soup = downloadPage(url)
             if soup:
                 pages = soup.select("ul.flex-grid li.col")
@@ -163,14 +170,7 @@ class TopicSites:
                         author = None
                         a = p.select_one("span.byline  > span")
                         if a: author = a.text.strip()
-                        date = None
-                        d = p.select_one("span.timestamp ")
-                        if d: 
-                            try:
-                                date = convertDate(d.text.strip(),"%b %d, %Y")
-                            except ValueError as e: # articles posted on current day are listed as how many hours ago they were published, so they don't follow the date format
-                                date = None # set it to None (it'll be changed to current day when initialized as an Article object)
-                        s = Scraper(url,title,author,date,[])
+                        s = Scraper(url,title,author,None,[])
                         self.pages.append(s)
                     except Exception as e:
                         print("SCRAPING ERROR:",e)
@@ -191,20 +191,12 @@ class TopicSites:
                                 url = "https://thehill.com" + headline['href']
                                 title = headline.text.strip()
                                 submitted = p.find("p",{"class":"submitted"})
-
                                 a = submitted.find("span",{"rel":"sioc:has_creator"})
                                 if a:
                                     author = a.text.split(',')[0].strip()
                                 else:
                                     author = None
-
-                                d = submitted.find("span",{"class":"date"})
-                                if d:
-                                    datestr = d.text.split()[0].strip()
-                                    date = convertDate(datestr,"%m/%d/%y")
-                                else:
-                                    date = None
-                                s = Scraper(url,title,author,date,[])
+                                s = Scraper(url,title,author,None,[])
                                 self.pages.append(s)
                         except Exception as e:
                             print("SCRAPING ERROR:",e)
@@ -226,18 +218,10 @@ class TopicSites:
                     a = p.select_one("div.PromoMedium-title a")
                     url = a['href']
                     title = a.text.strip()
-
-                    date = None
-                    d = p.select_one("div.PromoMedium-timestamp")
-                    if d: 
-                        # take Unix timestamp (initially in ms, convert to seconds), convert it to datetime and then %Y-%m-%d string
-                        date = datetime.datetime.fromtimestamp(float(d['data-timestamp']) / 1000).strftime('%Y-%m-%d') 
-
                     images = []
                     i = p.select_one("div.PromoMedium-media img")
                     if i: images = [i['data-src']]
-
-                    s = Scraper(url,title,author,date,images)
+                    s = Scraper(url,title,author,None,images)
                     self.pages.append(s)
                 except Exception as e:
                     print("SCRAPING ERROR:",e)
@@ -339,8 +323,11 @@ class TopicSites:
                             title = p.select_one("h3.entry-heading a").text.strip()
                             d = p.select_one("div.entry-meta p")
                             if d:
-                                datestr = d.text.split("|")[0].strip()
-                                date = convertDate(datestr,"%B %d, %Y")
+                                datesplit = d.text.split("|")
+                                date = datesplit[0].strip()
+                                time = convertTime(datesplit[1].strip().upper(),"%I:%M%p")
+                                datestr = date + " " + time
+                                date = convertDate(datestr,"%B %d, %Y %H:%M:%S")
                             else:
                                 date = None
                             s = Scraper(url,title,None,date,[])
@@ -372,6 +359,40 @@ class TopicSites:
                     except Exception as e:
                         print("SCRAPING ERROR:",e)
                         continue
+    
+    def collectWSJ(self,pageRange):
+        max_date = datetime.datetime.today()
+        min_date = (max_date - datetime.timedelta(days=2)).strftime('%Y/%m/%d') # searching for articles published in the last two days
+        max_date = max_date.strftime('%Y/%m/%d')
+        for i in range(pageRange[0],pageRange[1]+1):
+            url = "https://www.wsj.com/search/term.html?KEYWORDS=supreme%20court&min-date=" + min_date + "&max-date=" + max_date + "&isAdvanced=true&daysback=7d&andor=AND&sort=relevance&source=wsjarticle,wsjblogs&page=" + str(i)
+            soup = downloadPage(url)
+            # WSJ has some funkiness (maybe an actual error) in their formatting on the search page that makes BeautifulSoup parsing tricky
+            # so we have to convert our soup object to a str and manipulate the HTML to parse it properly
+            soupstr = str(soup)
+            find = soupstr.find('<div class="search-results-sector">') # what we want starts at the beginning of this element
+            if find > -1:
+                soupstr = "<html>" + soupstr[find:] # create an easily-parsable HTML document out of the remainder of the page
+                soup = BeautifulSoup(soupstr,"html.parser") #...and convert it to a Soup for scraping (now it's business as usual)
+                if soup:
+                    pages = soup.select("div.item-container")
+                    for p in pages:
+                        try:
+                            c = p.select_one("div.category")
+                            if c:
+                                category = c.text.strip().lower()
+                                blockedCategories = ["u.k.","india","latin america","europe","world","photos"] # search results in these categories are useless to us
+                                if category not in blockedCategories:
+                                    h = p.select_one("h3.headline a")
+                                    title = h.text.strip()
+                                    url = "https://wsj.com" + h['href'].split('?')[0]
+                                    a = p.select_one("li.byline")
+                                    if a:
+                                        author = a.text.strip()[3:]
+                                    s = Scraper(url,title,author,None,[])
+                                    self.pages.append(s)
+                        except Exception as e:
+                            print("SCRAPING ERROR;",e)
 
 # functions for Google Alerts RSS feeds
 class RSSFeeds:
@@ -379,11 +400,12 @@ class RSSFeeds:
         self.feeds = feeds # list of feeds to parse
     
     # driver
-    def parseFeeds(self,c,clf,v_text,v_title):
+    def parseFeeds(self,c,clf,v_text,v_title,tz,smm):
         print("*** Google Alerts RSS Feeds ***")
         print()
         total = 0
         successes = 0
+        si = SeleniumInstance()
         for feed in self.feeds:
             feed = feedparser.parse(feed)
             for post in feed.entries:
@@ -391,20 +413,20 @@ class RSSFeeds:
                     #break
                 total += 1
                 url = getURL(post['link'])
-                title = cleanTitle(post['title']).strip()
-                date = convertDate(post['date'],"%Y-%m-%dT%H:%M:%SZ")
-
+                title = processTitle(cleanTitle(post['title']).strip())
+                date = tz.fromutc(datetime.datetime.strptime(post['date'],"%Y-%m-%dT%H:%M:%SZ")).strftime("%Y-%m-%d %H:%M:%S")
                 printBasicInfo(title,url)
                 try:
                     if not articleIsDuplicate(title,url,c) and not rejectedIsDuplicate(title,url,c):
                         if not isBlockedSource(url):
                             s = Scraper(url,title,None,date,[])
-                            article = s.scrape(c)
+                            driver = decideScraperMethod(s.source,si)
+                            article = s.scrape(c,driver,tz)
                             if article:
                                 article.printInfo()
                                 if article.isRelevant_exp(clf,v_text,v_title,c,False):
                                     # add to database
-                                    article.addToDatabase(c)
+                                    article.addToDatabase(c,smm)
                                     article.printAnalysisData()
                                     successes += 1
                                     print()
@@ -413,6 +435,9 @@ class RSSFeeds:
                     print("Database Error (operation skipped) -",e)
                 print("======================================")
         print("***",successes,"/",total,"articles collected from Google Alerts RSS Feeds ***")
+        if si.driver:
+            print("Selenium driver was properly quit.")
+            si.driver.quit()
         print("======================================")
 
 # functions for NewsAPI functionality
@@ -422,7 +447,7 @@ class NewsAPICollection:
         self.newsapi = NewsApiClient(api_key=newsapi_key)
     
     # driver
-    def parseResults(self,c,clf,v_text,v_title):
+    def parseResults(self,c,clf,v_text,v_title,tz,smm):
         print("*** NewsAPI Search ***")
         print()
         total = 0
@@ -431,6 +456,7 @@ class NewsAPICollection:
         today = datetime.datetime.now()
         days_ago = (today - datetime.timedelta(days=2)).strftime('%Y-%m-%d')
         today = today.strftime('%Y-%m-%d')
+        si = SeleniumInstance()
         for q in self.queries:
             results = self.newsapi.get_everything(q=q, language='en', page_size=100, from_param=days_ago, to=today, sort_by='relevancy')
             for entry in results['articles']:
@@ -438,37 +464,33 @@ class NewsAPICollection:
                     #break
                 total += 1
                 images = []
-            
                 # get as much information as possible about the article before shipping it off to the scraper
                 if entry['title']:
-                    title = entry['title'].strip()
+                    title = processTitle(entry['title'].strip())
                 else:
                     title = untitledArticle()
-
                 if entry['urlToImage']:
                     images.append(entry['urlToImage'])
-
                 if entry['author']:
                     author = entry['author'].strip()
                 else:
                     author = None
-
                 if entry['publishedAt']:
-                    date = convertDate(entry['publishedAt'],"%Y-%m-%dT%H:%M:%SZ")
+                    date = tz.fromutc(datetime.datetime.strptime(entry['publishedAt'],"%Y-%m-%dT%H:%M:%SZ")).strftime("%Y-%m-%d %H:%M:%S")
                 else:
                     date = None
-
                 printBasicInfo(title,entry['url'])
                 try:
                     if not articleIsDuplicate(title,entry['url'],c) and not rejectedIsDuplicate(title,entry['url'],c):
                         if not isBlockedSource(entry['url']):
                             s = Scraper(entry['url'],title,author,date,images)
-                            article = s.scrape(c)
+                            driver = decideScraperMethod(s.source,si)
+                            article = s.scrape(c,driver,tz)
                             if article:
                                 article.printInfo()
                                 if article.isRelevant_exp(clf,v_text,v_title,c,False):
                                     # add to database
-                                    article.addToDatabase(c)
+                                    article.addToDatabase(c,smm)
                                     article.printAnalysisData()
                                     successes += 1
                                     print()
@@ -477,4 +499,7 @@ class NewsAPICollection:
                     print("Database Error (operation skipped) -",e)
                 print("======================================")
         print("***",successes,"/",total," articles collected from NewsAPI results ***")
+        if si.driver:
+            print("Selenium driver was properly quit.")
+            si.driver.quit()
         print("======================================")
