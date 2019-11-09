@@ -18,11 +18,11 @@ def main():
         for row in tqdm(iterable=reader,desc='Training Data',total=total):
             try:
                 ID = row['Article ID'].strip()
-                c.execute("""SELECT url, title, date, article_text FROM article WHERE idArticle=%s LIMIT 1""",(ID,))
+                c.execute("""SELECT url, title, datetime, article_text FROM article WHERE idArticle=%s LIMIT 1""",(ID,))
                 if c.rowcount == 1:
                     article = c.fetchone()
-                    t = (article['url'],article['date'],article['title'],article['article_text'],row['Code'].strip())
-                    c.execute("""INSERT INTO rejectedTrainingData(url,date,title,text,code) VALUES (%s,%s,%s,%s,%s)""",t)
+                    t = (article['url'],article['datetime'],article['title'],article['article_text'],row['Code'].strip())
+                    c.execute("""INSERT INTO rejectedTrainingData(url,datetime,title,text,code) VALUES (%s,%s,%s,%s,%s)""",t)
                     c.execute("""DELETE FROM article WHERE idArticle=%s LIMIT 1""",(ID,))
             except Exception as e:
                 print(e)
