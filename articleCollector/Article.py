@@ -51,8 +51,8 @@ class Article:
     def printAnalysisData(self):
         if self.sentimentScore is not None and self.magnitude is not None:
             print("Sentiment Score & Magnitude:",str(round(self.sentimentScore,3)) + ",",round(self.magnitude,3))
-            print()
         print("Social Media Metrics:",self.metrics)
+        print()
         for index, image in enumerate(self.images):
             if image.filename:
                 filestr = "Saved as " + image.filename
@@ -136,7 +136,7 @@ class Article:
 
     # adds all of an article's information to the database
     def addToDatabase(self,c,smm):
-        #self.analyzeSentiment(c)
+        self.analyzeSentiment(c)
         self.metrics = smm.get_metrics(self.url)
         # insert new Article row
         t = tuple([self.url, self.source, self.author, self.date, self.text, self.title, self.sentimentScore, self.magnitude] + list(self.metrics.values()))
@@ -149,8 +149,8 @@ class Article:
         # then insert the other stuff (keywords and images)
         idArticle = c.lastrowid # article id needed for keywords, images, and storing txt file
         self.addKeywords(idArticle,c)
-        #self.addImages(idArticle,c)
-        #self.write_txt(idArticle)
+        self.addImages(idArticle,c)
+        self.write_txt(idArticle)
 
     # driver function for downloading, saving, and analyzing each of an article's images
     def addImages(self,idArticle,c):
@@ -335,7 +335,7 @@ class Article:
     # data is coded by nature of irrelevancy; S = article is about state/lower court, F = article is about foreign court, U = unrelated topic
     def buildRejectedTrainingData(self,code,c):
         t = (self.url, self.date, self.text, self.title, code)
-        c.execute("""INSERT INTO rejectedTrainingData(url, date, text, title, code) VALUES (%s,%s,%s,%s,%s)""",t)
+        c.execute("""INSERT INTO rejectedTrainingData(url, datetime, text, title, code) VALUES (%s,%s,%s,%s,%s)""",t)
         print("Article added to training data with code",code)
 
     # increment sentiment requests counter in database

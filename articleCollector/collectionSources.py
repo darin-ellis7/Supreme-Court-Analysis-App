@@ -56,7 +56,7 @@ class TopicSites:
                     article = p.scrape(c,driver,tz)
                     if article:
                         article.printInfo()
-                        if article.isRelevant_exp(clf,v_text,v_title,c,False):
+                        if article.isRelevant_exp(clf,v_text,v_title,c,True):
                             # add to database
                             article.addToDatabase(c,smm)
                             article.printAnalysisData()
@@ -381,11 +381,12 @@ class TopicSites:
                             c = p.select_one("div.category")
                             if c:
                                 category = c.text.strip().lower()
-                                blockedCategories = ["u.k.","india","latin america","europe","world","photos"] # search results in these categories are useless to us
+                                blockedCategories = ["u.k.","india","latin america","europe","world","photos","corrections & amplifications"] # search results in these categories are useless to us
                                 if category not in blockedCategories:
                                     h = p.select_one("h3.headline a")
                                     title = h.text.strip()
                                     url = "https://wsj.com" + h['href'].split('?')[0]
+                                    author = None
                                     a = p.select_one("li.byline")
                                     if a:
                                         author = a.text.strip()[3:]
@@ -424,7 +425,7 @@ class RSSFeeds:
                             article = s.scrape(c,driver,tz)
                             if article:
                                 article.printInfo()
-                                if article.isRelevant_exp(clf,v_text,v_title,c,False):
+                                if article.isRelevant_exp(clf,v_text,v_title,c,True):
                                     # add to database
                                     article.addToDatabase(c,smm)
                                     article.printAnalysisData()
@@ -488,7 +489,7 @@ class NewsAPICollection:
                             article = s.scrape(c,driver,tz)
                             if article:
                                 article.printInfo()
-                                if article.isRelevant_exp(clf,v_text,v_title,c,False):
+                                if article.isRelevant_exp(clf,v_text,v_title,c,True):
                                     # add to database
                                     article.addToDatabase(c,smm)
                                     article.printAnalysisData()
