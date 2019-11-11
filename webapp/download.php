@@ -34,8 +34,8 @@
         $headers = array("Article ID", "Alt ID", "Date/Time", "Source", "MBFS Bias","MBFS Score","MBFS Factual Reporting", "AllSides Bias","AllSides Confidence","AllSides Agreement","AllSides Disagreement","URL","Title","Author","Sentiment Score","Sentiment Magnitude","Top Image Entity","Entity Score","Keywords");
         $metric_headers = array("FB Reactions"=>"fb_reactions","FB Comments"=>"fb_comments","FB Shares"=>"fb_shares","FB Comment Plugin"=>"fb_comment_plugin", 
                          "TW Tweets"=>"tw_tweets","TW Total Favorites"=>"tw_favorites","TW Total Retweets"=>"tw_retweets","TW Top Favorites"=>"tw_top_favorites","TW Top Retweets"=>"tw_top_retweets",
-                         "RDT Posts"=>"rdt_posts","RDT Favorites"=>"rdt_total_comments","RDT Total Comments"=>"rdt_total_comments",
-                         "RDT Total Scores"=>"rdt_total_scores","RDT Top Score"=>"rdt_top_score","RDT Top Ratio"=>"rdt_top_ratio","RDT Average Ratio"=>"rdt_avg_ratio");
+                         "RDT Posts"=>"rdt_posts","RDT Total Comments"=>"rdt_total_comments","RDT Total Scores"=>"rdt_total_scores","RDT Top Comments"=>"rdt_top_comments",
+                         "RDT Top Score"=>"rdt_top_score","RDT Top Ratio"=>"rdt_top_ratio","RDT Average Ratio"=>"rdt_avg_ratio");
         foreach($metric_headers as $header=>$colname) { // dynamically adding social media metric headers
             array_push($headers,"$header - Initial Entry"); array_push($headers,"$header - Day 1"); array_push($headers,"$header - Day 7"); 
         }

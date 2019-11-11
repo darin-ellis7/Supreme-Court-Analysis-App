@@ -274,8 +274,8 @@
                         <div id='reddit'>
                             <span class='subheader'>Reddit</span>
                             <?php
-                                $headers = array("Posts"=>"rdt_posts","Favorites"=>"rdt_total_comments","Total Comments"=>"rdt_total_comments",
-                                                 "Total Scores"=>"rdt_total_scores","Top Score"=>"rdt_top_score","Top Ratio"=>"rdt_top_ratio","Average Ratio"=>"rdt_avg_ratio");
+                                $headers = array("Posts"=>"rdt_posts","Total Comments"=>"rdt_total_comments","Total Scores"=>"rdt_total_scores",
+                                "Top Comments"=>"rdt_top_comments","Top Score"=>"rdt_top_score","Top Ratio"=>"rdt_top_ratio","Average Ratio"=>"rdt_avg_ratio");
                                 echo generate_SMM_table($headers,$row) ?>
                         </div>
                     </div>
