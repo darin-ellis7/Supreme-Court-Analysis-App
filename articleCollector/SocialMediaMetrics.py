@@ -139,15 +139,13 @@ class SocialMediaMetrics():
                         data['rdt_top_ratio'] = ratio
                 if data['rdt_posts'] > 0: 
                     data['rdt_avg_ratio'] = round(data['rdt_avg_ratio'] / data['rdt_posts'],3)
-                else: # no posts = no average (can't divide by zero)
-                    data = {'rdt_posts':0,'rdt_total_comments':0,'rdt_total_scores':0,'rdt_top_comments':0,'rdt_top_score':0,'rdt_top_ratio':0,'rdt_avg_ratio':0}
             except Exception as e:
                 print("Reddit error occurred:",e)
                 data = {'rdt_posts':None,'rdt_total_comments':None,'rdt_total_scores':None,'rdt_top_comments':None,'rdt_top_score':None,'rdt_top_ratio':None,'rdt_avg_ratio':None}
         return data
 
     # gather Facebook metrics
-    # fb_reactions = total # of reactions (combined $#of likes and emoji reactions) to posts linking to article URL
+    # fb_reactions = total # of reactions (combined # of likes and emoji reactions) to posts linking to article URL
     # fb_comments = total # of comments on posts linking to article URL
     # fb_shares = total # of shares of article URL
     # fb_comment_plugin = total # of comments on article webpages powered by the Facebook comment plugin
