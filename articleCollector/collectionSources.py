@@ -385,7 +385,7 @@ class TopicSites:
                                 if category not in blockedCategories:
                                     h = p.select_one("h3.headline a")
                                     title = h.text.strip()
-                                    url = "https://wsj.com" + h['href'].split('?')[0]
+                                    url = "https://www.wsj.com" + h['href'].split('?')[0]
                                     author = None
                                     a = p.select_one("li.byline")
                                     if a:
