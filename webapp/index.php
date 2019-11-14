@@ -4,9 +4,9 @@
 
 <?php
     // generates download button url 
-    function generateDownloadURL($search_query,$dateFrom,$dateTo,$sourcebox) {
+    function generateDownloadURL($search_query,$dateFrom,$dateTo,$source_search,$ID_search,$sourcebox) {
         $url = "download.php?";
-        $vars = array("search_query"=>$search_query,"dateFrom"=>$dateFrom,"dateTo"=>$dateTo,"sourcebox"=>$sourcebox);
+        $vars = array("search_query"=>$search_query,"dateFrom"=>$dateFrom,"dateTo"=>$dateTo,"source_search"=>$source_search,"ID_search"=>$ID_search,"sourcebox"=>$sourcebox);
         $add_ampersand = false; // flag for multivariables - every query string beyond the first will be prefixed with &
         foreach($vars as $key=>$var) {
             if(!empty($var)) {
@@ -33,11 +33,13 @@
     $search_query = (!empty($_GET['search_query']) ? trim($_GET['search_query']) : '');
     $dateFrom = (!empty($_GET['dateFrom']) ? $_GET['dateFrom'] : '');
     $dateTo = (!empty($_GET['dateTo']) ? $_GET['dateTo'] : '');
+    $source_search = (!empty($_GET['source_search']) ? trim($_GET['source_search']) : '');
+    $ID_search = (!empty($_GET['ID_search']) ? trim($_GET['ID_search']) : '');
     $sourcebox = (!empty($_GET['sourcebox']) ? $_GET['sourcebox'] : '');
 
-    $downloadURL = generateDownloadURL($search_query,$dateFrom,$dateTo,$sourcebox);
-    $results_sql = buildQuery($connect,$search_query,$dateFrom,$dateTo,$sourcebox,'results');
-    $sourcebox_sql = buildQuery($connect,$search_query,$dateFrom,$dateTo,$sourcebox,'sourcebox');
+    $downloadURL = generateDownloadURL($search_query,$dateFrom,$dateTo,$source_search,$ID_search,$sourcebox);
+    $results_sql = buildQuery($connect,$search_query,$dateFrom,$dateTo,$source_search,$ID_search,$sourcebox,'results');
+    $sourcebox_sql = buildQuery($connect,$search_query,$dateFrom,$dateTo,$source_search,$ID_search,$sourcebox,'sourcebox');
     $sourcebox_query = mysqli_query($connect, $sourcebox_sql) or die(mysqli_connect_error()); // execute source sidebar query
 ?>
 
@@ -51,18 +53,14 @@
         <meta name="viewport" content="width=device-width,initial-scale=1">
         <!-- Latest compiled and minified CSS -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-
         <!-- jQuery library -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-        <!--<script src="js/jquery.js"></script>-->
         <!-- Latest compiled JavaScript -->
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
         <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-
         <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.css">
         <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
-
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/css/bootstrap-datepicker.min.css" />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"></script>
         <script>
@@ -114,9 +112,10 @@
 				</script>
     </head>
     <body style="height:100%; background-color: #fffacd; font-family: monospace; font-weight: bold;">  <!--***  changes appearance of webpage-->
-
         <!-- header -->
-        <?php echo contactLink(); ?>
+        <div style='float:left; margin-left:1.5%;font-size: 18px; font-family: monospace;'>
+            <?php echo contactLink(); ?> | <a href='about.html' style='color:black;'>About SCOTUSApp</a>
+        </div>
         <div style="float:right; margin-right:1.5%;font-size: 18px; font-family: monospace;">
             <a style="color:black;" href="user_page.php"><?php echo $_SESSION['name']?></a> | <a style="color:black;" href="logout.php">Logout</a>
         </div>
@@ -148,11 +147,18 @@
                                     Submit
                                 </button>
                             </span>
-
                             <br>
-
                             From: <input data-provide="datepicker" class="datebox" type="text" name="dateFrom" <?php if(!empty($dateFrom) && !empty($dateTo)) { echo " value = '{$dateFrom}'"; } ?> >
                             To: <input data-provide="datepicker" class="datebox" type="text" name="dateTo" <?php if(!empty($dateFrom) && !empty($dateTo)) { echo " value = '{$dateTo}'";} ?> >
+                            <br><br>
+                            Sources: <input class='form-control' type="text" name="source_search" style="width:275px;" placeholder='Separate sources by spaces...' 
+                                <?php 
+                                    if(!empty($source_search)) echo " value='{$source_search}'"; 
+                                ?> >
+                            IDs: <input class='form-control' type="text" name="ID_search" style="width:250px;" placeholder='Separate IDs by spaces...' 
+                                <?php 
+                                    if(!empty($ID_search)) echo " value='{$ID_search}'"; 
+                                ?> >
                         </form>
                     </div>
                 </div>
@@ -200,7 +206,7 @@
 																		border-radius: 10px;'>Apply Filter</button><br><br>";  //***
 
                                     // pass in search parameters (if any) into filter form
-                                    $hiddenvars = array('search_query'=>$search_query,'dateFrom'=>$dateFrom,'dateTo'=>$dateTo);
+                                    $hiddenvars = array('search_query'=>$search_query,'dateFrom'=>$dateFrom,'dateTo'=>$dateTo,'ID_search'=>$ID_search);
                                     foreach($hiddenvars as $key=>$var) {
                                         if(!empty($var)) {
                                             echo "<input type='hidden' name='$key' value='$var'>";
@@ -232,10 +238,10 @@
                 <table id="results-table" style="background-color: #e0eee0;table-layout: fixed" width="100%" class="stripe hover"  align="center">
                     <thead>
                         <tr align="center">
-                        <th width="10%"><strong>ID</strong></th>
-                        <th width="75%"><strong>Title</strong></th>
+                        <th width="8%"><strong>ID</strong></th>
+                        <th width="65%"><strong>Title</strong></th>
                         <th width="15%"><strong>Source</strong></th>
-                        <th width="10%"><strong>Date</strong></th>
+                        <th width="12%"><strong>Date</strong></th>
                         </tr>
                     </thead>
                 </table>
@@ -247,8 +253,8 @@
                             "order": [[0,"desc"]],
                             "columnDefs": [
                                 {
-                                    "targets": [ 0 ], // sort by article ID to avoid "shuffling" articles, but keep the IDs themselves hidden
-                                    "visible": false
+                                    //"targets": [ 0 ], // sort by article ID to avoid "shuffling" articles, but keep the IDs themselves hidden
+                                    //"visible": false
                                 }
                             ],
                             "pageLength": 25,
@@ -261,6 +267,8 @@
                                     d.search_query = "<?php echo $search_query ?>";
                                     d.dateFrom = "<?php echo $dateFrom ?>";
                                     d.dateTo = "<?php echo $dateTo ?>";
+                                    d.ID_search = "<?php echo $ID_search ?>";
+                                    d.source_search = "<?php echo $source_search ?>";
                                     d.sourcebox = <?php echo json_encode($sourcebox) ?>;
                                 }
                               }
@@ -269,6 +277,10 @@
                 </script>
             </div>
         </div>
-        <div style="height:200px"></div>
+        <footer>
+            <div style="margin-top:25px; margin-bottom:25px; text-align:center; font-size:14px;">
+            <p>Use of this application must be in accordance with the <a href='tos.html'>SCOTUSApp Terms of Use</a>.</p>
+            </div>
+        </footer>
     </body>
 </html>

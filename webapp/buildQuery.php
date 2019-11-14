@@ -1,5 +1,5 @@
 <?php
-	function buildQuery($connect,$search_query,$dateFrom,$dateTo,$sourcebox,$mode) {
+	function buildQuery($connect,$search_query,$dateFrom,$dateTo,$source_search,$ID_search,$sourcebox,$mode) {
         // preventing SQL injections...(sourcebox strings handled farther down)
         $search_query = mysqli_real_escape_string($connect,$search_query);
         $dateFrom = mysqli_real_escape_string($connect,$dateFrom);
@@ -65,15 +65,44 @@
         // if source filter has been applied and search parameters set, limit the sources to what has been checked
         if(!empty($sourcebox) && $mode != 'sourcebox') {
             $source_filter_str = !$conditionsExist ? "WHERE " : "AND ";
+            $conditionsExist = true;
             $source_filter_str .= "a.source IN "; 
-
             $sourcebox_safe = array(); // build an array of sources in SQL string format, ex: ['source1','source2','source3'], all escaped to prevent SQL injections
             foreach($sourcebox as $source) {
                 $source_str = "'" . mysqli_real_escape_string($connect,$source) . "'";
                 array_push($sourcebox_safe,$source_str);
             }
-            $source_filter_str .= "(" . implode(",",$sourcebox_safe) . ")"; // implode array by comma delimiter, bookended by parentheses to give us full list of sources to query against in SQL format
+            $source_filter_str .= "(" . implode(",",$sourcebox_safe) . ") "; // implode array by comma delimiter, bookended by parentheses to give us full list of sources to query against in SQL format
             $sql .= $source_filter_str;
+        }
+
+        // source search box (different from sourcebox, though functionally the same)
+        if(!empty($source_search)) {
+            $ss_str = !$conditionsExist ? "WHERE " : "AND ";
+            $conditionsExist = true;
+            $ss_str .= "a.source IN ";
+            $ss_arr = preg_split('/\s+/', $source_search, -1, PREG_SPLIT_NO_EMPTY); // delimit by whitespace
+            $ss_safe = array();
+            foreach($ss_arr as $s) {
+                $s_str = "'" . mysqli_real_escape_string($connect,$s) . "'";
+                array_push($ss_safe,$s_str);
+            }
+            $ss_str .= "(" . implode(",",$ss_safe) . ") ";
+            $sql .= $ss_str;
+        }
+
+        if(!empty($ID_search)) {
+            $id_str = !$conditionsExist ? "WHERE " : "AND ";
+            $conditionsExist = true;
+            $id_str .= "a.idArticle IN ";
+            $id_arr = preg_split('/\s+/', $ID_search, -1, PREG_SPLIT_NO_EMPTY);
+            $id_safe = array();
+            foreach($id_arr as $i) {
+                $i_str = "'" . mysqli_real_escape_string($connect,$i) . "'";
+                array_push($id_safe,$i_str);
+            }
+            $id_str .= "(" . implode(",",$id_safe) . ") ";
+            $sql .= $id_str;
         }
 
         $sql .= "GROUP BY a.idArticle ";
@@ -82,6 +111,7 @@
         }
         if($mode == "download") { $sql .= "ORDER BY a.idArticle DESC"; }
         else if($mode == 'sourcebox') { $sql .= ") AS results GROUP BY source ORDER BY source"; }
+        //echo $sql;
         return $sql;
     }
 ?>

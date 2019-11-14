@@ -13,9 +13,11 @@
     $search_query = (!empty($_GET['search_query']) ? trim($_GET['search_query']) : '');
     $dateFrom = (!empty($_GET['dateFrom']) ? $_GET['dateFrom'] : '');
     $dateTo = (!empty($_GET['dateTo']) ? $_GET['dateTo'] : '');
+    $source_search = (!empty($_GET['source_search']) ? trim($_GET['source_search']) : '');
+    $ID_search = (!empty($_GET['ID_search']) ? trim($_GET['ID_search']) : '');
     $sourcebox = (!empty($_GET['sourcebox']) ? $_GET['sourcebox'] : '');
 
-    $sql = buildQuery($connect,$search_query,$dateFrom,$dateTo,$sourcebox,"download");
+    $sql = buildQuery($connect,$search_query,$dateFrom,$dateTo,$source_search,$ID_search,$sourcebox,"download");
     // settings user variables necessary for calculating an article's Alt ID
     mysqli_query($connect,"SET @n=0");
     mysqli_query($connect,"SET @pubdate=''");
