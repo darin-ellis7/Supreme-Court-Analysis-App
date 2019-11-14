@@ -24,9 +24,7 @@
             if(sizeof($admins) > 1) {
                 $mailto .= "?cc=" . join(";",array_slice($admins,1));
             }
-            $html = "<div style='float:left; margin-left:1.5%;font-size: 18px; font-family: monospace;'>
-                        <a style='color:black;' href='$mailto'>Contact</a>
-                    </div>";
+            $html = "<a style='color:black;' href='$mailto'>Contact</a>";
         }
         return $html;
     }

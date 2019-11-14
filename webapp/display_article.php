@@ -101,7 +101,9 @@
         </style>
     </head>
     <body style="height:100%; background-color: #fffacd; font-family: monospace; font-weight: bold;">
-        <?php echo contactLink(); ?>
+        <div style='float:left; margin-left:1.5%;font-size: 18px; font-family: monospace;'>
+            <?php echo contactLink(); ?> | <a href='about.html' style='color:black;'>About SCOTUSApp</a>
+        </div>
         <div style="float:right; margin-right:1.5%;font-size: 18px; font-family: monospace;">
             <a style="color:black;" href="user_page.php"><?php echo $_SESSION['name']?></a> | <a style="color:black;" href="logout.php">Logout</a>
         </div>
@@ -288,12 +290,9 @@
                         <!--THIS PORTION OF THE ATTRIBUTION MUST BE INCLUDED-->
                         <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img style="margin-top: 5px; margin-bottom: 5px;" alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" /></a><br />
                         <p><a xmlns:dct="http://purl.org/dc/terms/" href="https://www.allsides.com/media-bias/media-bias-ratings" rel="dct:source"><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Dataset" property="dct:title" rel="dct:type">AllSides Media Bias Ratings</span></a> by <a xmlns:cc="http://creativecommons.org/ns#" href="https://www.allsides.com/unbiased-balanced-news" property="cc:attributionName" rel="cc:attributionURL">AllSides.com</a> are licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International License</a>. You may use this data for research or noncommercial purposes provided you include this attribution.</p>
-                    </div>  
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
                         <p>Media Bias Fact Check ratings courtesy of <a href="https://mediabiasfactcheck.com">MediaBiasFactCheck.com</a>.
                         You may use this data for research or noncommercial purposes provided you include this attribution.</p>
+                        <p>Use of this application must be in accordance with the <a href='tos.html'>SCOTUSApp Terms of Use</a>.</p>
                     </div>  
                 </div>
             </footer>

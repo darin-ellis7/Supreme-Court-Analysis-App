@@ -64,11 +64,14 @@
         </script>
     </head>
     <body style="height:100%; background-color: #fffacd; font-family: monospace; font-weight: bold; font-size:14px;">
-        <?php echo contactLink(); ?><br>
+        <div style='float:left; margin-left:1.5%;font-size: 18px; font-family: monospace;'>
+            <?php echo contactLink(); ?> | <a href='about.html' style='color:black;'>About SCOTUSApp</a>
+        </div><br>
         <h1 style="text-align: center; font-size: 50px; font-weight: bold;"><a href='index.php' style='color:black;'>SCOTUSApp</a></h1><hr style="background-color:#fffacd;">
         <h2 style="font-size: 30px; font-weight: bold; text-align:center;">Login</h2><br>
-        <form method="post" action="" style="margin:0 auto;width:30%;">
+        <form method="post" action="" style="margin:0 auto;width:40%;">
             <p>SCOTUSApp can only be used by verified accounts - login will only be successful once you have created an account and have been verified by our administrators. If you haven't registered yet, <a href="register.php">click this link</a> to do so.</p>
+            <p>Use of this application must be in accordance with the <a href='tos.html'>SCOTUSApp Terms of Use</a>.</p>
             <fieldset class="form-group">
                 <?php
                     if(isset($errs) && sizeof($errs) > 0) {

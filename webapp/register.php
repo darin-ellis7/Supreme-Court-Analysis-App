@@ -8,6 +8,14 @@
         return true;
     }
 
+    function verifyTOS($tos,&$errs) {
+        if(empty($tos) || $tos != "1") {
+            array_push($errs,"You must agree to the terms of use before proceeding.");
+            return false;
+        }
+        return true;
+    }
+
     // verify valid password
     function verifyPassword($password,$confirm_password,&$errs) {
         $is_valid = true;
@@ -117,12 +125,14 @@
         $password=isset($_POST['password']) ? ($_POST['password']) : "";
         $confirm_password=isset($_POST['confirm_password']) ? $_POST['confirm_password'] : "";
         $notes=isset($_POST['notes']) ? trim($_POST['notes']) : "";
+        $tos = isset($_POST['tos']) ? $_POST['tos'] : "";
         $errs = array(); // this array keeps track of any errors found in the registration process; passed in by reference to the verification functions
 
         $validName = verifyName($name,$errs);
         $validEmail = verifyEmail($email,$connect,$errs);
         $validPassword = verifyPassword($password,$confirm_password,$errs);
-        $valid_reg = $validName && $validEmail && $validPassword; // all conditions must be true for successful registration
+        $validTOS = verifyTOS($tos,$errs);
+        $valid_reg = $validName && $validEmail && $validPassword && $validTOS; // all conditions must be true for successful registration
 
         if($valid_reg) {
             $idUser = addUser($email,$name,$password,$notes,$connect);
@@ -155,10 +165,12 @@
         </script>
     </head>
     <body style="height:100%; background-color: #fffacd; font-family: monospace; font-weight: bold; font-size:14px;">
-        <?php echo contactLink(); ?><br>
+        <div style='float:left; margin-left:1.5%;font-size: 18px; font-family: monospace;'>
+            <?php echo contactLink(); ?> | <a href='about.html' style='color:black;'>About SCOTUSApp</a>
+        </div><br>
         <h1 style="text-align: center; font-size: 50px; font-weight: bold;"><a href='index.php' style='color:black;'>SCOTUSApp</a></h1><hr style="background-color:#fffacd;">
         <h2 style="font-size: 30px; font-weight: bold; text-align:center;">Register Account</h2><br>
-        <form method="post" action="register.php" style="margin:0 auto;width:30%;">
+        <form method="post" action="register.php" style="margin:0 auto;width:45%;">
             <p>SCOTUSApp can only be used by verified accounts - once you register, your information (minus password) will be sent to our administrators for vetting. Upon verification, you will be sent a success email and can begin use of SCOTUSApp.</p>
             <fieldset class="form-group">
                 <?php
@@ -190,6 +202,7 @@
                 <input class = 'form-control' type="password" name="confirm_password"><br>
                 Notes (why you want to use SCOTUSApp, any necessary information, etc. - 1000 characters max) 
                 <textarea class = 'form-control' rows="15" cols="60" maxlength="1000" name="notes"><?php if(isset($notes)) echo $notes;?></textarea><br>
+                I agree to the <a href='tos.html'>SCOTUSApp Terms of Use</a>: <input type="checkbox" name="tos" value="1"><br><br>
                 <button id="formBut" type='submit' class='btn btn-default' onmouseover='changeSubBut()' onmouseout='revertSubBut()'
                     style = "height: 30px;
                     font-weight: bold;

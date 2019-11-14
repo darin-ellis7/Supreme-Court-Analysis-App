@@ -143,7 +143,9 @@
         </script>
     </head>
     <body style="height:100%; background-color: #fffacd; font-family: monospace; font-weight: bold; font-size:14px;">
-        <?php echo contactLink(); ?>
+        <div style='float:left; margin-left:1.5%;font-size: 18px; font-family: monospace;'>
+            <?php echo contactLink(); ?> | <a href='about.html' style='color:black;'>About SCOTUSApp</a>
+        </div>
         <div style="float:right; margin-right:1.5%;font-size: 18px; font-family: monospace;">
             <a style="color:black;" href="user_page.php"><?php echo $_SESSION['name']?></a> | <a style="color:black;" href="logout.php">Logout</a>
         </div><br>
