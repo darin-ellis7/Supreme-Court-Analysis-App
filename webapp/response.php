@@ -11,11 +11,13 @@
 
 	$search_query = (!empty($_GET['search_query']) ? trim($_GET['search_query']) : '');
     $dateFrom = (!empty($_GET['dateFrom']) ? $_GET['dateFrom'] : '');
-    $dateTo = (!empty($_GET['dateTo']) ? $_GET['dateTo'] : '');
-    $sourcebox = (!empty($_GET['sourcebox']) ? $_GET['sourcebox'] : '');
-
+	$dateTo = (!empty($_GET['dateTo']) ? $_GET['dateTo'] : '');
+	$source_search = (!empty($_GET['source_search']) ? trim($_GET['source_search']) : '');
+    $ID_search = (!empty($_GET['ID_search']) ? trim($_GET['ID_search']) : '');
+	$sourcebox = (!empty($_GET['sourcebox']) ? $_GET['sourcebox'] : '');
+	
 	// grab full chunk of data
-	$sql = buildQuery($connect,$search_query,$dateFrom,$dateTo,$sourcebox,'results');
+	$sql = buildQuery($connect,$search_query,$dateFrom,$dateTo,$source_search,$ID_search,$sourcebox,'results');
 	$query=mysqli_query($connect,$sql);
 	$totalData=mysqli_num_rows($query);
 	$totalFilter=$totalData;
