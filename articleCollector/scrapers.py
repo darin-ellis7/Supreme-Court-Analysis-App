@@ -155,6 +155,8 @@ class Scraper:
         return article,error_code
 
     def nytimes(self,soup,tz):
+        junk = soup.select("div.g-tracked-refer, div.g-container")
+        for j in junk: j.decompose()
         if not self.title or self.title.split()[-1] == "...":
             t = soup.find("meta",property="og:title")
             if t:
@@ -176,7 +178,13 @@ class Scraper:
             if i:
                 i = i.get("content")
                 self.images.append(i)
-        paragraphs = [p.text.strip() for p in soup.select("section[name=articleBody] p")]
+        paragraphs = []
+        p_select = soup.select("section[name=articleBody] p")
+        if not p_select: p_select = soup.find_all("p",{"class":["g-body","graphic-text"]})
+        for ps in p_select:
+            ptext = ps.text.strip()
+            if len(ptext) > 0:
+                paragraphs.append(ptext)
         text = '\n\n'.join(paragraphs)
         if text == '':
             print("Rejected - likely bad scraping job (no article text)")
