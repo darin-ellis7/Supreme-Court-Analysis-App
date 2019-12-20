@@ -50,9 +50,9 @@ class Scraper:
             except Exception as e:
                 print("Rejected - SCRAPING ERROR (likely formatting change): ",e)
                 article,error_code = None, 1
-            if article and error_code == 0:
-                c.execute("""DELETE FROM alerts WHERE sources=%s AND type='S'""",(self.source,)) 
-            elif article is None and error_code == 1:
+            '''if article and error_code == 0:
+                c.execute("""DELETE FROM alerts WHERE sources=%s AND type='S'""",(self.source,))'''
+            if article is None and error_code == 1:
                 self.ScraperAlert(self.url,self.source,c)
         else:
             article, error_code = None, 1
@@ -60,9 +60,9 @@ class Scraper:
 
     # send scraper alert to admins
     def ScraperAlert(self,url,source,c):
-        c.execute("""SELECT * FROM alerts WHERE sources=%s AND type='S' LIMIT 1""",(source,))
+        c.execute("""SELECT * FROM alerts WHERE sources=%s AND type='S' AND url=%s LIMIT 1""",(source,url,))
         if c.rowcount == 0:
-            c.execute("""INSERT INTO alerts(sources,type) VALUES (%s,'S')""",(source,))
+            c.execute("""INSERT INTO alerts(sources,type,url) VALUES (%s,'S',%s)""",(source,url,))
             subject = "SCOTUSApp - Custom Scraper Failure"
             text =  "During the latest run of the SCOTUSApp article collection script, the following source's custom scraper failed: " + source + "\nThe failure occurred at this URL: " + url
             text += "\n\nThis doesn't necessarily mean a scraper is down - sometimes a non-standard article page will appear in one of our feeds and fail. "
@@ -112,9 +112,9 @@ class Scraper:
     # scraper for CNN
     # all of these scraping functions are pretty similar, so I'm not commenting on the others unless there's a noticable difference (read the BeautifulSoup docs too)
     def cnn(self,soup,tz):
-        if "cnn.com/videos/" in self.url: # video link - no text to be scraped, DROPPED
-            print("Rejected - CNN video link")
-            article, error_code = None, 2 # we don't want video links anyways, so scraper fails but don't sound alarm or attempt to rescrape with generic scraper
+        if any(category in self.url for category in ["/videos/","/live-news/"]): # non-article links - no text to be scraped, DROPPED
+            print("Rejected - link is not an article")
+            article, error_code = None, 2 # we don't want non-articles anyway, so scraper fails but don't sound alarm or attempt to rescrape with generic scraper
         else:
             opener = soup.find("cite",{"class":"el-editorial-source"})
             if opener:
