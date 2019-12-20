@@ -299,7 +299,8 @@ class Article:
         'roberts', 'kennedy', 'thomas', 'ginsburg', 'breyer', 'alito', 
         'sotomayor', 'kagan', 'gorsuch', 'kavanaugh'] # full names of justices, as well as their last names
         # check for the "dead giveaways"
-        if any(term in self.title.lower() for term in (instantTerms + justices)): 
+        instantSources = ["scotusblog"]
+        if any(term in self.title.lower() for term in (instantTerms + justices)) or self.source in instantSources: 
             return True
         else:
             if self.stateCourtDetected(c,collectTrainingData) or self.foreignCourtDetected(c,collectTrainingData):
