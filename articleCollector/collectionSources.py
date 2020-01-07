@@ -381,7 +381,7 @@ class TopicSites:
         soup = downloadPage(url)
         if not soup: error_code = 2
         else:
-            junk = [soup.find("div",{"id":"zone-trending"}),soup.find("div",{"class":"card--newsletter"})]
+            junk = soup.find_all("div",{"id":"zone-trending"}) + soup.find_all("div",{"class":"card--newsletter"})
             for j in junk: 
                 if j: j.decompose()
             pages = soup.select("div.card")
