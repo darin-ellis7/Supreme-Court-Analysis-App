@@ -163,12 +163,15 @@ class TopicSites:
     def collectChicagoTribune(self,pageRange):
         error_code = 0
         for i in range(pageRange[0],pageRange[1]+1):
-            url = "https://www.chicagotribune.com/search/supreme%20court/1-w/story/score/" + str(i) + "/"
+            url = "https://www.chicagotribune.com/search/supreme%20court/4-d/story/score/" + str(i) + "/"
             soup = downloadPage(url)
             if not soup: error_code = 2
             else:
                 pages = soup.select("ul.flex-grid li.col")
-                if not pages: error_code = 1 
+                count = soup.select_one("h2.number-results")
+                if count: count = count.text.strip()[0]
+                if count is None or (not pages and count != "0"): # either no articles are scraped when they should be, or our count scraper has failed so throw an error
+                    error_code = 1
                 for p in pages:
                     try:
                         h = p.select_one("p.h7 > a")
@@ -403,7 +406,7 @@ class TopicSites:
                     error_code = 1
                     continue
         return error_code
-    
+
     def collectWSJ(self,pageRange):
         error_code = 0
         max_date = datetime.datetime.today()
@@ -445,7 +448,7 @@ class TopicSites:
                             error_code = 1
                             print("SCRAPING ERROR;",e)
         return error_code
-                          
+        
 # functions for Google Alerts RSS feeds
 class RSSFeeds:
     def __init__(self,feeds):

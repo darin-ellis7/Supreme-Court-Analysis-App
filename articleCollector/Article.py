@@ -197,7 +197,7 @@ class Article:
     # checking whether an article pertains to a foreign supreme court - True if so, False if not
     # very similar to stateCourtDetected()
     def foreignCourtDetected(self,c,collectTrainingData):
-        foreignSources = ['indiatimes','thehindu','liberianobserver','allafrica','firstpost','ndtv','news18'] # sources that near exclusively (if not entirely) report on foreign supreme court news, so blocking them manually here
+        foreignSources = ['indiatimes','thehindu','liberianobserver',"allafrica",'vanguardngr','firstpost','ndtv','news18','moneycontrol','newzimbabwe'] # sources that near exclusively (if not entirely) report on foreign supreme court news, so blocking them manually here
         if self.source.lower() in foreignSources or ('india' in self.url.lower() and 'indiana' not in self.url.lower()): # indian supreme court pops ups a lot, so block any source with "india" in it ("indiana" still passes)
             print("Rejected - from a known foreign source")
             if collectTrainingData:
@@ -293,14 +293,14 @@ class Article:
     
     # relevancy check function - True for relevant, False otherwise
     def isRelevant_exp(self,clf,v_text,v_title,c,collectTrainingData):
-        instantTerms = ["usa supreme court", "us supreme court", "u.s. supreme court", "united states supreme court", "scotus"] # dead giveaways for relevancy
-        justices = ['john roberts', 'anthony kennedy', 'clarence thomas', 'ruth bader ginsburg', 'stephen breyer', 
-        'samuel alito', 'sonia sotomayor', 'elena kagan', 'neil gorsuch', 'brett kavanaugh', 
-        'roberts', 'kennedy', 'thomas', 'ginsburg', 'breyer', 'alito', 
-        'sotomayor', 'kagan', 'gorsuch', 'kavanaugh'] # full names of justices, as well as their last names
+        instantTerms = ["usa supreme court", "us supreme court", "u.s. supreme court", "united states supreme court", "scotus",
+                    'john roberts', 'anthony kennedy', 'clarence thomas', 'ruth bader ginsburg', 'stephen breyer', 
+                    'samuel alito', 'sonia sotomayor', 'elena kagan', 'neil gorsuch', 'brett kavanaugh', "antonin scalia"] # dead giveaways for relevancy
+        justice_keys = ['roberts', 'kennedy', 'thomas', 'ginsburg', 'breyer', 'alito', 
+                        'sotomayor', 'kagan', 'gorsuch', 'kavanaugh','scalia'] # last names of the justices for parsing in keywords
         # check for the "dead giveaways"
         instantSources = ["scotusblog"]
-        if any(term in self.title.lower() for term in (instantTerms + justices)) or self.source in instantSources: 
+        if any(term in self.title.lower() for term in (instantTerms + justice_keys)) or self.source in instantSources: 
             return True
         else:
             if self.stateCourtDetected(c,collectTrainingData) or self.foreignCourtDetected(c,collectTrainingData):
@@ -318,10 +318,10 @@ class Article:
                     # our classification is very good but not perfect
                     # to account for false negatives, if an article is classified as relevant but certain keywords do not exist, then the classifier must be extra sure (higher probability) it is relevant before truly deeming it relevant
                     # this is called our "relevancy threshold" test
-                    if not (('supreme' in self.keywords and 'court' in self.keywords) or 'scotus' in self.keywords) and not any(justice in self.keywords for justice in justices): 
+                    if not (('supreme' in self.keywords and 'court' in self.keywords) or 'scotus' in self.keywords) and not any(justice in self.keywords for justice in justice_keys): 
                         relevancy_threshold = 0.75 # numbers subject to change (still trying to find a "sweet spot" but this seems to do well)
                     else:
-                        relevancy_threshold = 0.55
+                        relevancy_threshold = 0.5
                     if result_prob >= relevancy_threshold:
                         return True
                     else:
@@ -335,8 +335,8 @@ class Article:
     # insert irrelevant article data into the database for training purposes
     # data is coded by nature of irrelevancy; S = article is about state/lower court, F = article is about foreign court, U = unrelated topic
     def buildRejectedTrainingData(self,code,c):
-        t = (self.url, self.date, self.text, self.title, code)
-        c.execute("""INSERT INTO rejectedTrainingData(url, datetime, text, title, code) VALUES (%s,%s,%s,%s,%s)""",t)
+        t = (self.url, self.date, self.text, self.title, code, ','.join(self.keywords))
+        c.execute("""INSERT INTO rejectedTrainingData(url, datetime, text, title, code, keywords) VALUES (%s,%s,%s,%s,%s,%s)""",t)
         print("Article added to training data with code",code)
 
     # increment sentiment requests counter in database
