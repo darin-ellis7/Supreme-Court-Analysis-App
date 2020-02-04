@@ -244,7 +244,7 @@ class Scraper:
             d = soup.find("time")
             if d:
                 datestr = d.text.strip() + " 00:00:00"
-                self.date = convertDate(d.text,"%B %d, %Y %H:%M:%S")
+                self.date = convertDate(datestr,"%B %d, %Y %H:%M:%S")
         text = ''
         container = soup.find("div",{"class":"jds-main-content"})
         if container:
