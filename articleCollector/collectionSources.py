@@ -448,7 +448,7 @@ class TopicSites:
                             error_code = 1
                             print("SCRAPING ERROR;",e)
         return error_code
-        
+   
 # functions for Google Alerts RSS feeds
 class RSSFeeds:
     def __init__(self,feeds):
