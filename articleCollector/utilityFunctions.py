@@ -110,7 +110,7 @@ def printBasicInfo(title,url):
 
 # checks whether an article is from a known "bad" source - usually aggregate sites, paywalled sites, or obscure sites that don't scrape well and aren't worth writing a scraper for
 def isBlockedSource(url):
-    blockedSources = ['law360','law','freerepublic','bloomberglaw','nakedcapitalism','independent','mentalfloss'] 
+    blockedSources = ['law360','law','freerepublic','bloomberglaw','nakedcapitalism','independent','mentalfloss','columbustelegram'] 
     if "howappealing.abovethelaw.com" in url or getSource(url) in blockedSources:
         print("Rejected - URL/source known to have a paywall, or does not contain full articles")
         return True
@@ -182,11 +182,11 @@ def replaceTitle(originalTitle, scrapedTitle):
 # our model will consist of two separate tf-idf matrices (one for article text, another for titles) combined into one
 def train_relevancy(c):
     print("Training relevancy check dataset...")
-    Xraw, Y = get_training_data(c,False)
+    Xraw, Y = get_training_data(c,True)
     v_text = TfidfVectorizer(stop_words=stopwords.words("english"),min_df=5)
-    v_title = TfidfVectorizer(stop_words=stopwords.words("english"))
+    v_title = TfidfVectorizer(stop_words=stopwords.words("english"),ngram_range=(1,3))
     X = convertTextData(Xraw,v_text,v_title,'train')
-    clf = CalibratedClassifierCV(LinearSVC(),method='sigmoid',cv=3).fit(X,Y) #LinearSVC() doesn't have probability functionality by default so wrapping it into CalibratedClassiferCV()
+    clf = CalibratedClassifierCV(LinearSVC(class_weight='balanced'),method='sigmoid',cv=5).fit(X,Y) #LinearSVC() doesn't have probability functionality by default so wrapping it into CalibratedClassiferCV()
     return clf, v_text, v_title
 
 # training data consists of input (x) and output (y)
@@ -196,21 +196,20 @@ def train_relevancy(c):
 def get_training_data(c,binary):
     x = []
     y = []
-    # get relevant training data - label 1 for relevant
-    c.execute("""SELECT article_text,title FROM article WHERE idArticle <= 26234""") # only using training articles I've tested for now (so up to a certain id)
+    # get relevant training data - label R for relevant
+    c.execute("""SELECT article_text,title FROM article WHERE idArticle <= 30604""") # only using training articles I've tested for now (so up to a certain id)
     rows = c.fetchall()
     for r in rows:
         x.append([r["title"],r["article_text"]])
         y.append("R")
-    # get irrelevant training data - label 0 for irrelevant
-    c.execute("""SELECT code,text,title FROM rejectedTrainingData WHERE id <= 13276""")
+    # get irrelevant training data - label U for irrelevant
+    c.execute("""SELECT code,text,title FROM rejectedTrainingData WHERE id <= 26301""")
     rows = c.fetchall()
     for r in rows:
         x.append([r["title"],r["text"]])
         code = r["code"]
-        if binary:
-            if r["code"] != "R":
-                code = "U"
+        if binary and code in ['S','F']:
+            code = "U"
         y.append(code)
     return x, y
 
