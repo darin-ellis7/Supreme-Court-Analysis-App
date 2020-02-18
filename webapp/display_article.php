@@ -53,7 +53,6 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
         <!-- jQuery library -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-        <!--<script src="js/jquery.js"></script>-->
         <!-- Latest compiled JavaScript -->
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
         <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -66,7 +65,21 @@
 			function revertResBut(){ //revert style back to original for tab2
 				document.getElementById("resBut").style.backgroundColor =  //***
 				"rgba(255, 255, 255, 0.7)" /*transparent white*/;  //***
-			}
+            }
+            function ir_marking() { // function 
+                $.ajax({
+                    type: "POST",
+                    url: "ir_marking.php",
+                    data: { idArticle: "<?php echo $idArticle ?>"},
+                    success:function(msg) {
+                        if(msg == "Your recommendation has been noted.") {
+                            // disable button (flag has been set, any further markings are redundant)
+                            document.getElementById("ir_wrapper").innerHTML = "<span id='ir' style='color:red'>Marked as Irrelevant</span>";
+                        }
+                        alert(msg);
+                    }
+                })
+            }
 		</script>
         <style>
             .box {
@@ -152,7 +165,15 @@
                         <span class="field-header">Publication Date</span><br><?php echo !empty($row['datetime']) ? $row['datetime'] : "N/A"; ?><br><br>
                         <span class="field-header">URL</span><br><?php echo !empty($row['url']) ? "<a href='{$row['url']}'>{$row['url']}</a>" : "N/A"; ?><br><br>
                         <span class="field-header">Sentiment Score: <?php echo isset($row['score']) ? $row['score'] : "N/A"; ?></span><br>
-                        <span class="field-header">Magnitude: <?php echo isset($row['magnitude']) ? $row['magnitude'] : "N/A"; ?></span><br>
+                        <span class="field-header">Magnitude: <?php echo isset($row['magnitude']) ? $row['magnitude'] : "N/A"; ?></span><br><br>
+                        <?php
+                            if(!empty($row)) { // if article exists, show irrelevancy marking functionality
+                                echo "<div id='ir_wrapper'>";
+                                // if article isn't already marked as irrelevant, show the marking button - if not, show a "Marked as Irrelevant" message
+                                echo !$row['marked_irrelevant'] ? "<button id='ir' onclick='ir_marking()'>Mark as Irrelevant</button>" : "<span id='ir' style='color:red'>Marked as Irrelevant</span>";
+                                echo "</div>";
+                            }
+                        ?>
                     </div>
                     <div id="bias" class="box" style="margin-top:6%;">
                         <span class="box-header">Source Bias</span><hr>
